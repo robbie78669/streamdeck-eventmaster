@@ -1,0 +1,100 @@
+{
+  "Actions": [
+    {
+      "Icon": "icons/allTransActionIcon",
+      "Name": "All Trans", 
+      "States": [
+        {
+          "Image": "icons/allTransDefaultImage",
+          "TitleAlignment": "middle", 
+          "FontSize": "16"
+        }
+      ], 
+      "SupportedInMultiActions": false,
+      "Tooltip": "This action transitions all layers in Preview to Program", 
+      "PropertyInspectorPath": "properties_inspectors/all_trans_pi.html",
+      "UUID": "com.barco.eventmaster.alltrans"
+    },
+    {
+      "Icon": "icons/cutActionIcon",
+      "Name": "Cut", 
+      "States": [
+        {
+          "Image": "icons/cutDefaultImage",
+          "TitleAlignment": "middle", 
+          "FontSize": "16"
+        }
+      ], 
+      "SupportedInMultiActions": false,
+      "Tooltip": "This action cuts all layers in Preview to Program", 
+      "PropertyInspectorPath": "properties_inspectors/noparams_pi.html",
+      "UUID": "com.barco.eventmaster.cut"
+    },
+    {
+      "Icon": "icons/activatePresetActionIcon",
+      "Name": "Recall Preset", 
+      "States": [
+        {
+          "Image": "icons/activatePresetDefaultImage",
+          "TitleAlignment": "middle", 
+          "FontSize": "16"
+        }
+      ], 
+      "SupportedInMultiActions": false,
+      "Tooltip": "This action recalls the specified preset", 
+      "PropertyInspectorPath": "properties_inspectors/recallpreset_pi.html",
+      "UUID": "com.barco.eventmaster.recallpreset"
+    },
+    {
+      "Icon": "icons/recallNextPresetActionIcon",
+      "Name": "Recall Next Preset", 
+      "States": [
+        {
+          "Image": "icons/recallNextPresetDefaultImage",
+          "TitleAlignment": "middle", 
+          "FontSize": "16"
+        }
+      ], 
+      "SupportedInMultiActions": false,
+      "Tooltip": "This action recalls the next preset", 
+      "PropertyInspectorPath": "properties_inspectors/noparans_pi.html",
+      "UUID": "com.barco.eventmaster.recallnextpreset"
+    },
+    {
+      "Icon": "icons/activateCueActionIcon",
+      "Name": "Go Cue", 
+      "States": [
+        {
+          "Image": "icons/activateCueDefaultImage",
+          "TitleAlignment": "middle", 
+          "FontSize": "16"
+        }
+      ], 
+      "SupportedInMultiActions": false,
+      "Tooltip": "This action recalls the specified cue", 
+      "PropertyInspectorPath": "properties_inspectors/recallCue_pi.html",
+      "UUID": "com.barco.eventmaster.recallcue"
+    },
+  ],
+  "Category": "Barco Event Master",
+  "CategoryIcon": "EventMasterCategoryIcon",
+  "Icon": "EventMasterPluginIcon",
+  "Author": "Barco", 
+  "CodePath": "index.html",
+  "Description": "Requires Event Master v6.2 or higher. Adds Event Master commend support to Stream Deck.", 
+  "PropertyInspectorPath": "index_pi.html", 
+  "Name": "Event Master", 
+  "URL": "https://www.barco.com/en/product/e2", 
+  "Version": "1.0",
+  "OS": [
+    {
+        "Platform": "mac", 
+        "MinimumVersion" : "10.11"
+    },
+    {
+        "Platform": "windows", 
+        "MinimumVersion" : "10"
+    }
+  ]
+  ]
+}
