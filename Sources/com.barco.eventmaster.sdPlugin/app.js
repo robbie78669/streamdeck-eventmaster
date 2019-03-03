@@ -3,21 +3,31 @@ var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
 var jrpc = null;
+
        
 var DestinationEnum = Object.freeze({ "HARDWARE_AND_SOFTWARE": 0, "HARDWARE_ONLY": 1, "SOFTWARE_ONLY": 2 })
 
 var eventMasterAction = {
     
+    onPropertyInspectorDidAppear: function (action, context, settings, coordinates) {
+        // send notification to property_inspector to load saved settings
+        var json = {
+            "event": "sendToPropertyInspector",
+            "context": context,
+            "payload": settingsCache[context]
+        };
+
+        websocket.send(JSON.stringify(json));
+    },
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
         
-        var jSON_method = "";
-        var jSON_params = "";
-        var jSON_host = settings.ipAddress;
-        var jSON_port = settings.port;
-        var jSON_id = "1234";
+        jrpc = new simple_jsonrpc();
 
+        jrpc.host=settings.ipAddress +":"+ settings.port;
+        var params = ["presetNo:1.0"];
+      
         if( action == "com.barco.eventmaster.alltrans" ) {
-           jrpc.call("allTrans", []).then(function (result) {
+           jrpc.call("allTrans", params).then(function (result) {
                 settings.status(result);
            });
         }
@@ -50,34 +60,18 @@ var eventMasterAction = {
     },
 
     onWillAppear: function (action, context, settings, coordinates) {
-
-        jrpc = new simple_jsonrpc();
-
-        //configure the http request..
-        jrpc.toStream = function(_msg){
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (this.readyState != 4) return;
-
-                try {
-                    JSON.parse(this.responseText);
-                    jrpc.messageHandler(this.responseText);
-                }
-                catch (e){
-                    console.error(e);
-                }
-            };
-
-            xhr.open("POST", "http://"+ host + ":" + port, true);
-            xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-            xhr.send(_msg);
-        };
+        if(settings != null ){
+            settingsCache[context] = settings;
+        }
     },
 
     SetTitle: function (action, context, keyPressCounter) {
     },
 
     SetSettings: function (context, settings) {
+        
+        settingsCache[context] = settings;
+        
         var json = {
             "event": "setSettings",
             "context": context,
@@ -137,17 +131,53 @@ function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
             var coordinates = jsonPayload['coordinates'];
             eventMasterAction.onWillAppear(action, context, settings, coordinates);
         }
+        else if (event == "propertyInspectorDidAppear") {
+            var settings = jsonPayload['settings'];
+            var coordinates = jsonPayload['coordinates'];
+            eventMasterAction.onPropertyInspectorDidAppear(action, context, settings, coordinates);
+        }
+        else if (event == "didReceiveSettings") {
+            var settings = jsonPayload['settings'];
+            var coordinates = jsonPayload['coordinates'];
+            eventMasterAction.onDidReceiveSettings(action, context, settings, coordinates);
+        }
         else if (event == "sendToPlugin") {
 
-            /*if (jsonPayload.hasOwnProperty('setValue')) {
+            var updatedSettings = {};
+            var changed = false;
 
-                var newValue = jsonPayload.setValue;
-                eventMasterAction.SetSettings(context, { "keyPressCounter": newValue });
-                eventMasterAction.SetTitle(context, newValue);
+            // event coming from the property inspector..
+            if (jsonPayload.hasOwnProperty('ipAddress')) {
 
-            }*/
+                var ipAddress = jsonPayload.ipAddress;
+                changed = true;
+                updatedSettings["ipAddress"] = ipAddress;
+            }
+            if (jsonPayload.hasOwnProperty('port')) {
 
+                changed = true;
+                var port = jsonPayload.port;
+                updatedSettings["port"] = port;
+            }
+            if (jsonPayload.hasOwnProperty('presetName')) {
+
+                changed = true;
+                var presetName = jsonPayload.presetName;
+                updatedSettings["presetName"] = presetName;
+            }
+            if (jsonPayload.hasOwnProperty('cueName')) {
+
+                changed = true;
+                var cueName = jsonPayload.cueName;
+                updatedSettings["cueName"] = cueName;
+            }
+            
+            if( changed  ) {
+                eventMasterAction.SetSettings(context, updatedSettings);
+            }
+            
         }
+        
     };
 
     websocket.onclose = function () {

@@ -1,80 +1,80 @@
 {
   "Actions": [
     {
-      "Icon": "icons/allTransActionIcon",
+      "Icon": "images/allTransActionIcon",
       "Name": "All Trans", 
       "States": [
         {
-          "Image": "icons/allTransDefaultImage",
+          "Image": "images/allTransDefaultImage",
           "TitleAlignment": "middle", 
           "FontSize": "16"
         }
       ], 
       "SupportedInMultiActions": false,
       "Tooltip": "This action transitions all layers in Preview to Program", 
-      "PropertyInspectorPath": "properties_inspectors/all_trans_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.alltrans"
     },
     {
-      "Icon": "icons/cutActionIcon",
+      "Icon": "images/cutActionIcon",
       "Name": "Cut", 
       "States": [
         {
-          "Image": "icons/cutDefaultImage",
+          "Image": "images/cutDefaultImage",
           "TitleAlignment": "middle", 
           "FontSize": "16"
         }
       ], 
       "SupportedInMultiActions": false,
       "Tooltip": "This action cuts all layers in Preview to Program", 
-      "PropertyInspectorPath": "properties_inspectors/noparams_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.cut"
     },
     {
-      "Icon": "icons/activatePresetActionIcon",
+      "Icon": "images/activatePresetActionIcon",
       "Name": "Recall Preset", 
       "States": [
         {
-          "Image": "icons/activatePresetDefaultImage",
+          "Image": "images/activatePresetDefaultImage",
           "TitleAlignment": "middle", 
           "FontSize": "16"
         }
       ], 
       "SupportedInMultiActions": false,
       "Tooltip": "This action recalls the specified preset", 
-      "PropertyInspectorPath": "properties_inspectors/recallpreset_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/recallpreset_pi.html",
       "UUID": "com.barco.eventmaster.recallpreset"
     },
     {
-      "Icon": "icons/recallNextPresetActionIcon",
+      "Icon": "images/recallNextPresetActionIcon",
       "Name": "Recall Next Preset", 
       "States": [
         {
-          "Image": "icons/recallNextPresetDefaultImage",
+          "Image": "images/recallNextPresetDefaultImage",
           "TitleAlignment": "middle", 
           "FontSize": "16"
         }
       ], 
       "SupportedInMultiActions": false,
       "Tooltip": "This action recalls the next preset", 
-      "PropertyInspectorPath": "properties_inspectors/noparans_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/noparans_pi.html",
       "UUID": "com.barco.eventmaster.recallnextpreset"
     },
     {
-      "Icon": "icons/activateCueActionIcon",
+      "Icon": "images/activateCueActionIcon",
       "Name": "Go Cue", 
       "States": [
         {
-          "Image": "icons/activateCueDefaultImage",
+          "Image": "images/activateCueDefaultImage",
           "TitleAlignment": "middle", 
           "FontSize": "16"
         }
       ], 
       "SupportedInMultiActions": false,
       "Tooltip": "This action recalls the specified cue", 
-      "PropertyInspectorPath": "properties_inspectors/recallCue_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/recallCue_pi.html",
       "UUID": "com.barco.eventmaster.recallcue"
-    },
+    }
   ],
   "Category": "Barco Event Master",
   "CategoryIcon": "EventMasterCategoryIcon",
@@ -82,8 +82,7 @@
   "Author": "Barco", 
   "CodePath": "index.html",
   "Description": "Requires Event Master v6.2 or higher. Adds Event Master commend support to Stream Deck.", 
-  "PropertyInspectorPath": "index_pi.html", 
-  "Name": "Event Master", 
+    "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
   "Version": "1.0",
   "OS": [
@@ -95,6 +94,5 @@
         "Platform": "windows", 
         "MinimumVersion" : "10"
     }
-  ]
   ]
 }
