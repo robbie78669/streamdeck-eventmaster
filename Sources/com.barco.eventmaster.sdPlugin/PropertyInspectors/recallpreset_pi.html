@@ -29,15 +29,15 @@
                 <div class="sdpi-item-label">Preset Name</div> 
                 <input id="presetName" class="sdpi-item-value" value="" placeholder="e.g. 1.0" oninput="updateSettings()">
             </div>
-            <div type="radio" class="sdpi-item">
+            <div type="radio" class="sdpi-item" id="presetMode" >
                 <div class="sdpi-item-label">Recall To:</div>
                 <div class="sdpi-item-value ">
                     <div class="sdpi-item-child">
-                        <input id="toPVWRadio" type="radio" value="preview" name="rdio" checked >
+                        <input id="toPVWRadio" type="radio" value="preview" name="presetModeRadio" checked onchange="updateSettings()">
                         <label for="toPVWRadio" class="sdpi-item-label"><span></span>Preview</label>
                     </div>
                     <div class="sdpi-item-child">
-                        <input id="toPGMRadio" type="radio" value="program" name="rdio">
+                        <input id="toPGMRadio" type="radio" value="program" name="presetModeRadio" checked onchange="updateSettings()">
                         <label for="toPGMRadio" class="sdpi-item-label"><span></span>Program</label>
                     </div>
                 </div>

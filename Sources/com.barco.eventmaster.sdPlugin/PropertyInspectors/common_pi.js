@@ -43,14 +43,13 @@ function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
             var presetName = document.getElementById('presetName');
             presetName.value = payload['presetName'];
 
-            //var presetMode = document.getElementById('toPVWRadio');
-            //if( payload['presetMode'] == 2) {
-            //    presetMode.checked = false;
-            //}
-            //else {
-            //    presetMode = document.getElementById(toPGMRadio);
-            //    presetMode.checked = true;
-            //}
+            var presetMode = document.getElementById('toPVWRadio');
+            if( payload['presetMode'] == 0) {
+                presetMode.checked = true;
+            }
+            else {
+                presetMode.checked = false;
+            }
         }
       
     };
@@ -60,7 +59,8 @@ function updateSettings() {
     var ipAddress = document.getElementById('ipAddress');
     var port = document.getElementById('port');
     var presetName = document.getElementById('presetName');
-    
+    var presetModeToPVW = document.getElementById('toPVWRadio');
+        
     var payload = {};
 
     payload.property_inspector = 'updateSettings';
@@ -72,7 +72,12 @@ function updateSettings() {
         payload.port = port.value;
     
     if( presetName != null)
-        payload.presetName = presetName.value
+        payload.presetName = presetName.value;
+
+    if( presetModeToPVW.checked == true)
+        payload.presetMode = 0;
+    else   
+        payload.presetMode = 1;
 
     sendPayloadToPlugin(payload);
 }

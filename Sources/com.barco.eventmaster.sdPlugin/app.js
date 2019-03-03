@@ -165,6 +165,12 @@ function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
                 var presetName = jsonPayload.presetName;
                 updatedSettings["presetName"] = presetName;
             }
+            if (jsonPayload.hasOwnProperty('presetMode')) {
+
+                changed = true;
+                var presetMode = jsonPayload.presetMode;
+                updatedSettings["presetMode"] = presetMode;
+            }
             if (jsonPayload.hasOwnProperty('cueName')) {
 
                 changed = true;
