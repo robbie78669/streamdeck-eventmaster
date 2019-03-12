@@ -77,8 +77,8 @@
     }
   ],
   "Category": "Barco Event Master",
-  "CategoryIcon": "EventMasterCategoryIcon",
-  "Icon": "EventMasterPluginIcon",
+  "CategoryIcon": "images/barco_logo",
+  "Icon": "images/eventmaster_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
   "Description": "Requires Event Master v6.2 or higher. Adds Event Master commend support to Stream Deck.", 

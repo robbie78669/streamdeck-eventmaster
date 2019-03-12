@@ -7,17 +7,29 @@ var jrpc = null;
        
 var DestinationEnum = Object.freeze({ "HARDWARE_AND_SOFTWARE": 0, "HARDWARE_ONLY": 1, "SOFTWARE_ONLY": 2 })
 
+function isEmpty( obj ) {
+    for (var key in obj) {
+        if( obj.hasOwnProperty(key))
+            return false;
+    }
+
+    return true;
+}
+
 var eventMasterAction = {
     
     onPropertyInspectorDidAppear: function (action, context, settings, coordinates) {
         // send notification to property_inspector to load saved settings
-        var json = {
-            "event": "sendToPropertyInspector",
-            "context": context,
-            "payload": settingsCache[context]
-        };
+       if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
 
-        websocket.send(JSON.stringify(json));
+            var json = {
+                "event": "sendToPropertyInspector",
+                "context": context,
+                "payload": settingsCache[context]
+            };
+
+            websocket.send(JSON.stringify(json));
+        }
     },
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
         
@@ -165,6 +177,12 @@ function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
                 var presetName = jsonPayload.presetName;
                 updatedSettings["presetName"] = presetName;
             }
+            if (jsonPayload.hasOwnProperty('presetMode')) {
+
+                changed = true;
+                var presetMode = jsonPayload.presetMode;
+                updatedSettings["presetMode"] = presetMode;
+            }
             if (jsonPayload.hasOwnProperty('cueName')) {
 
                 changed = true;
@@ -174,6 +192,9 @@ function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
             
             if( changed  ) {
                 eventMasterAction.SetSettings(context, updatedSettings);
+
+                var coordinates = jsonPayload['coordinates'];
+                eventMasterAction.onPropertyInspectorDidAppear(action, context, updatedSettings, coordinates);
             }
             
         }
