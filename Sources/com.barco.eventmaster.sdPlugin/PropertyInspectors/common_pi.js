@@ -5,6 +5,7 @@ var websocket = null,
     runningApps = [],
     isQT = navigator.appVersion.includes('QtWebEngine');
     
+    var deleteThisVar=null;
 
 function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
     uuid = inUUID;
