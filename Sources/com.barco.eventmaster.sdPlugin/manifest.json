@@ -43,7 +43,7 @@
       "SupportedInMultiActions": false,
       "Tooltip": "This action recalls the specified preset", 
       "PropertyInspectorPath": "PropertyInspectors/recallpreset_pi.html",
-      "UUID": "com.barco.eventmaster.recallpreset"
+      "UUID": "com.barco.eventmaster.recallpreset" 
     },
     {
       "Icon": "images/recallNextPresetActionIcon",
