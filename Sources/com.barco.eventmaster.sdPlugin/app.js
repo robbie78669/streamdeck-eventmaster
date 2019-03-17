@@ -17,13 +17,72 @@ function isEmpty( obj ) {
     return true;
 }
 
+function isValidIpAndPort(ipAddress, port) {
+    
+    var ipformat = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    
+    if( validateNum(port, 1025, 65535) && ipAddress.match(ipformat) )
+        return true;
+
+    return false;
+}
+
+function validateNum(input, min, max) {
+    var num = +input;
+    return num >= min && num <= max && input === num.toString();
+}
+
 
 var eventMasterAction = {
     
+    testEventMasterConnection: function ( context ) {
+
+        if( isEmpty(settingsCache) )
+            return;
+
+        var settings = settingsCache[context];
+        if( settings && isValidIpAndPort(settings.ipAddress, settings.port) ) {
+                jrpc.toStream = function(_msg){
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState != 4) return;
+        
+                    try {
+                        JSON.parse(this.responseText);
+                        jrpc.messageHandler(this.responseText);
+                    }
+                    catch (e){
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+                    }
+                };
+        
+                try {
+                    xhr.open("POST", "http://" + settings.ipAddress + ":" + settings.port, true);
+                    xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
+                    xhr.send(_msg);
+                }
+                catch (e){
+                    eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+                }
+            };
+
+            jrpc.call("powerStatus", []).then(function (result) {
+                if( result == 0)
+                    eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                    eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            });
+        }
+        else
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+    },
+
     onPropertyInspectorDidAppear: function (action, context, settings, coordinates) {
         // send notification to property_inspector to load saved settings
        if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
 
+            eventMasterAction.testEventMasterConnection( context )
+            
             var json = {
                 "event": "sendToPropertyInspector",
                 "context": context,
@@ -34,50 +93,66 @@ var eventMasterAction = {
         }
     },
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
+        if( settings.ipAddress && settings.port ) {
+            jrpc.toStream = function(_msg){
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState != 4) return;
         
-        jrpc.toStream = function(_msg){
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (this.readyState != 4) return;
-    
-                try {
-                    JSON.parse(this.responseText);
-                    jrpc.messageHandler(this.responseText);
-                }
-                catch (e){
-                    eventMasterAction.SetStatus(context, e)
-                }
+                    try {
+                        JSON.parse(this.responseText);
+                        jrpc.messageHandler(this.responseText);
+                    }
+                    catch (e){
+                        eventMasterAction.SetStatus(context, "Error Message received:"+e)
+                    }
+                };
+        
+                xhr.open("POST", "http://" + settings.ipAddress + ":" + settings.port, true);
+                xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
+                xhr.send(_msg);
             };
-    
-            xhr.open("POST", "http://" + settings.ipAddress + ":" + settings.port, true);
-            xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
-            xhr.send(_msg);
-        };
-        
-        if( action == "com.barco.eventmaster.alltrans" ) {
-            jrpc.call("allTrans", []).then(function (result) {
-                eventMasterAction.SetStatus(context, result);
-            });
-        }
-        else if (action == "com.barco.eventmaster.cut") {
-            jrpc.call("cut", []).then(function (result) {
-                eventMasterAction.SetStatus(context, result);
-            });
-        }
-        else if (action == "com.barco.eventmaster.recallnextpreset") {
-            jrpc.call("recallNextPreset", []).then(function (result) {
-                eventMasterAction.SetStatus(context, result);
-            });
-        }
-        else if (action == "com.barco.eventmaster.recallpreset") {
-            jrpc.call("activatePreset", ["PresetName:"+settings.presetName, "type:"+settings.presetMode]).then(function (result) {
-                eventMasterAction.SetStatus(context, result);
-            });
-        }
-        else if (action == "com.barco.eventmaster.recallcue"){
-            jrpc.call("activateCue", ["cueName:"+settings.cueName, "type:"+settings.cueMode]).then(function (result) {
-                eventMasterAction.SetStatus(context, result);
-            });
+            
+            if( action == "com.barco.eventmaster.alltrans" ) {
+                jrpc.call("allTrans", []).then(function (result) {
+                if( result == 0)
+                    eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                    eventMasterAction.SetStatus(context, "Error Message received:"+result);
+                });
+            }
+            else if (action == "com.barco.eventmaster.cut") {
+                jrpc.call("cut", []).then(function (result) {
+                if( result == 0)
+                    eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                    eventMasterAction.SetStatus(context, "Error Message received:"+result);
+                });
+            }
+            else if (action == "com.barco.eventmaster.recallnextpreset") {
+                jrpc.call("recallNextPreset", []).then(function (result) {
+                if( result == 0)
+                    eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                    eventMasterAction.SetStatus(context, "Error Message received:"+result);
+                });
+            }
+            else if (action == "com.barco.eventmaster.recallpreset") {
+                jrpc.call("activatePreset", ["PresetName:"+settings.presetName, "type:"+settings.presetMode]).then(function (result) {
+                    if( result == 0)
+                    eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                    eventMasterAction.SetStatus(context, "Error Message received:"+result);
+                });
+            }
+            else if (action == "com.barco.eventmaster.recallcue"){
+                jrpc.call("activateCue", ["cueName:"+settings.cueName, "type:"+settings.cueMode]).then(function (result) {
+                    if( result == 0)
+                    eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                    eventMasterAction.SetStatus(context, "Error Message received:"+result);
+                });
+            }    
         }
     },
     
@@ -90,32 +165,7 @@ var eventMasterAction = {
             settingsCache[context] = settings;
         }
 
-        if( settings.ipAddress && settings.port ) {
-            jrpc.toStream = function(_msg){
-                var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function() {
-                    if (this.readyState != 4) return;
-        
-                    try {
-                        JSON.parse(this.responseText);
-                        jrpc.messageHandler(this.responseText);
-                    }
-                    catch (e){
-                        eventMasterAction.SetStatus(context, e);
-                    }
-                };
-        
-                xhr.open("POST", "http://" + settings.ipAddress + ":" + settings.port, true);
-                xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
-                xhr.send(_msg);
-            };
-            jrpc.call("powerStatus", []).then(function (result) {
-                if( result == 0)
-                   eventMasterAction.SetStatus(context, "Connection Established");
-                else    
-                   eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            });
-        }
+        eventMasterAction.testEventMasterConnection( context )
     },
 
     SetTitle: function (context, title) {
@@ -124,8 +174,18 @@ var eventMasterAction = {
 
     SetStatus: function (context, status) {
         var settings = settingsCache[context];
-        settings.status = status;
-        eventMasterAction.SetSettings(context, settings);
+        if( settings ) {
+            settings.status = status;
+            eventMasterAction.SetSettings(context, settings);
+        
+            var json = {
+                "event": "sendToPropertyInspector",
+                "context": context,
+                "payload": settingsCache[context]
+            };
+    
+            websocket.send(JSON.stringify(json));
+        }
     },
 
     SetSettings: function (context, settings) {
@@ -243,9 +303,7 @@ function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
             
             if( changed  ) {
                 eventMasterAction.SetSettings(context, updatedSettings);
-
-                var coordinates = jsonPayload['coordinates'];
-                eventMasterAction.onPropertyInspectorDidAppear(action, context, updatedSettings, coordinates);
+                eventMasterAction.testEventMasterConnection( context )
             }
             
         }

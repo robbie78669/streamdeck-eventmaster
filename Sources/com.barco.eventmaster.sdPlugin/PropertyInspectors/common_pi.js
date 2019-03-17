@@ -31,6 +31,7 @@ function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
         // Received message from Stream Deck
         var jsonObj = JSON.parse(evt.data);
 
+        
         // This event should come
         if (jsonObj.event === 'sendToPropertyInspector') {
             var payload = jsonObj.payload;
@@ -95,8 +96,8 @@ function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
 
             var status_payload = payload['status'];
             if( status_payload != null ) {
-                var statusElement = document.getElementById('status')
-                statusElement.value = status_payload;
+                statusElement = document.getElementById('status');
+                statusElement.innerText = status_payload;
             }
         }
     };
