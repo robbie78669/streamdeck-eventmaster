@@ -76,6 +76,7 @@
       "UUID": "com.barco.eventmaster.recallcue"
     }
   ],
+  "SDKVersion": 2,
   "Category": "Barco Event Master",
   "CategoryIcon": "images/eventmasterCategoryIcon",
   "Icon": "images/barco_logo",
@@ -94,5 +95,9 @@
         "Platform": "windows", 
         "MinimumVersion" : "10"
     }
-  ]
+  ],
+  "Software": 
+    {
+        "MinimumVersion" : "4.1"
+    }
 }
