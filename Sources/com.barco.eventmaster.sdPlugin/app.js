@@ -2,8 +2,9 @@
 var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
-var jrpc = null;
-
+var socket = null;
+var jrpc = new simple_jsonrpc();
+    
        
 var DestinationEnum = Object.freeze({ "HARDWARE_AND_SOFTWARE": 0, "HARDWARE_ONLY": 1, "SOFTWARE_ONLY": 2 })
 
@@ -15,6 +16,7 @@ function isEmpty( obj ) {
 
     return true;
 }
+
 
 var eventMasterAction = {
     
@@ -33,40 +35,52 @@ var eventMasterAction = {
     },
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
         
-        jrpc = new simple_jsonrpc();
-
-        jrpc.host=settings.ipAddress +":"+ settings.port;
-        var params = ["presetNo:1.0"];
-      
+        jrpc.toStream = function(_msg){
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState != 4) return;
+    
+                try {
+                    JSON.parse(this.responseText);
+                    jrpc.messageHandler(this.responseText);
+                }
+                catch (e){
+                    eventMasterAction.SetStatus(context, e)
+                }
+            };
+    
+            xhr.open("POST", "http://" + settings.ipAddress + ":" + settings.port, true);
+            xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
+            xhr.send(_msg);
+        };
+        
         if( action == "com.barco.eventmaster.alltrans" ) {
-           jrpc.call("allTrans", params).then(function (result) {
-                settings.status(result);
-           });
+            jrpc.call("allTrans", []).then(function (result) {
+                eventMasterAction.SetStatus(context, result);
+            });
         }
         else if (action == "com.barco.eventmaster.cut") {
             jrpc.call("cut", []).then(function (result) {
-                settings.status(result);
+                eventMasterAction.SetStatus(context, result);
             });
         }
         else if (action == "com.barco.eventmaster.recallnextpreset") {
             jrpc.call("recallNextPreset", []).then(function (result) {
-                settings.status(result);
+                eventMasterAction.SetStatus(context, result);
             });
         }
         else if (action == "com.barco.eventmaster.recallpreset") {
-            jrpc.call("activtatePreset", ["PresetName:"+settings.presetName, "type:"+settings.presetMode]).then(function (result) {
-                settings.status(result);
+            jrpc.call("activatePreset", ["PresetName:"+settings.presetName, "type:"+settings.presetMode]).then(function (result) {
+                eventMasterAction.SetStatus(context, result);
             });
         }
         else if (action == "com.barco.eventmaster.recallcue"){
-            jrpc.call("activtateCue", ["cueName:"+settings.cueName, "type:"+settings.cueMode]).then(function (result) {
-                settings.status(result);
+            jrpc.call("activateCue", ["cueName:"+settings.cueName, "type:"+settings.cueMode]).then(function (result) {
+                eventMasterAction.SetStatus(context, result);
             });
         }
-        
-        
     },
-
+    
     onKeyUp: function (action, context, settings, coordinates, userDesiredState) {
 
     },
@@ -75,9 +89,43 @@ var eventMasterAction = {
         if(settings != null ){
             settingsCache[context] = settings;
         }
+
+        if( settings.ipAddress && settings.port ) {
+            jrpc.toStream = function(_msg){
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (this.readyState != 4) return;
+        
+                    try {
+                        JSON.parse(this.responseText);
+                        jrpc.messageHandler(this.responseText);
+                    }
+                    catch (e){
+                        eventMasterAction.SetStatus(context, e);
+                    }
+                };
+        
+                xhr.open("POST", "http://" + settings.ipAddress + ":" + settings.port, true);
+                xhr.setRequestHeader('Content-type', 'text/plain; charset=utf-8');
+                xhr.send(_msg);
+            };
+            jrpc.call("powerStatus", []).then(function (result) {
+                if( result == 0)
+                   eventMasterAction.SetStatus(context, "Connection Established");
+                else    
+                   eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            });
+        }
     },
 
-    SetTitle: function (action, context, keyPressCounter) {
+    SetTitle: function (context, title) {
+    },
+  
+
+    SetStatus: function (context, status) {
+        var settings = settingsCache[context];
+        settings.status = status;
+        eventMasterAction.SetSettings(context, settings);
     },
 
     SetSettings: function (context, settings) {
@@ -92,11 +140,8 @@ var eventMasterAction = {
 
         websocket.send(JSON.stringify(json));
     },
-
-    AddToSettings: function (context, newSettings) {
-        settingsCache[context]
-    }
 };
+
 
 function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
     pluginUUID = inPluginUUID
@@ -188,6 +233,12 @@ function connectSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
                 changed = true;
                 var cueName = jsonPayload.cueName;
                 updatedSettings["cueName"] = cueName;
+            }
+            if (jsonPayload.hasOwnProperty('cueMode')) {
+
+                changed = true;
+                var cueMode = jsonPayload.cueMode;
+                updatedSettings["cueMode"] = cueMode;
             }
             
             if( changed  ) {

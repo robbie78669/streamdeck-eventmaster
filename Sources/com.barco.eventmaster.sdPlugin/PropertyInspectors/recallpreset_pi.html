@@ -25,20 +25,20 @@
                 <div class="sdpi-item-label">Port</div> 
                 <input id="port" class="sdpi-item-value" value="" placeholder="e.g. 9999" required pattern="\d{1,5}" oninput="updateSettings()">
             </div>
-            <div class="sdpi-item" title="This field lets you enter the preset name. The little exclamation mark changes to a checkmark, if the condition is met (e.g. you entered an IP-address.).">
+            <div class="sdpi-item" title="This field lets you enter the preset name.">
                 <div class="sdpi-item-label">Preset Name</div> 
                 <input id="presetName" class="sdpi-item-value" value="" placeholder="e.g. 1.0" oninput="updateSettings()">
             </div>
-            <div type="radio" class="sdpi-item">
+            <div type="radio" id="presetMode" class="sdpi-item" onchange="updateSettings()">
                 <div class="sdpi-item-label">Recall To:</div>
                 <div class="sdpi-item-value ">
                     <div class="sdpi-item-child">
-                        <input id="toPVWRadio" type="radio" value="0" name="rdio" checked >
-                        <label for="toPVWRadio" class="sdpi-item-label"><span></span>Preview</label>
+                        <input id="presetMode_toPreview" type="radio" name="presetMode" value="presetMode_toPreview" checked >
+                        <label for="presetMode_toPreview" class="sdpi-item-label"><span></span>Preview</label>
                     </div>
                     <div class="sdpi-item-child">
-                        <input id="toPGMRadio" type="radio" value="1" name="rdio">
-                        <label for="toPGMRadio" class="sdpi-item-label"><span></span>Program</label>
+                        <input id="presetMode_toProgram" type="radio" name="presetMode" value="presetMode_toProgram">
+                        <label for="presetMode_toProgram" class="sdpi-item-label"><span></span>Program</label>
                     </div>
                 </div>
             </div>

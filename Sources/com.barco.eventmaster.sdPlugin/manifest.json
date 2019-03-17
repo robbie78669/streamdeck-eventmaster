@@ -1,13 +1,13 @@
 {
   "Actions": [
     {
-      "Icon": "images/allTransActionIcon",
+      "Icon": "images/allTransActionImage",
       "Name": "All Trans", 
       "States": [
         {
-          "Image": "images/allTransDefaultImage",
-          "TitleAlignment": "middle", 
-          "FontSize": "16"
+          "Image": "images/allTransKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": false,
@@ -16,13 +16,13 @@
       "UUID": "com.barco.eventmaster.alltrans"
     },
     {
-      "Icon": "images/cutActionIcon",
+      "Icon": "images/cutActionImage",
       "Name": "Cut", 
       "States": [
         {
-          "Image": "images/cutDefaultImage",
-          "TitleAlignment": "middle", 
-          "FontSize": "16"
+          "Image": "images/cutKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": false,
@@ -31,13 +31,13 @@
       "UUID": "com.barco.eventmaster.cut"
     },
     {
-      "Icon": "images/activatePresetActionIcon",
+      "Icon": "images/activatePresetActionImage",
       "Name": "Recall Preset", 
       "States": [
         {
-          "Image": "images/activatePresetDefaultImage",
-          "TitleAlignment": "middle", 
-          "FontSize": "16"
+          "Image": "images/activatePresetKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": false,
@@ -46,28 +46,28 @@
       "UUID": "com.barco.eventmaster.recallpreset" 
     },
     {
-      "Icon": "images/recallNextPresetActionIcon",
+      "Icon": "images/recallNextPresetActionImage",
       "Name": "Recall Next Preset", 
       "States": [
         {
-          "Image": "images/recallNextPresetDefaultImage",
-          "TitleAlignment": "middle", 
-          "FontSize": "16"
+          "Image": "images/recallNextPresetKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": false,
       "Tooltip": "This action recalls the next preset", 
-      "PropertyInspectorPath": "PropertyInspectors/noparans_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.recallnextpreset"
     },
     {
-      "Icon": "images/activateCueActionIcon",
+      "Icon": "images/activateCueActionImage",
       "Name": "Go Cue", 
       "States": [
         {
-          "Image": "images/activateCueDefaultImage",
-          "TitleAlignment": "middle", 
-          "FontSize": "16"
+          "Image": "images/activateCueKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": false,
@@ -77,8 +77,8 @@
     }
   ],
   "Category": "Barco Event Master",
-  "CategoryIcon": "images/barco_logo",
-  "Icon": "images/eventmaster_logo",
+  "CategoryIcon": "images/eventmasterCategoryIcon",
+  "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
   "Description": "Requires Event Master v6.2 or higher. Adds Event Master commend support to Stream Deck.", 

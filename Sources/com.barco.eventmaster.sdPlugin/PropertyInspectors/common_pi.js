@@ -35,54 +35,158 @@ function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
         if (jsonObj.event === 'sendToPropertyInspector') {
             var payload = jsonObj.payload;
 
-            var ipAddress = document.getElementById('ipAddress');
-            ipAddress.value = payload['ipAddress'];
+            var ipAddress_payload = payload['ipAddress'];
+            if( ipAddress_payload != null ) {
+                var ipAddresElement = document.getElementById('ipAddress');
+                ipAddresElement.value = payload['ipAddress'];
+            }
+            
+            var port_payload = payload['port'];
+            if( port_payload != null ) {
 
-            var port = document.getElementById('port');
-            port.value = payload['port'];
-
-            var presetName = document.getElementById('presetName');
-            if( presetName != null )
-                presetName.value = payload['presetName'];
-
-            var presetMode = document.getElementById('toPVWRadio');
-            if( presetMode != null ) {
-                if( payload["presetMode"] ) {
-                    if( payload["presetMode"] == 0)
-                        presetMode.checked = true;
-                    else
-                        presetMode.checked = false;
+                var portElement = document.getElementById('port');
+                portElement.value = payload['port'];
+            }
+            
+            var presetName_payload = payload['presetName'];
+            if( presetName_payload != null ) {
+                var presetNameElement = document.getElementById('presetName');
+                presetNameElement.value = payload['presetName'];
+            }
+                
+            var payload_presetMode = payload["presetMode"];
+            var presetModeElement = document.getElementsByName('presetMode');
+            if( payload_presetMode == null ) {
+                if( presetModeElement != null ) 
+                    setChecked(presetModeElement, "presetMode_toPreview");
+            }
+            else {
+                if( payload_presetMode == 0  ) {
+                    setChecked(presetModeElement, "presetMode_toPreview");
                 }
+                else {
+                    setChecked(presetModeElement, "presetMode_toProgram");
+                }
+            }
+
+            var cueName_payload = payload['cueName'];
+            if( cueName_payload != null ) {
+                var cueNameElement = document.getElementById('cueName');
+                cueNameElement.value = payload['cueName'];
+            }
+
+            var payload_cueMode = payload["cueMode"];
+            var cueModeElement = document.getElementsByName('cueMode');
+            if( payload_cueMode == null ) {
+                if( cueModeElement != null ) 
+                    setChecked(cueModeElement, "cueMode_Play");
+            }
+            else {
+                if( payload_cueMode == 0  ) {
+                    setChecked(cueModeElement, "cueMode_Play");
+                }
+                else if( payload_cueMode == 1 ) {
+                    setChecked(cueModeElement, "cueMode_Pause");
+                }
+                else {
+                    setChecked(cueModeElement, "cueMode_Stop");
+                }
+            }
+
+            var status_payload = payload['status'];
+            if( status_payload != null ) {
+                var statusElement = document.getElementById('status')
+                statusElement.value = status_payload;
             }
         }
     };
 }
 
+// return the value of the radio button that is checked
+// return an empty string if none are checked, or
+// there are no radio buttons
+function getChecked(radioObj) {
+	if(!radioObj)
+		return "";
+	var radioLength = radioObj.length;
+	if(radioLength == undefined)
+		if(radioObj.checked)
+			return radioObj.value;
+		else
+			return "";
+	for(var i = 0; i < radioLength; i++) {
+		if(radioObj[i].checked) {
+			return radioObj[i].id;
+		}
+	}
+	return "";
+}
+
+// set the radio button with the given value as being checked
+// do nothing if there are no radio buttons
+// if the given value does not exist, all the radio buttons
+// are reset to unchecked
+function setChecked(radioObj, newValue) {
+	if(!radioObj)
+		return;
+	var radioLength = radioObj.length;
+	if(radioLength == undefined) {
+		radioObj.checked = (radioObj.value == newValue.toString());
+		return;
+	}
+	for(var i = 0; i < radioLength; i++) {
+		radioObj[i].checked = false;
+		if(radioObj[i].id == newValue.toString()) {
+			radioObj[i].checked = true;
+		}
+	}
+}
+
 function updateSettings() {
-    var ipAddress = document.getElementById('ipAddress');
-    var port = document.getElementById('port');
-    var presetName = document.getElementById('presetName');
-    var pvmMode = document.getElementById('toPVWRadio')
+    var ipAddressElement = document.getElementById('ipAddress');
+    var portElement = document.getElementById('port');
+    var presetNameElement = document.getElementById('presetName');
+    var presetModeElement = document.getElementsByName('presetMode');
+    var cueNameElement = document.getElementById('cueName');
+    var cueModeElement = document.getElementsByName('cueMode');
+    
     
     var payload = {};
 
     payload.property_inspector = 'updateSettings';
 
-    if( ipAddress != null )
+    if( ipAddressElement != null )
         payload.ipAddress = ipAddress.value;
     
-    if( port != null )
+    if( portElement != null )
         payload.port = port.value;
     
-    if( presetName != null)
+    if( presetNameElement != null)
         payload.presetName = presetName.value
 
-    if( pvmMode.checked == true ) {
+    if( presetModeElement != null ) {
+        var presetMode=getChecked(presetModeElement);
         payload.presetMode = 0;
+        if( presetMode && presetMode.length>0 ) { 
+            if (presetMode == "presetMode_toProgram")
+                payload.presetMode = 1;                
+        }
     }
-    else {
-         payload.presetMode = 1;
+
+    if( cueNameElement != null)
+        payload.cueName = cueName.value
+
+    if( cueModeElement != null ) {
+        var cueMode=getChecked(cueModeElement);
+        payload.cueMode = 0;
+        if( cueMode && cueMode.length>0 ) { 
+            if (cueMode == "cueMode_Pause")
+                payload.cueMode = 1;                
+            else   
+                payload.cueMode = 2;
+        }
     }
+    
     
     sendPayloadToPlugin(payload);
 }
