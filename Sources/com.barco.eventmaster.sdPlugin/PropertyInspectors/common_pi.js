@@ -7,7 +7,7 @@ var websocket = null,
     
     
 
-function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
     uuid = inUUID;
     actionInfo = JSON.parse(inActionInfo); // cache the info
     inInfo = JSON.parse(inInfo);
@@ -79,7 +79,7 @@ function connectSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
             var payload_cueMode = payload["cueMode"];
             var cueModeElement = document.getElementsByName('cueMode');
             if( payload_cueMode == null ) {
-                if( cueModeElement != null ) 
+                if( cueModeElement = null ) 
                     setChecked(cueModeElement, "cueMode_Play");
             }
             else {
@@ -183,7 +183,7 @@ function updateSettings() {
         if( cueMode && cueMode.length>0 ) { 
             if (cueMode == "cueMode_Pause")
                 payload.cueMode = 1;                
-            else   
+            else if( cueMode == "cueMode_Stop")  
                 payload.cueMode = 2;
         }
     }
