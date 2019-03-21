@@ -17,12 +17,12 @@ function isEmpty( obj ) {
     return true;
 }
 
-function isValidIpAndPort(ipAddress, port) {
+function isValidIp(ipAddress) {
     
     var ipformat = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     
-    if( ipAddress && port ) {
-        if( validateNum(port, 1025, 65535) && ipAddress.match(ipformat) )
+    if( ipAddress ) {
+        if( ipAddress.match(ipformat) )
         return true;
     }
     
@@ -38,9 +38,10 @@ function validateNum(input, min, max) {
 
 var eventMasterAction = {
     
-    sendJSON_RPC_Post: function( context, ipAddress, port, method, paramList ) {
+    sendJSON_RPC_Post: function( context, ipAddress, method, paramList ) {
 
-        if( isValidIpAndPort(ipAddress, port) ) {
+        var port = 9999;
+        if( isValidIp(ipAddress) ) {
         
             xhr = new XMLHttpRequest();
             var url = "http://"+ ipAddress + ":" + port;
@@ -81,7 +82,7 @@ var eventMasterAction = {
             return;
         }
 
-        eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, settings.port, "powerStatus", {} ) ;
+        eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, "powerStatus", {} ) ;
     },
 
     onPropertyInspectorDidAppear: function (action, context, settings, coordinates) {
@@ -104,19 +105,19 @@ var eventMasterAction = {
         if( settings ) {
             
             if( action == "com.barco.eventmaster.alltrans" ) {
-                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, settings.port,"allTrans", {});
+                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress,"allTrans", {});
             }
             else if (action == "com.barco.eventmaster.cut") {
-                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, settings.port, "cut", {});
+                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, "cut", {});
             }
             else if (action == "com.barco.eventmaster.recallnextpreset") {
-                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, settings.port, "recallNextPreset", {});
+                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, "recallNextPreset", {});
             }
             else if (action == "com.barco.eventmaster.recallpreset") {
-                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, settings.port, "activatePreset", {"presetName": settings.presetName, "type":settings.presetMode});
+                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, "activatePreset", {"presetName": settings.presetName, "type":settings.presetMode});
             }
             else if (action == "com.barco.eventmaster.recallcue"){
-                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, settings.port, "activateCue", {"cueName":settings.cueName, "type":settings.cueMode});
+                eventMasterAction.sendJSON_RPC_Post(context, settings.ipAddress, "activateCue", {"cueName":settings.cueName, "type":settings.cueMode});
             }    
         }
     },
@@ -236,12 +237,6 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                 var ipAddress = jsonPayload.ipAddress;
                 changed = true;
                 updatedSettings["ipAddress"] = ipAddress;
-            }
-            if (jsonPayload.hasOwnProperty('port')) {
-
-                changed = true;
-                var port = jsonPayload.port;
-                updatedSettings["port"] = port;
             }
             if (jsonPayload.hasOwnProperty('presetName')) {
 

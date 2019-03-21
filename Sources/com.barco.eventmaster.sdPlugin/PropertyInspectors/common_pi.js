@@ -42,13 +42,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 ipAddresElement.value = payload['ipAddress'];
             }
             
-            var port_payload = payload['port'];
-            if( port_payload != null ) {
-
-                var portElement = document.getElementById('port');
-                portElement.value = payload['port'];
-            }
-            
             var presetName_payload = payload['presetName'];
             if( presetName_payload != null ) {
                 var presetNameElement = document.getElementById('presetName');
@@ -145,7 +138,6 @@ function setChecked(radioObj, newValue) {
 
 function updateSettings() {
     var ipAddressElement = document.getElementById('ipAddress');
-    var portElement = document.getElementById('port');
     var presetNameElement = document.getElementById('presetName');
     var presetModeElement = document.getElementsByName('presetMode');
     var cueNameElement = document.getElementById('cueName');
@@ -158,10 +150,7 @@ function updateSettings() {
 
     if( ipAddressElement != null )
         payload.ipAddress = ipAddress.value;
-    
-    if( portElement != null )
-        payload.port = port.value;
-    
+        
     if( presetNameElement != null)
         payload.presetName = presetName.value
 
