@@ -10,7 +10,7 @@
           "FontSize": "8"
         }
       ], 
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "This action transitions all layers in Preview to Program", 
       "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.alltrans"
@@ -25,7 +25,7 @@
           "FontSize": "8"
         }
       ], 
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "This action cuts all layers in Preview to Program", 
       "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.cut"
@@ -40,7 +40,7 @@
           "FontSize": "8"
         }
       ], 
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "This action recalls the specified preset", 
       "PropertyInspectorPath": "PropertyInspectors/recallpreset_pi.html",
       "UUID": "com.barco.eventmaster.recallpreset" 
@@ -55,7 +55,7 @@
           "FontSize": "8"
         }
       ], 
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "This action recalls the next preset", 
       "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.recallnextpreset"
@@ -70,10 +70,55 @@
           "FontSize": "8"
         }
       ], 
-      "SupportedInMultiActions": false,
+      "SupportedInMultiActions": true,
       "Tooltip": "This action recalls the specified cue", 
       "PropertyInspectorPath": "PropertyInspectors/recallCue_pi.html",
       "UUID": "com.barco.eventmaster.recallcue"
+    },
+    {
+      "Icon": "images/freezeActionImage",
+      "Name": "Freeze", 
+      "States": [
+        {
+          "Image": "images/freezeKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "This action recalls the freezes a source, BG, Screen Dest, or Aux Dest", 
+      "PropertyInspectorPath": "PropertyInspectors/freeze_pi.html",
+      "UUID": "com.barco.eventmaster.freeze"
+    },
+    {
+      "Icon": "images/unfreezeActionImage",
+      "Name": "Freeze", 
+      "States": [
+        {
+          "Image": "images/unfreezeKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "This action recalls the unfreezes a source, BG, Screen Dest, or Aux Dest", 
+      "PropertyInspectorPath": "PropertyInspectors/unfreeze_pi.html",
+      "UUID": "com.barco.eventmaster.unfreeze"
+    },
+    {
+      "Icon": "images/changeLayerSourceActionImage",
+      "Name": "trans Layer", 
+      "States": [
+        {
+          "Image": "images/changeLayerSourceKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "This action changes a source within a layer", 
+      "PropertyInspectorPath": "PropertyInspectors/changeLayerSource_pi.html",
+      "UUID": "com.barco.eventmaster.changeLayerSource"
     }
   ],
   "SDKVersion": 2,
@@ -85,7 +130,7 @@
   "Description": "Requires Event Master v6.2 or higher. Adds Event Master commend support to Stream Deck.", 
     "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
-  "Version": "1.2",
+  "Version": "2.0",
   "OS": [
     {
         "Platform": "mac", 

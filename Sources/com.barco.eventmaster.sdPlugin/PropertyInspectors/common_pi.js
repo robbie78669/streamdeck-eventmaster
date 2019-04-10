@@ -31,8 +31,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         // Received message from Stream Deck
         var jsonObj = JSON.parse(evt.data);
 
-        
-        // This event should come
+    
         if (jsonObj.event === 'sendToPropertyInspector') {
             var payload = jsonObj.payload;
 
@@ -41,13 +40,36 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 var ipAddresElement = document.getElementById('ipAddress');
                 ipAddresElement.value = payload['ipAddress'];
             }
+
+            var
             
+            var preset_payload = payload['activatePreset'];
+            if( preset_payload != null ) {
+                var presetNameElement = document.getElementById('presetName');
+                presetNameElement.value = preset_payload.presetName;
+                
+                var presetModeElement = document.getElementsByName('presetMode');
+                if( payload_preset.presetMode == null ) {
+                    if( presetModeElement != null ) 
+                        setChecked(presetModeElement, "presetMode_toPreview");
+                }
+                else {
+                    if( payload_preset.presetMode == 0  ) {
+                        setChecked(presetModeElement, "presetMode_toPreview");
+                    }
+                    else {
+                        setChecked(presetModeElement, "presetMode_toProgram");
+                    }
+                }
+            }
+
+            /*
             var presetName_payload = payload['presetName'];
             if( presetName_payload != null ) {
                 var presetNameElement = document.getElementById('presetName');
                 presetNameElement.value = payload['presetName'];
             }
-                
+            
             var payload_presetMode = payload["presetMode"];
             var presetModeElement = document.getElementsByName('presetMode');
             if( payload_presetMode == null ) {
@@ -61,8 +83,32 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 else {
                     setChecked(presetModeElement, "presetMode_toProgram");
                 }
+            }*/
+
+            var cue_payload = payload['activateCue'];
+            if( cue_payload != null ) {
+                var cueNameElement = document.getElementById('cueName');
+                cueNameElement.value = cue_payload.cueName;
+         
+                var cueModeElement = document.getElementsByName('cueMode');
+                if( cue_payload.cueMode == null ) {
+                    if( cueModeElement = null ) 
+                        setChecked(cueModeElement, "cueMode_Play");
+                }
+                else {
+                    if( cue_payload.cueMode == 0  ) {
+                        setChecked(cueModeElement, "cueMode_Play");
+                    }
+                    else if( cue_payload.cueMode == 1 ) {
+                        setChecked(cueModeElement, "cueMode_Pause");
+                    }
+                    else {
+                        setChecked(cueModeElement, "cueMode_Stop");
+                    }
+                }
             }
 
+            /*
             var cueName_payload = payload['cueName'];
             if( cueName_payload != null ) {
                 var cueNameElement = document.getElementById('cueName');
@@ -92,6 +138,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 statusElement = document.getElementById('status');
                 statusElement.innerText = status_payload;
             }
+            */
         }
     };
 }
@@ -138,10 +185,22 @@ function setChecked(radioObj, newValue) {
 
 function updateSettings() {
     var ipAddressElement = document.getElementById('ipAddress');
-    var presetNameElement = document.getElementById('presetName');
-    var presetModeElement = document.getElementsByName('presetMode');
-    var cueNameElement = document.getElementById('cueName');
-    var cueModeElement = document.getElementsByName('cueMode');
+    
+    var activatePreset_presetNameElement = document.getElementById('presetName');
+    var activatePreset_presetModeElement = document.getElementsByName('presetMode');
+    
+    var activateCue_cueNameElement = document.getElementById('cueName');
+    var activateCue_cueModeElement = document.getElementsByName('cueMode');
+    
+    var freezeElement_typeElement = document.getElementById('freezeType');
+    var freezeElement_nameElement = document.getElementById('freezeName');
+    
+    var unfreezeElement_typeElement = document.getElementById('unfreezeType')
+    var unfreezeElement_nameElement = document.getElementById('unfreezeName');
+    
+    var changeLayerSource_destNameElement = document.getElementById('destName');
+    var changeLayerSource_sourceNameElement = document.getElementById('sourceName');
+    var changeLayerSource_layerNameElement = document.getElementById('layerName');
     
     
     var payload = {};
@@ -150,32 +209,71 @@ function updateSettings() {
 
     if( ipAddressElement != null )
         payload.ipAddress = ipAddress.value;
-        
-    if( presetNameElement != null)
-        payload.presetName = presetName.value
 
-    if( presetModeElement != null ) {
-        var presetMode=getChecked(presetModeElement);
-        payload.presetMode = 0;
+    /** activatePreset */
+    if( activatePreset_presetNameElement != null){
+        payload.activatePreset.presetName = activatePreset_presetNameElement.value
+    }
+
+    if( activatePreset_presetModeElement != null ) {
+        var presetMode=getChecked(activatePreset_presetModeElement);
+        payload.activatePreset.presetMode = 0;
         if( presetMode && presetMode.length>0 ) { 
             if (presetMode == "presetMode_toProgram")
-                payload.presetMode = 1;                
+                payload.activatePreset.presetMode = 1;                
         }
     }
 
-    if( cueNameElement != null)
-        payload.cueName = cueName.value
+    /* activateCue */
+    if( activateCue_cueNameElement != null)
+        payload.activateCue.cueName = activateCue_cueNameElement.value
 
-    if( cueModeElement != null ) {
-        var cueMode=getChecked(cueModeElement);
-        payload.cueMode = 0;
+    if( activateCue_cueModeElement != null ) {
+        var cueMode=getChecked(activateCue_cueModeElement);
+        payload.activateCue.cueMode = 0;
         if( cueMode && cueMode.length>0 ) { 
             if (cueMode == "cueMode_Pause")
-                payload.cueMode = 1;                
+                payload.activateCue.cueMode = 1;                
             else if( cueMode == "cueMode_Stop")  
-                payload.cueMode = 2;
+                payload.activateCue.cueMode = 2;
         }
     }
+
+    //Freeze
+    if( freezeElement_typeElement != null ) {
+        var freezeType=getChecked(freezeElement_typeElement);
+        payload.freeze.freezeType = 0; /*Input Source*/
+        if( freezeType && freezeType.length>0 ) { 
+            if (freezeType == "freeze_BGSource")
+                payload.freeze.freezeType = 1;                
+            else if( freezeType == "freeze_screenSource")  
+                payload.freeze.freezeType = 2;
+            else if( freezeType == "freeze_auxSource")  
+                payload.freeze.freezeType = 3;
+        }
+    }
+
+    if( freezeElement_nameElement != null)
+        payload.freeze.name = freezeElement_nameElement.value
+
+
+    //unFreeze
+    if( unfreezeElement_typeElement != null ) {
+        var unfreezeType=getChecked(unfreezeElement_typeElement);
+        payload.unfreeze.freezeType = 0; /*Input Source*/
+        if( unfreezeType && unfreezeType.length>0 ) { 
+            if (unfreezeType == "unfreeze_BGSource")
+                payload.unfreeze.freezeType = 1;                
+            else if( unfreezeType == "unfreeze_screenSource")  
+                payload.ufreeze.freezeType = 2;
+            else if( unfreezeType == "unfreeze_auxSource")  
+                payload.unfreeze.freezeType = 3;
+        }
+    }
+
+    if( freezeElement_nameElement != null)
+        payload.freeze.name = freezeElement_nameElement.value
+
     
     
     sendPayloadToPlugin(payload);
