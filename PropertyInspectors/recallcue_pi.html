@@ -1,0 +1,54 @@
+<head>
+    <meta charset="utf-8" />
+    <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
+    <meta name=apple-mobile-web-app-capable content=yes>
+    <meta name=apple-mobile-web-app-status-bar-style content=black>
+    <title>Property Inspector Samples PI</title>
+    <link rel="stylesheet" href="../css/sdpi.css">
+    <!--link rel="stylesheet" 
+          media="screen and (max-width: 1025px)" 
+          href="css/local.css" -->
+     <link rel="stylesheet" href="../css/local.css">
+
+</head>
+
+<body>
+    <div class="sdpi-wrapper localbody hiddenx">
+        <div class="sdpi-item" title="This field lets you enter an IP-Adress. The little exclamation mark changes to a checkmark, if the condition is met (e.g. you entered an IP-address.).">
+            <div class="sdpi-item-label">IP Address</div> 
+            <input id="ipAddress" class="sdpi-item-value" value="" placeholder="e.g. 192.168.61.1" required pattern="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" oninput="updateSettings()">
+        </div>
+        <div class="sdpi-item" title="This field lets you enter the Cue name.">
+            <div class="sdpi-item-label">Cue Name</div> 
+            <input id="cueName" class="sdpi-item-value" value="" placeholder="e.g. 1.0" oninput="updateSettings()">
+        </div>
+        <div type="radio" id="presetMode" class="sdpi-item" onchange="updateSettings()">
+            <div class="sdpi-item-label">Play Mode:</div>
+            <div class="sdpi-item-value ">
+                <div class="sdpi-item-child">
+                    <input id="cueMode_Play" type="radio" name="cueMode" value="cueMode_Play" checked >
+                    <label for="cueMode_Play" class="sdpi-item-label"><span></span>Play</label>
+                </div>
+                <div class="sdpi-item-child">
+                    <input id="cueMode_Pause" type="radio" name="cueMode" value="cueMode_Pause" >
+                    <label for="cueMode_Pause" class="sdpi-item-label"><span></span>Pause</label>
+                </div>
+                <div class="sdpi-item-child">
+                    <input id="cueMode_Stop" type="radio" name="cueMode" value="cueMode_Stop">
+                    <label for="cueMode_Stop" class="sdpi-item-label"><span></span>Stop</label>
+                </div>
+            </div>
+        </div>
+        <<div class="sdpi-item">
+            <div class="sdpi-item-label">Status</div>
+                <span class="sdpi-item-value" id="status">
+                    <b>Cannot detect Event Master on the the network</b>
+                </span>
+            </div>
+        </div>
+    </div>
+    <script src="common_pi.js"></script>
+        
+</body>
+            
+</html>

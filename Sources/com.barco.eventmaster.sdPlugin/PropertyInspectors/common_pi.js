@@ -41,8 +41,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 ipAddresElement.value = payload['ipAddress'];
             }
 
-            var
-            
+                       
             var preset_payload = payload['activatePreset'];
             if( preset_payload != null ) {
                 var presetNameElement = document.getElementById('presetName');
