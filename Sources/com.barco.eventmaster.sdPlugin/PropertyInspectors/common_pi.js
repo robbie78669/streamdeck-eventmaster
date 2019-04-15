@@ -1,3 +1,4 @@
+
 var websocket = null,
     uuid = null,
     actionInfo = {},
@@ -40,20 +41,19 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 var ipAddresElement = document.getElementById('ipAddress');
                 ipAddresElement.value = payload['ipAddress'];
             }
-
-                       
+            
             var preset_payload = payload['activatePreset'];
             if( preset_payload != null ) {
                 var presetNameElement = document.getElementById('presetName');
                 presetNameElement.value = preset_payload.presetName;
                 
                 var presetModeElement = document.getElementsByName('presetMode');
-                if( payload_preset.presetMode == null ) {
+                if( preset_payload.presetMode == null ) {
                     if( presetModeElement != null ) 
                         setChecked(presetModeElement, "presetMode_toPreview");
                 }
                 else {
-                    if( payload_preset.presetMode == 0  ) {
+                    if( preset_payload.presetMode == 0  ) {
                         setChecked(presetModeElement, "presetMode_toPreview");
                     }
                     else {
@@ -61,28 +61,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     }
                 }
             }
-
-            /*
-            var presetName_payload = payload['presetName'];
-            if( presetName_payload != null ) {
-                var presetNameElement = document.getElementById('presetName');
-                presetNameElement.value = payload['presetName'];
-            }
-            
-            var payload_presetMode = payload["presetMode"];
-            var presetModeElement = document.getElementsByName('presetMode');
-            if( payload_presetMode == null ) {
-                if( presetModeElement != null ) 
-                    setChecked(presetModeElement, "presetMode_toPreview");
-            }
-            else {
-                if( payload_presetMode == 0  ) {
-                    setChecked(presetModeElement, "presetMode_toPreview");
-                }
-                else {
-                    setChecked(presetModeElement, "presetMode_toProgram");
-                }
-            }*/
 
             var cue_payload = payload['activateCue'];
             if( cue_payload != null ) {
@@ -107,37 +85,57 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 }
             }
 
-            /*
-            var cueName_payload = payload['cueName'];
-            if( cueName_payload != null ) {
-                var cueNameElement = document.getElementById('cueName');
-                cueNameElement.value = payload['cueName'];
-            }
+            /*  Freeze */
+            var freeze_payload = payload['freeze'];
+            if( freeze_payload != null ){
+                var freezelist_Element = document.getElementById("freeze_list");
+                var optgroupElements = freezelist_Element.options;
+                
+                var id = freeze_payload.id;
+                var type = freeze_payload.type;
+                var label = freeze_payload.label;
 
-            var payload_cueMode = payload["cueMode"];
-            var cueModeElement = document.getElementsByName('cueMode');
-            if( payload_cueMode == null ) {
-                if( cueModeElement = null ) 
-                    setChecked(cueModeElement, "cueMode_Play");
-            }
-            else {
-                if( payload_cueMode == 0  ) {
-                    setChecked(cueModeElement, "cueMode_Play");
-                }
-                else if( payload_cueMode == 1 ) {
-                    setChecked(cueModeElement, "cueMode_Pause");
-                }
-                else {
-                    setChecked(cueModeElement, "cueMode_Stop");
+                console.log("sendToPropertyInspector: freeze_payload.id="+id+", type="+type+", group="+label);
+
+                for (var i=0; i<optgroupElements.length; i++)
+                {
+                    console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
+                    if( optgroupElements[i].parentNode.label==label)
+                    {
+                        console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
+                        optgroupElements[i].selected = true;
+                    }
                 }
             }
 
+            /*unfreeze */
+            var unfreeze_payload = payload['unfreeze'];
+            if( unfreeze_payload != null ){
+                var unfreezelist_Element = document.getElementById("unfreeze_list");
+                var optgroupElements = unfreezelist_Element.options;
+                
+                var id = unfreeze_payload.id;
+                var type = unfreeze_payload.type;
+                var label = unfreeze_payload.label;
+
+                console.log("sendToPropertyInspector: unfreeze_payload.id="+id+", type="+type+", group="+label);
+
+                for (var i=0; i<optgroupElements.length; i++)
+                {
+                    console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
+                    if( optgroupElements[i].parentNode.label==label)
+                    {
+                        console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
+                        optgroupElements[i].selected = true;
+                    }
+                }
+            }
             var status_payload = payload['status'];
             if( status_payload != null ) {
                 statusElement = document.getElementById('status');
                 statusElement.innerText = status_payload;
             }
-            */
+        
         }
     };
 }
@@ -191,12 +189,9 @@ function updateSettings() {
     var activateCue_cueNameElement = document.getElementById('cueName');
     var activateCue_cueModeElement = document.getElementsByName('cueMode');
     
-    var freezeElement_typeElement = document.getElementById('freezeType');
-    var freezeElement_nameElement = document.getElementById('freezeName');
-    
-    var unfreezeElement_typeElement = document.getElementById('unfreezeType')
-    var unfreezeElement_nameElement = document.getElementById('unfreezeName');
-    
+    var freeze_listElement = document.getElementById('freeze_list');
+    var unfreeze_listElement = document.getElementById('unfreeze_list');
+           
     var changeLayerSource_destNameElement = document.getElementById('destName');
     var changeLayerSource_sourceNameElement = document.getElementById('sourceName');
     var changeLayerSource_layerNameElement = document.getElementById('layerName');
@@ -211,70 +206,112 @@ function updateSettings() {
 
     /** activatePreset */
     if( activatePreset_presetNameElement != null){
-        payload.activatePreset.presetName = activatePreset_presetNameElement.value
-    }
+        var activatePreset = {presetName: "null", presetMode: 0};
 
-    if( activatePreset_presetModeElement != null ) {
-        var presetMode=getChecked(activatePreset_presetModeElement);
-        payload.activatePreset.presetMode = 0;
-        if( presetMode && presetMode.length>0 ) { 
-            if (presetMode == "presetMode_toProgram")
-                payload.activatePreset.presetMode = 1;                
+        activatePreset.presetName = activatePreset_presetNameElement.value;
+
+        if( activatePreset_presetModeElement != null ) {
+            var presetMode=getChecked(activatePreset_presetModeElement);
+            if( presetMode && presetMode.length>0 ) { 
+                if (presetMode == "presetMode_toProgram")
+                    activatePreset.presetMode = 1;                
+            }
         }
+
+        payload.activatePreset = activatePreset;
     }
 
     /* activateCue */
-    if( activateCue_cueNameElement != null)
-        payload.activateCue.cueName = activateCue_cueNameElement.value
+    if( activateCue_cueNameElement != null) {
+        var activateCue = {cueName: "null", cueMode: 0 };
 
-    if( activateCue_cueModeElement != null ) {
-        var cueMode=getChecked(activateCue_cueModeElement);
-        payload.activateCue.cueMode = 0;
-        if( cueMode && cueMode.length>0 ) { 
-            if (cueMode == "cueMode_Pause")
-                payload.activateCue.cueMode = 1;                
-            else if( cueMode == "cueMode_Stop")  
-                payload.activateCue.cueMode = 2;
+        activateCue.cueName = activateCue_cueNameElement.value
+
+        if( activateCue_cueModeElement != null ) {
+            var cueMode=getChecked(activateCue_cueModeElement);
+            if( cueMode && cueMode.length>0 ) { 
+                if (cueMode == "cueMode_Pause")
+                    activateCue.cueMode = 1;                
+                else if( cueMode == "cueMode_Stop")  
+                    activateCue.cueMode = 2;
+            }
+        }
+
+        payload.activateCue = activateCue;
+    }
+ 
+    /* Freeze */
+    if( freeze_listElement != null && freeze_listElement.selectedIndex > 0) {
+
+        // determine which group (set the type based on the optgroup //
+        var selectedIndex = freeze_listElement.selectedIndex;
+        var op = freeze_listElement.options[selectedIndex];
+        var optGroup = op.parentNode;
+
+        console.log( "freeze_listElement: group= "+optGroup.label+", name="+op.text+" ,id="+op.value);
+        
+        if( optGroup.label == "Inputs") {
+            var freeze = { type: 0, id: -1, label: optGroup.label};
+            freeze.id = optGroup.value;
+            
+            payload.freeze = freeze;
+        }
+        else if (optGroup.label == "Backgrounds" ){
+            var freeze = { type: 1, id: -1, label: optGroup.label};
+            freeze.id = op.value;
+            
+            payload.freeze = freeze;
+        }
+        else if (optGroup.label == "ScreenDestinations") {
+            var freeze = { type: 2, id: -1, label: optGroup.label};
+            freeze.id = op.value;
+            
+            payload.freeze = freeze;
+        }
+        else if( optGroup.label == "AuxDestinations"){
+            var freeze = { type: 3, id: -1, label: optGroup.label};
+            freeze.id = op.value;
+            
+            payload.freeze = freeze;
         }
     }
-
-    //Freeze
-    if( freezeElement_typeElement != null ) {
-        var freezeType=getChecked(freezeElement_typeElement);
-        payload.freeze.freezeType = 0; /*Input Source*/
-        if( freezeType && freezeType.length>0 ) { 
-            if (freezeType == "freeze_BGSource")
-                payload.freeze.freezeType = 1;                
-            else if( freezeType == "freeze_screenSource")  
-                payload.freeze.freezeType = 2;
-            else if( freezeType == "freeze_auxSource")  
-                payload.freeze.freezeType = 3;
-        }
-    }
-
-    if( freezeElement_nameElement != null)
-        payload.freeze.name = freezeElement_nameElement.value
-
-
-    //unFreeze
-    if( unfreezeElement_typeElement != null ) {
-        var unfreezeType=getChecked(unfreezeElement_typeElement);
-        payload.unfreeze.freezeType = 0; /*Input Source*/
-        if( unfreezeType && unfreezeType.length>0 ) { 
-            if (unfreezeType == "unfreeze_BGSource")
-                payload.unfreeze.freezeType = 1;                
-            else if( unfreezeType == "unfreeze_screenSource")  
-                payload.ufreeze.freezeType = 2;
-            else if( unfreezeType == "unfreeze_auxSource")  
-                payload.unfreeze.freezeType = 3;
-        }
-    }
-
-    if( freezeElement_nameElement != null)
-        payload.freeze.name = freezeElement_nameElement.value
-
     
-    
+    /* UnFreeze */
+    if( unfreeze_listElement != null && unfreeze_listElement.selectedIndex > 0) {
+
+        // determine which group (set the type based on the optgroup //
+        var selectedIndex = unfreeze_listElement.selectedIndex;
+        var op = unfreeze_listElement.options[selectedIndex];
+        var optGroup = op.parentNode;
+
+        console.log( "unfreeze_listElement: group= "+optGroup.label+", name="+op.text+" ,id="+op.value);
+
+        if( optGroup.label == "Inputs") {
+            var unfreeze = { type: 0, id: -1, label: optGroup.label};
+            unfreeze.id = optGroup.value;
+            
+            payload.unfreeze = unfreeze;
+        }
+        else if (optGroup.label == "Backgrounds" ){
+            var unfreeze = { type: 1, id: -1, label: optGroup.label};
+            unfreeze.id = op.value;
+            
+            payload.unfreeze = unfreeze;
+        }
+        else if (optGroup.label == "ScreenDestinations") {
+            var unfreeze = { type: 2, id: -1, label: optGroup.label};
+            unfreeze.id = op.value;
+            
+            payload.unfreeze = unfreeze;
+        }
+        else if( optGroup.label == "AuxDestinations"){
+            var unfreeze = { type: 3, id: -1, label: optGroup.label};
+            unfreeze.id = op.value;
+            
+            payload.unfreeze = unfreeze;
+        }
+    }
+        
     sendPayloadToPlugin(payload);
 }
 

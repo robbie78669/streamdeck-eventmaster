@@ -88,11 +88,11 @@
       "SupportedInMultiActions": true,
       "Tooltip": "This action recalls the freezes a source, BG, Screen Dest, or Aux Dest", 
       "PropertyInspectorPath": "PropertyInspectors/freeze_pi.html",
-      "UUID": "com.barco.eventmaster.unfreeze"
+      "UUID": "com.barco.eventmaster.freeze"
     },
     {
       "Icon": "images/unfreezeActionImage",
-      "Name": "UnFreeze", 
+      "Name": "Freeze", 
       "States": [
         {
           "Image": "images/unfreezeKeyIcon",
@@ -107,7 +107,7 @@
     },
     {
       "Icon": "images/changeLayerSourceActionImage",
-      "Name": "Trans Layer", 
+      "Name": "trans Layer", 
       "States": [
         {
           "Image": "images/changeLayerSourceKeyIcon",
