@@ -1,4 +1,5 @@
 
+
 var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
@@ -333,7 +334,7 @@ var EventMasterRPC = {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("freeze error: settingCache is null!");
+            console.error("freezeDestSource error: settingCache is null!");
 
             return;
         }
@@ -352,7 +353,7 @@ var EventMasterRPC = {
 					if( xhr.status === 200) {
 						
                         var fullResponse = JSON.parse(xhr.response);
-                        console.log("freeze response: "+xhr.response);
+                        console.log("freezeDestSource response: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
@@ -363,7 +364,7 @@ var EventMasterRPC = {
 			};
 
 			xhr.onerror = function (e) {
-                console.error("freeze error: "+xhr.response);
+                console.error("freezeDestSource error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -373,7 +374,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("freeze: Invalid IP Address: " + ipAddress);
+            console.error("freezeDestSource: Invalid IP Address: " + ipAddress);
         }
         
 	},
@@ -383,12 +384,12 @@ var EventMasterRPC = {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("unfreeze error: settingCache is null!");
+            console.error("unfreezeDestSource error: settingCache is null!");
             return;
         }
 
         ipAddress = ipAddress;
-		if( isValidIp( this._ipAddress ) ) {
+		if( isValidIp( ipAddress ) ) {
 			var url = "http://"+ipAddress+":9999";
 				
 			var xhr = new XMLHttpRequest();
@@ -399,18 +400,18 @@ var EventMasterRPC = {
 				if (xhr.readyState === 4 ) {
 					if( xhr.status === 200) {
                         var fullResponse = JSON.parse(xhr.response);
-                        console.log("unfreeze response: "+xhr.response);
+                        console.log("unfreezeDestSource response: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("unfreeze error: "+xhr.response);
+                        console.error("unfreezeDestSource error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("unfreeze error: "+xhr.response);
+                console.error("unfreezeDestSource error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -420,7 +421,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("unfreeze: Invalid IP Address: " + ipAddress);
+            console.error("unfreezeDestSource: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -451,27 +452,24 @@ var EventMasterRPC = {
 						console.log("getSources response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            var sources = fullResponse.result.response;
-                            this._sourceList = sources;
+                            var sources = settings.sources = fullResponse.result.response;
                             var arrayLength = sources.length;
                             for (var i = 0; i < arrayLength; i++) {
-                                    console.log("source #"+(i+1))
-                                    console.log("id:" + sources[i].id);
-                                    console.log("Name:" + sources[i].Name);
-                                    console.log("HSize:"+ sources[i].HSize);
-                                    console.log("VSize:"+ sources[i].VSize);
-                                    console.log("SrcType:"+ sources[i].SrcType);
-                                    console.log("InputCfgIndex:"+ sources[i].InputCfgIndex);
-                                    console.log("StillIndex:"+ sources[i].StillIndex);
-                                    console.log("DestIndex:"+ sources[i].DestIndex);
-                                    console.log("UserKeyIndex:"+ sources[i].UserKeyIndex);
-                                    console.log("Mode3D:"+ sources[i].Mode3D);
-                                    console.log("Freeze:"+ sources[i].Freeze);
-                                    console.log("Capacity:"+ sources[i].Capacity);
-                                    console.log("InputCfgVideoStatus:"+ sources[i].InputCfgVideoStatus);
-                                    console.log("--------------------------------------------------------");
-
-                                    //Do something
+                                console.log("source #"+(i+1))
+                                console.log("id:" + sources[i].id);
+                                console.log("Name:" + sources[i].Name);
+                                console.log("HSize:"+ sources[i].HSize);
+                                console.log("VSize:"+ sources[i].VSize);
+                                console.log("SrcType:"+ sources[i].SrcType);
+                                console.log("InputCfgIndex:"+ sources[i].InputCfgIndex);
+                                console.log("StillIndex:"+ sources[i].StillIndex);
+                                console.log("DestIndex:"+ sources[i].DestIndex);
+                                console.log("UserKeyIndex:"+ sources[i].UserKeyIndex);
+                                console.log("Mode3D:"+ sources[i].Mode3D);
+                                console.log("Freeze:"+ sources[i].Freeze);
+                                console.log("Capacity:"+ sources[i].Capacity);
+                                console.log("InputCfgVideoStatus:"+ sources[i].InputCfgVideoStatus);
+                                console.log("--------------------------------------------------------");
                             }
                         }
 					}
@@ -488,7 +486,7 @@ var EventMasterRPC = {
 			};
 
 		
-			var data = JSON.stringify({"params":{"id":"0"}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
+			var data = JSON.stringify({"params":{"type":0}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -497,7 +495,78 @@ var EventMasterRPC = {
         }
 	},
 
-	getDestinations: function (contexet) {
+    getBackgrounds: function( context ) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("getBackgrounds error: settingCache is null!");
+            return;
+        }
+
+        ipAddress = settings.ipAddress;
+		if( isValidIp( ipAddress ) ) {
+		
+			var url = "http://"+ipAddress+":9999";
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-type", "application/json");
+
+			xhr.onload = function (e) { 
+				if (xhr.readyState === 4 ) {
+					if( xhr.status === 200) {
+                        
+                        eventMasterAction.SetStatus(context, "Connection Established");
+						var fullResponse = JSON.parse(xhr.response);
+						console.log("getBackgrounds response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+                            settings.backgrounds = fullResponse.result.response;
+                            var arrayLength = settings.backgrounds.length;
+                            for (var i = 0; i < arrayLength; i++) {
+                                    console.log("source #"+(i+1))
+                                    console.log("id:" + settings.backgrounds[i].id);
+                                    console.log("Name:" + settings.backgrounds[i].Name);
+                                    console.log("HSize:"+ settings.backgrounds[i].HSize);
+                                    console.log("VSize:"+ settings.backgrounds[i].VSize);
+                                    console.log("SrcType:"+ settings.backgrounds[i].SrcType);
+                                    console.log("InputCfgIndex:"+ settings.backgrounds[i].InputCfgIndex);
+                                    console.log("StillIndex:"+ settings.backgrounds[i].StillIndex);
+                                    console.log("DestIndex:"+ settings.backgrounds[i].DestIndex);
+                                    console.log("UserKeyIndex:"+ settings.backgrounds[i].UserKeyIndex);
+                                    console.log("Mode3D:"+ settings.backgrounds[i].Mode3D);
+                                    console.log("Freeze:"+ settings.backgrounds[i].Freeze);
+                                    console.log("Capacity:"+ settings.backgrounds[i].Capacity);
+                                    console.log("InputCfgVideoStatus:"+ settings.backgrounds[i].InputCfgVideoStatus);
+                                    console.log("--------------------------------------------------------");
+
+                            }
+                        }
+					}
+					else {
+                        console.error("getBackgrounds error: "+xhr.responseText);
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+					}
+				}
+			};
+
+			xhr.onerror = function (e) {
+                console.error("getBackgrounds error: "+xhr.responseText);
+                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+			};
+
+		
+			var data = JSON.stringify({"params":{"type":1}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
+			xhr.send(data);
+			console.log("sent: "+data);
+        }
+        else{
+            console.error("getBackgrounds: Invalid IP Address: " + ipAddress);
+        }
+	},
+
+	getDestinations: function (context) {
 
         var settings = settingsCache[context];
         if( settings == null ) {
@@ -526,9 +595,9 @@ var EventMasterRPC = {
                         console.log("getDestinations response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            settings.screenDestinationList = fullResponse.result.response.ScreenDestination;
-                            var screendestinations = fullResponse.result.response.ScreenDestination;
-                            var arrayLength = screendestinations.length;
+                            
+                            var screendestinations = settings.screenDestinations = fullResponse.result.response.ScreenDestination;
+                            var arrayLength = settings.screenDestinations.length;
                             for (var i = 0; i < arrayLength; i++) {
                                     console.log("screen destinations #"+(i+1));
                                     console.log("  id:" + screendestinations[i].id);
@@ -550,13 +619,15 @@ var EventMasterRPC = {
                                         console.log("    Freeze:"+ outMap[i].Freeze);
                                     }
                             }
+                            
                             console.log("AuxDestination:");
-                            settings.auxDestinationList = fullResponse.result.response.AuxDestination;
-                            var auxDestinations = fullResponse.result.response.AuxDestination;
-                            for (var i = 0; i < auxDestinations.length; i++) {
+                            var auxDestinations = settings.auxDestinations = fullResponse.result.response.AuxDestination;
+                            for (var i = 0; i < settings.auxDestinations.length; i++) {
                                 console.log("  AuxDestination #:"+(i+1));
                                 console.log("    id:" + auxDestinations[i].id);
+                                console.log("    Name: "+ auxDestinations[i].Name)
                                 console.log("    AuxStreamMode:" + auxDestinations[i].AuxStreamMode);
+
                             }
                                     
                             console.log("--------------------------------------------------------");
@@ -585,7 +656,7 @@ var EventMasterRPC = {
 	
 	},
 
-	listContent: function( context ) {
+	listContent: function( context, destinationId ) {
 
         var settings = settingsCache[context];
         if( settings == null ) {
@@ -610,12 +681,16 @@ var EventMasterRPC = {
                         console.log("listContent response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            var destContent = fullResponse.result.response;
-                            settings.destinationContents[destContent.id] = destContent;
+                            if( settings.destinationContents == null )
+                                settings.destinationContents = [];
+
+                            settings.destinationContents[destinationId] = fullResponse.result.response;
+                            var destContent= fullResponse.result.response;
+                             
                             console.log("dest Content");
                             console.log("  id:" + destContent.id);
                             console.log("  Name:" + destContent.Name);
-                            
+                    
                             var transitions = destContent.Transition;
                             for (var i = 0; i < transitions.length; i++) {
                                 console.log("   Transition #"+(i+1));
@@ -645,6 +720,7 @@ var EventMasterRPC = {
                             for (var i = 0; i < layers.length; i++) {
                                 console.log("Layer #"+(i+1));
                                 console.log("   id:" + layers[i].id);
+                                console.log("   Name:"+ layers[i].Name);
                                 console.log("   LastSrcIdx:" + layers[i].LastSrcIdx);
                                 console.log("   PvwMode:" + layers[i].PvwMode);
                                 console.log("   PgmMode:" + layers[i].PgmMode);
@@ -707,7 +783,7 @@ var EventMasterRPC = {
         }
 
         
-        if( isValidIp( this._ipAddress ) ) {
+        if( isValidIp( ipAddress ) ) {
     
             var url = "http://"+ipAddress+":9999";
 
@@ -753,23 +829,24 @@ var EventMasterRPC = {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
             return;
         }
-        
-        
-        ipAddress = settings.ipAddress;
-		if( isValidIp( ipAddress ) ) {		
-			var url = "http://"+ipAddress+":9999";
 
-			for(var i=0; i<this._destinationList.length; i++ )
-				listContent(context);
-		
-		}
+        if( settings["screenDestinations"] != null ){
+            destList = settings["screenDestinations"];
+            if( destList.length==0)
+                console.log("getAllDestinationContent:  There are no destinations in the settings");
+                
+            for(var i=0; i<destList.length; i++ ) {
+				this.listContent(context, destList[i].id);
+            }
+        }
 	},
 
 	updateCache: function(context) {
-		this.getSources(context);
-		this.getDestinations(context);
-		this.getAllDestinationContent(context);
-	}
+        this.getDestinations(context);
+        this.getSources(context);
+        this.getBackgrounds(context);
+        this.getAllDestinationContent(context);
+	},
 };
 
 
@@ -787,8 +864,7 @@ var eventMasterAction = {
         // send notification to property_inspector to load saved settings
        if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
 
-            eventMasterAction.testEventMasterConnection( context )
-            
+            EventMasterRPC.updateCache(context);            
             var json = {
                 "event": "sendToPropertyInspector",
                 "context": context,
@@ -798,6 +874,8 @@ var eventMasterAction = {
             websocket.send(JSON.stringify(json));
         }
     },
+
+    
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
         var settings = settingsCache[context];
         if( settings ) {
@@ -838,7 +916,15 @@ var eventMasterAction = {
             settingsCache[context] = settings;
         }
 
-        eventMasterAction.testEventMasterConnection( context )
+        if( action == "com.barco.eventmaster.freeze" || 
+            action == "com.barco.eventmaster.unfreeze" || 
+            action == "com.barco.eventmaster.transLayer" ) {
+                EventMasterRPC.updateCache(context);
+        }
+        else {
+            eventMasterAction.testEventMasterConnection( context )
+        }
+        
     },
 
     SetTitle: function (context, title) {
@@ -926,42 +1012,47 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             eventMasterAction.onWillAppear(action, context, settings, coordinates);
         }
         else if (event == "propertyInspectorDidAppear")  {
+            var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
             eventMasterAction.onPropertyInspectorDidAppear(action, context, settings, coordinates);
         }
-        else if (event == "didReceiveSettings") {
-            var settings = jsonPayload['settings'];
-            var coordinates = jsonPayload['coordinates'];
-            eventMasterAction.onDidReceiveSettings(action, context, settings, coordinates);
-        }
         else if (event == "sendToPlugin") {
 
-            var updatedSettings = {};
+            var settings;
             var changed = false;
+            settings = settingsCache[context];
 
             // event coming from the property inspector..
             if (jsonPayload.hasOwnProperty('ipAddress')) {
 
-                var ipAddress = jsonPayload.ipAddress;
                 changed = true;
-                updatedSettings["ipAddress"] = ipAddress;
+                settings["ipAddress"] = jsonPayload.ipAddress;
             }
             if (jsonPayload.hasOwnProperty('activatePreset')) {
 
                 changed = true;
-                var activatePreset = jsonPayload.activatePreset;
-                updatedSettings["activatePreset"] = activatePreset;
+                settings["activatePreset"] = jsonPayload.activatePreset;;
             }
-           if (jsonPayload.hasOwnProperty('activateCue')) {
+            if (jsonPayload.hasOwnProperty('activateCue')) {
 
                 changed = true;
-                var activateCue = jsonPayload.activateCue;
-                updatedSettings["activateCue"] = activateCue;
+                settings["activateCue"] = jsonPayload.activateCue;
             }
-            
+            if( jsonPayload.hasOwnProperty('freeze')) {
+                changed = true;
+                settings["freeze"] = jsonPayload.freeze;
+            }
+            if( jsonPayload.hasOwnProperty('unfreeze')) {
+                changed = true;
+                settings["unfreeze"] = jsonPayload.unfreeze;
+            }
+            if( jsonPayload.hasOwnProperty('transLayer')) {
+                changed = true;
+                settings["transLayer"] = jsonPayload.transLayer;
+            }
+                        
             if( changed  ) {
-                eventMasterAction.SetSettings(context, updatedSettings);
-                eventMasterAction.testEventMasterConnection( context )
+                eventMasterAction.testEventMasterConnection( context );
             }
         }
     };

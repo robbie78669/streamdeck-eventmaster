@@ -1,4 +1,5 @@
 
+
 var websocket = null,
     uuid = null,
     actionInfo = {},
@@ -35,6 +36,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
     
         if (jsonObj.event === 'sendToPropertyInspector') {
             var payload = jsonObj.payload;
+            var action = jsonObj.action;
+
+            // populate the html lists..
+            //  - freeze/unfreeze the object list (inputs, BGs, screen and aux dests)
+            //  - transLayer (input, screen destination and layer (preview / program))
 
             var ipAddress_payload = payload['ipAddress'];
             if( ipAddress_payload != null ) {
@@ -42,100 +48,367 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 ipAddresElement.value = payload['ipAddress'];
             }
             
-            var preset_payload = payload['activatePreset'];
-            if( preset_payload != null ) {
-                var presetNameElement = document.getElementById('presetName');
-                presetNameElement.value = preset_payload.presetName;
-                
-                var presetModeElement = document.getElementsByName('presetMode');
-                if( preset_payload.presetMode == null ) {
-                    if( presetModeElement != null ) 
-                        setChecked(presetModeElement, "presetMode_toPreview");
-                }
-                else {
-                    if( preset_payload.presetMode == 0  ) {
-                        setChecked(presetModeElement, "presetMode_toPreview");
+            var sources = payload["sources"];
+            var backgrounds = payload["backgrounds"];
+            var screenDestinations = payload["screenDestinations"];
+            var auxDestinations = payload["auxDestinations"];
+            var destContent = payload["destinationContent"];
+            
+            if( action == "com.barco.eventmaster.recallPreset"){
+                var preset_payload = payload['activatePreset'];
+                if( preset_payload != null ) {
+                    var presetNameElement = document.getElementById('presetName');
+                    presetNameElement.value = preset_payload.presetName;
+                    
+                    var presetModeElement = document.getElementsByName('presetMode');
+                    if( preset_payload.presetMode == null ) {
+                        if( presetModeElement != null ) 
+                            setChecked(presetModeElement, "presetMode_toPreview");
                     }
                     else {
-                        setChecked(presetModeElement, "presetMode_toProgram");
+                        if( preset_payload.presetMode == 0  ) {
+                            setChecked(presetModeElement, "presetMode_toPreview");
+                        }
+                        else {
+                            setChecked(presetModeElement, "presetMode_toProgram");
+                        }
                     }
                 }
             }
-
-            var cue_payload = payload['activateCue'];
-            if( cue_payload != null ) {
-                var cueNameElement = document.getElementById('cueName');
-                cueNameElement.value = cue_payload.cueName;
-         
-                var cueModeElement = document.getElementsByName('cueMode');
-                if( cue_payload.cueMode == null ) {
-                    if( cueModeElement = null ) 
-                        setChecked(cueModeElement, "cueMode_Play");
-                }
-                else {
-                    if( cue_payload.cueMode == 0  ) {
-                        setChecked(cueModeElement, "cueMode_Play");
-                    }
-                    else if( cue_payload.cueMode == 1 ) {
-                        setChecked(cueModeElement, "cueMode_Pause");
+            else if( action == "com.barco.eventmaster.recallCue") {
+                var cue_payload = payload['activateCue'];
+                if( cue_payload != null ) {
+                    var cueNameElement = document.getElementById('cueName');
+                    cueNameElement.value = cue_payload.cueName;
+             
+                    var cueModeElement = document.getElementsByName('cueMode');
+                    if( cue_payload.cueMode == null ) {
+                        if( cueModeElement = null ) 
+                            setChecked(cueModeElement, "cueMode_Play");
                     }
                     else {
-                        setChecked(cueModeElement, "cueMode_Stop");
+                        if( cue_payload.cueMode == 0  ) {
+                            setChecked(cueModeElement, "cueMode_Play");
+                        }
+                        else if( cue_payload.cueMode == 1 ) {
+                            setChecked(cueModeElement, "cueMode_Pause");
+                        }
+                        else {
+                            setChecked(cueModeElement, "cueMode_Stop");
+                        }
                     }
                 }
             }
-
-            /*  Freeze */
-            var freeze_payload = payload['freeze'];
-            if( freeze_payload != null ){
+            else if( action == "com.barco.eventmaster.freeze") {
+            
                 var freezelist_Element = document.getElementById("freeze_list");
-                var optgroupElements = freezelist_Element.options;
-                
-                var id = freeze_payload.id;
-                var type = freeze_payload.type;
-                var label = freeze_payload.label;
+                if( freezelist_Element != null ) {
 
-                console.log("sendToPropertyInspector: freeze_payload.id="+id+", type="+type+", group="+label);
+                    var options = freezelist_Element.getElementsByTagName("option");
+                    for (var i=0; i<options.length; i++){
+                        freezelist_Element.removeChild(options[i]);
+                        i--;
+                    }
 
-                for (var i=0; i<optgroupElements.length; i++)
-                {
-                    console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
-                    if( optgroupElements[i].parentNode.label==label)
+                    // Inputs
+                    var optG = document.getElementById('freeze_type_input');
+                    for(var i=0; i<sources.length; i++) {
+                        var name = sources[i].Name;
+                        if( sources[i].SrcType  == 0 ) {
+                            var sourceElement = optG.appendChild( new Option(name) );
+                            sourceElement.id = sources[i].id;
+
+                            console.log("sendToPropertyInspector: append freeze_list source label:" + sourceElement.label + ",value:" + sourceElement.value )
+                        }
+                    }
+                    
+                        
+                    // Backgrounds
+                    var optG = document.getElementById('freeze_type_background');
+                    for(var i=0; i<backgrounds.length; i++) {
+                        var name = backgrounds[i].Name;
+                        if( backgrounds[i].BGSrcType  == 0 ) {
+                            var bgElement = optG.appendChild( new Option(name) );
+                            bgElement.id = backgrounds[i].id;
+                        }
+                    }
+                    
+
+                    // screen dests  
+                    var optG = document.getElementById('freeze_type_screen');
+                    for(var i=0; i<screenDestinations.length; i++) {
+                        var screenElement = optG.appendChild( new Option(screenDestinations[i].Name) );
+                        screenElement.id = screenDestinations[i].id;
+                    }
+                    
+                    // aux dests  
+                    var optG = document.getElementById('freeze_type_aux');
+                    for(var i=0; i<auxDestinations.length; i++) {
+                        var auxElement = optG.appendChild( new Option(auxDestinations[i].Name) );
+                        auxElement.id = auxDestinations[i].id;
+                    }
+                }
+
+                var freeze_payload = payload['freeze'];
+                if( freeze_payload != null ){
+    
+                    var optgroupElements = freezelist_Element.options;
+                    var arrayLength = optgroupElements.length;
+                    
+                    var id = freeze_payload.id;
+                    var type = freeze_payload.type;
+                    var label = freeze_payload.label;
+    
+                    console.log("sendToPropertyInspector: freeze_payload.id="+id+", type="+type+", group="+label);
+    
+                    for (var i=0; i<arrayLength; i++)
                     {
-                        console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
-                        optgroupElements[i].selected = true;
+                        console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
+                        if( optgroupElements[i].parentNode.label==label)
+                        {
+                            console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
+                            optgroupElements[i].selected = true;
+                        }
                     }
                 }
             }
-
-            /*unfreeze */
-            var unfreeze_payload = payload['unfreeze'];
-            if( unfreeze_payload != null ){
+            else if( action == "com.barco.eventmaster.unfreeze"){
                 var unfreezelist_Element = document.getElementById("unfreeze_list");
-                var optgroupElements = unfreezelist_Element.options;
-                
-                var id = unfreeze_payload.id;
-                var type = unfreeze_payload.type;
-                var label = unfreeze_payload.label;
+                if( unfreezelist_Element != null ) {
 
-                console.log("sendToPropertyInspector: unfreeze_payload.id="+id+", type="+type+", group="+label);
+                    var options = unfreezelist_Element.getElementsByTagName("option");
+                    for (var i=0; i<options.length; i++){
+                        unfreezelist_Element.removeChild(options[i]);
+                        i--;
+                    }
 
-                for (var i=0; i<optgroupElements.length; i++)
-                {
-                    console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
-                    if( optgroupElements[i].parentNode.label==label)
+                    // Inputs
+                    var optG = document.getElementById('unfreeze_type_input');
+                    for(var i=0; i<sources.length; i++) {
+                        var name = sources[i].Name;
+                        if( sources[i].SrcType  == 0 ) {
+                            var sourceElement = optG.appendChild( new Option(name) );
+                            sourceElement.id = sources[i].id;
+
+                            console.log("sendToPropertyInspector: append freeze_list source label:" + sourceElement.label + ",value:" + sourceElement.value )
+                        }
+                    }
+                    
+                        
+                    // Backgrounds
+                    var optG = document.getElementById('unfreeze_type_background');
+                    for(var i=0; i<backgrounds.length; i++) {
+                        var name = backgrounds[i].Name;
+                        if( backgrounds[i].BGSrcType  == 0 ) {
+                            var bgElement = optG.appendChild( new Option(name) );
+                            bgElement.id = backgrounds[i].id;
+                        }
+                    }
+                    
+
+                    // screen dests  
+                    var optG = document.getElementById('unfreeze_type_screen');
+                    for(var i=0; i<screenDestinations.length; i++) {
+                        var screenElement = optG.appendChild( new Option(screenDestinations[i].Name) );
+                        screenElement.id = screenDestinations[i].id;
+                    }
+                    
+                    // aux dests  
+                    var optG = document.getElementById('unfreeze_type_aux');
+                    for(var i=0; i<auxDestinations.length; i++) {
+                        var auxElement = optG.appendChild( new Option(auxDestinations[i].Name) );
+                        auxElement.id = auxDestinations[i].id;
+                    }
+                }
+                // ----------------- select source --------------------
+                var unfreeze_payload = payload['unfreeze'];
+                if( unfreeze_payload != null ){
+    
+                    var optgroupElements = unfreezelist_Element.options;
+                    var arrayLength = optgroupElements.length;
+                    
+                    var id = unfreeze_payload.id;
+                    var type = unfreeze_payload.type;
+                    var label = unfreeze_payload.label;
+    
+                    console.log("sendToPropertyInspector: unfreeze_payload.id="+id+", type="+type+", group="+label);
+    
+                    for (var i=0; i<arrayLength; i++)
                     {
-                        console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
-                        optgroupElements[i].selected = true;
+                        console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
+                        if( optgroupElements[i].parentNode.label==label)
+                        {
+                            console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
+                            optgroupElements[i].selected = true;
+                        }
                     }
                 }
             }
-            var status_payload = payload['status'];
-            if( status_payload != null ) {
-                statusElement = document.getElementById('status');
-                statusElement.innerText = status_payload;
+            else if( action == "com.barco.eventmaster.transLayer") {
+                //
+                // Clear list, repopulate, and check selected item
+                //
+                
+                // ---------------- dest ------------------------------------------------- 
+                var transLayer_dest_list_Element = document.getElementById("transLayer_dest_list");
+                for (var i=0; i<transLayer_dest_list_Element.length; i++){
+                        transLayer_dest_list_Element.remove(i);
+                        i--;
+                }    
+                
+                
+                for(var i=0; i<screenDestinations.length; i++) {
+                    var name = screenDestinations[i].Name;
+                    var destElement = transLayer_dest_list_Element.appendChild( new Option(name) );
+                    destElement.id = screenDestinations[i].id;
+
+                    console.log("sendToPropertyInspector: append trans_dest_list label:" + destElement.label + ",value:" + destElement.value )
+
+                }
+
+                // --------------- sources------------------------------------------
+                var transLayer_source_list_Element = document.getElementById("transLayer_source_list");
+                if( transLayer_source_list_Element != null ) {
+
+                    var options = transLayer_source_list_Element.getElementsByTagName("option");
+                    for (var i=0; i<options.length; i++){
+                        transLayer_source_list_Element.removeChild(options[i]);
+                        i--;
+                    }
+
+                    // Inputs
+                    var optG = document.getElementById('translayer_source_type_input');
+                    for(var i=0; i<sources.length; i++) {
+                        var name = sources[i].Name;
+                        if( sources[i].SrcType  == 0 ) {
+                            var sourceElement = optG.appendChild( new Option(name) );
+                            sourceElement.id = sources[i].id;
+    
+                            console.log("append freeze_list source label:" + sourceElement.label + ",value:" + sourceElement.value )
+                        }
+                    }
+                                            
+                    // Backgrounds
+                    var optG = document.getElementById('translayer_source_background');
+                    for(var i=0; i<backgrounds.length; i++) {
+                        var name = backgrounds[i].Name;
+                        if( backgrounds[i].BGSrcType  == 0 ) {
+                            var bgElement = optG.appendChild( new Option(name) );
+                            bgElement.id = backgrounds[i].id;
+                        }
+                    }
+                        
+                    // screen dests  
+                    var optG = document.getElementById('translayer_source_screen');
+                    for(var i=0; i<screenDestinations.length; i++) {
+                        var screenElement = optG.appendChild( new Option(screenDestinations[i].Name) );
+                        screenElement.id = screenDestinations[i].id;
+                    }
+                    
+                    // aux dests  
+                    var optG = document.getElementById('translayer_source_aux');
+                    for(var i=0; i<auxDestinations.length; i++) {
+                        var auxElement = optG.appendChild( new Option(auxDestinations[i].Name) );
+                        auxElement.id = auxDestinations[i].id;
+                    }
+                }
+
+                // ---------------- layer ------------------------------------------------- 
+                var transLayer_layer_list_Element = document.getElementById("transLayer_layer_list");
+                for (var i=0; i<transLayer_layer_list_Element.length; i++){
+
+                    transLayer_layer_list_Element.remove(i);
+                    i--;
+                }    
+                
+                /** add destination optGroup, followed by list of layers */
+                /*for(var i=0; i<destinationContents.length; i++) {
+                    
+                    var destOptGroup_Element = document.createElement('OPTGROUP');
+                    destOptGroup_Element.id = screenDestinations[i].id;
+                    destOptGroup_Element.label = screenDestinations[i].Name;
+
+                    // OPTGROUP Screen Destination Name
+                    //      OPTGROUP BG
+                    //          OPTION BG-A (pvwMode == 1)
+                    //          OPTION BG-B (pvwMode == 0)
+                    //      OPTGROUP Layer$Zorder-$Capacity
+                    //         OPTION Layer$Zorder-A (pvwMode == 1)
+                    //         OPTION Layer$Zorder-B (pvwMode == 0)
+                    //         if no preview then
+                    //             OPTION Layer$Zorder
+                    //
+                    for (var j=0; j<destinationContent[i].Layers.length; j++) {
+                        var layerOptGroup_Element = document.createElement('OPTGROUP');
+                        if( screenDestinations[i].Layers[j].z )
+                        layerOptGroup_Element.id = screenDestinations[i].Layers[j].id;
+                        layerOptGroup_Element.label = "Layer"screenDestinations[i].Name +;
+                        var destElement = destOptGroup_Element.appendChild( new Option(destinationContent[i].Layers[j].) );
+                        destElement.id = screenDestinations[i].id;
+                    }
+                }*/
+                    
+                // Select the GUI element
+                var transLayer_payload = payload['transLayer'];
+                if( transLayer_payload != null ){
+                    var destId = transLayer_payload.destId;
+                    var destLabel = transLayer_payload.destLabel;
+                    var sourceId = transLayer_payload.sourceId;
+                    var sourceLabel = transLayer_payload.sourceLabel;
+                    var layerId = transLayer_payload.layerId;
+                    var layerLaber = transLayer_payload.layerLabel;
+                    
+                    // ----------------- select destination --------------------
+                    var destListElements = transLayer_dest_list_Element.transLayer_dest_list;
+                    var arrayLength = destListElements.length;
+                    
+                    console.log("sendToPropertyInspector: transLayer: destId="+destId+", destLabel="+destLabel);
+    
+                    for (var i=0; i<arrayLength; i++)
+                    {
+                        console.log("sendToPropertyInspector: comparing : "+destListElements[i].label);
+                        if( destListElements[i].label==label)
+                        {
+                            console.log("sendToPropertyInspector: found:. "+destListElements[i].label);
+                            destListElements[i].selected = true;
+                            break;
+                        }
+                    }
+                    // ----------------- select source --------------------
+                    var optgroupElements = transLayer_source_list_Element.options;
+                    var arrayLength = optgroupElements.length;
+                    
+                    console.log("sendToPropertyInspector: transLayer: srcId="+sourceId+", sourceLabel="+sourceLabel);
+    
+                    for (var i=0; i<arrayLength; i++)
+                    {
+                        console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
+                        if( optgroupElements[i].parentNode.label==label)
+                        {
+                            console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
+                            optgroupElements[i].selected = true;
+                            break;
+                        }
+                    }
+                    
+                    // ----------------- select layer --------------------
+                    var layerListElements = transLayer_layer_list_Element.transLayer_dest_list;
+                    var arrayLength = layerListElements.length;
+                    
+                    console.log("sendToPropertyInspector: transLayer: layerId="+layerId+", layerLabel="+layerLabel);
+    
+                    for (var i=0; i<arrayLength; i++)
+                    {
+                        console.log("sendToPropertyInspector: comparing : "+layerListElements[i].label);
+                        if( layerListElements[i].label==label)
+                        {
+                            console.log("sendToPropertyInspector: found:. "+layerListElements[i].label);
+                            layerListElements[i].selected = true;
+                            break;
+                        }
+                    }
+                }
             }
-        
         }
     };
 }
@@ -181,30 +454,18 @@ function setChecked(radioObj, newValue) {
 }
 
 function updateSettings() {
-    var ipAddressElement = document.getElementById('ipAddress');
-    
-    var activatePreset_presetNameElement = document.getElementById('presetName');
-    var activatePreset_presetModeElement = document.getElementsByName('presetMode');
-    
-    var activateCue_cueNameElement = document.getElementById('cueName');
-    var activateCue_cueModeElement = document.getElementsByName('cueMode');
-    
-    var freeze_listElement = document.getElementById('freeze_list');
-    var unfreeze_listElement = document.getElementById('unfreeze_list');
-           
-    var changeLayerSource_destNameElement = document.getElementById('destName');
-    var changeLayerSource_sourceNameElement = document.getElementById('sourceName');
-    var changeLayerSource_layerNameElement = document.getElementById('layerName');
-    
-    
     var payload = {};
 
     payload.property_inspector = 'updateSettings';
 
+    /** ipaddress **/
+    var ipAddressElement = document.getElementById('ipAddress');
     if( ipAddressElement != null )
         payload.ipAddress = ipAddress.value;
 
     /** activatePreset */
+    var activatePreset_presetNameElement = document.getElementById('presetName');
+    var activatePreset_presetModeElement = document.getElementsByName('presetMode');
     if( activatePreset_presetNameElement != null){
         var activatePreset = {presetName: "null", presetMode: 0};
 
@@ -221,7 +482,9 @@ function updateSettings() {
         payload.activatePreset = activatePreset;
     }
 
-    /* activateCue */
+    /** activateCue **/
+    var activateCue_cueNameElement = document.getElementById('cueName');
+    var activateCue_cueModeElement = document.getElementsByName('cueMode');
     if( activateCue_cueNameElement != null) {
         var activateCue = {cueName: "null", cueMode: 0 };
 
@@ -240,7 +503,8 @@ function updateSettings() {
         payload.activateCue = activateCue;
     }
  
-    /* Freeze */
+    /** Freeze **/
+    var freeze_listElement = document.getElementById('freeze_list');
     if( freeze_listElement != null && freeze_listElement.selectedIndex > 0) {
 
         // determine which group (set the type based on the optgroup //
@@ -276,7 +540,8 @@ function updateSettings() {
         }
     }
     
-    /* UnFreeze */
+    /** UnFreeze **/
+    var unfreeze_listElement = document.getElementById('unfreeze_list');
     if( unfreeze_listElement != null && unfreeze_listElement.selectedIndex > 0) {
 
         // determine which group (set the type based on the optgroup //
@@ -311,6 +576,44 @@ function updateSettings() {
             payload.unfreeze = unfreeze;
         }
     }
+
+    /** transLayer **/
+    var destInfo = {id: -1, label: null};
+    var srcInfo = {type: 0, id: -1, label: ""};
+    var layerInfo = {id: -1, label: ""};
+    var transLayer = { destInfo: null, srcInfo: null,layerInfo: null};
+
+    var transLayer_destElement = document.getElementById('transLayer_dest_list');
+    if( transLayer_destElement != null ) {
+        var selectedIndex = transLayer_destElement.selectedIndex;
+        if( selectedIndex > 0 ){
+            destInfo.id = transLayer_destElement[selectedIndex].value;
+            destInfo.label = transLayer_destElement[selectedIndex].label;
+            transLayer.transLayer_destInfo = destInfo;
+        } 
+    }
+    var transLayer_sourceElement = document.getElementById('transLayer_source_list');
+    if( transLayer_sourceElement != null ) {
+        var selectedIndex = transLayer_sourceElement.selectedIndex;
+        if( selectedIndex > 0 ){
+            srcInfo.id = transLayer_sourceElement[selectedIndex].value;
+            srcInfo.label = transLayer_sourceElement[selectedIndex].label;
+            srcInfo = transLayer_srcInfo;
+        }
+    }
+    var transLayer_layerElement = document.getElementById('translayer_layer_list');
+    if( transLayer_layerElement != null ) {
+        var selectedIndex = transLayer_layerElement.selectedIndex;
+        if( selectedIndex > 0 ){
+            layerInfo.id = transLayer_layerElement[selectedIndex].value;
+            layerInfo.label = transtransLayer_layerElementLayer_sourceElement[selectedIndex].label;
+            layerInfo = transLayer_srcInfo;
+        }
+    }
+    
+    
+    
+    
         
     sendPayloadToPlugin(payload);
 }

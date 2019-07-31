@@ -329,7 +329,7 @@ var EventMasterRPC = {
         }
 	},
 
-	freezeDestSource: function(context) {
+	freeze: function(context) {
         
         var settings = settingsCache[context];
         if( settings == null ) {
@@ -379,7 +379,7 @@ var EventMasterRPC = {
         
 	},
 
-	unfreezeDestSource: function(context ) {
+	unfreeze: function(context ) {
         
         var settings = settingsCache[context];
         if( settings == null ) {
@@ -452,33 +452,25 @@ var EventMasterRPC = {
 						console.log("getSources response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            var sources = fullResponse.result.response;
-                            var sourceInfo = {id:-1, name: null};
-                            var sourceList = [];
+                            var sources = settings.sources = fullResponse.result.response;
                             var arrayLength = sources.length;
                             for (var i = 0; i < arrayLength; i++) {
-                                    console.log("source #"+(i+1))
-                                    console.log("id:" + sources[i].id);
-                                    console.log("Name:" + sources[i].Name);
-                                    console.log("HSize:"+ sources[i].HSize);
-                                    console.log("VSize:"+ sources[i].VSize);
-                                    console.log("SrcType:"+ sources[i].SrcType);
-                                    console.log("InputCfgIndex:"+ sources[i].InputCfgIndex);
-                                    console.log("StillIndex:"+ sources[i].StillIndex);
-                                    console.log("DestIndex:"+ sources[i].DestIndex);
-                                    console.log("UserKeyIndex:"+ sources[i].UserKeyIndex);
-                                    console.log("Mode3D:"+ sources[i].Mode3D);
-                                    console.log("Freeze:"+ sources[i].Freeze);
-                                    console.log("Capacity:"+ sources[i].Capacity);
-                                    console.log("InputCfgVideoStatus:"+ sources[i].InputCfgVideoStatus);
-                                    console.log("--------------------------------------------------------");
-
-                                    sourceInfo.id = sources[i].id;
-                                    sourceInfo.name = sources[i].Name;
-                                    sourceList.push(sourceInfo);
-                                    //Do something
+                                console.log("source #"+(i+1))
+                                console.log("id:" + sources[i].id);
+                                console.log("Name:" + sources[i].Name);
+                                console.log("HSize:"+ sources[i].HSize);
+                                console.log("VSize:"+ sources[i].VSize);
+                                console.log("SrcType:"+ sources[i].SrcType);
+                                console.log("InputCfgIndex:"+ sources[i].InputCfgIndex);
+                                console.log("StillIndex:"+ sources[i].StillIndex);
+                                console.log("DestIndex:"+ sources[i].DestIndex);
+                                console.log("UserKeyIndex:"+ sources[i].UserKeyIndex);
+                                console.log("Mode3D:"+ sources[i].Mode3D);
+                                console.log("Freeze:"+ sources[i].Freeze);
+                                console.log("Capacity:"+ sources[i].Capacity);
+                                console.log("InputCfgVideoStatus:"+ sources[i].InputCfgVideoStatus);
+                                console.log("--------------------------------------------------------");
                             }
-                            settings["sources"]=sourceList;
                         }
 					}
 					else {
@@ -494,7 +486,7 @@ var EventMasterRPC = {
 			};
 
 		
-			var data = JSON.stringify({"params":{"id":"0", "type":"0"}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
+			var data = JSON.stringify({"params":{"type":0}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -530,33 +522,26 @@ var EventMasterRPC = {
 						console.log("getBackgrounds response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            var backgrounds = fullResponse.result.response;
-                            var bgInfo = {id:-1, name: null};
-                            var bgList = [];
-                            var arrayLength = backgrounds.length;
+                            settings.backgrounds = fullResponse.result.response;
+                            var arrayLength = settings.backgrounds.length;
                             for (var i = 0; i < arrayLength; i++) {
                                     console.log("source #"+(i+1))
-                                    console.log("id:" + backgrounds[i].id);
-                                    console.log("Name:" + backgrounds[i].Name);
-                                    console.log("HSize:"+ backgrounds[i].HSize);
-                                    console.log("VSize:"+ backgrounds[i].VSize);
-                                    console.log("SrcType:"+ backgrounds[i].SrcType);
-                                    console.log("InputCfgIndex:"+ backgrounds[i].InputCfgIndex);
-                                    console.log("StillIndex:"+ backgrounds[i].StillIndex);
-                                    console.log("DestIndex:"+ backgrounds[i].DestIndex);
-                                    console.log("UserKeyIndex:"+ backgrounds[i].UserKeyIndex);
-                                    console.log("Mode3D:"+ backgrounds[i].Mode3D);
-                                    console.log("Freeze:"+ backgrounds[i].Freeze);
-                                    console.log("Capacity:"+ backgrounds[i].Capacity);
-                                    console.log("InputCfgVideoStatus:"+ backgrounds[i].InputCfgVideoStatus);
+                                    console.log("id:" + settings.backgrounds[i].id);
+                                    console.log("Name:" + settings.backgrounds[i].Name);
+                                    console.log("HSize:"+ settings.backgrounds[i].HSize);
+                                    console.log("VSize:"+ settings.backgrounds[i].VSize);
+                                    console.log("SrcType:"+ settings.backgrounds[i].SrcType);
+                                    console.log("InputCfgIndex:"+ settings.backgrounds[i].InputCfgIndex);
+                                    console.log("StillIndex:"+ settings.backgrounds[i].StillIndex);
+                                    console.log("DestIndex:"+ settings.backgrounds[i].DestIndex);
+                                    console.log("UserKeyIndex:"+ settings.backgrounds[i].UserKeyIndex);
+                                    console.log("Mode3D:"+ settings.backgrounds[i].Mode3D);
+                                    console.log("Freeze:"+ settings.backgrounds[i].Freeze);
+                                    console.log("Capacity:"+ settings.backgrounds[i].Capacity);
+                                    console.log("InputCfgVideoStatus:"+ settings.backgrounds[i].InputCfgVideoStatus);
                                     console.log("--------------------------------------------------------");
 
-                                    bgInfo.id = backgrounds[i].id;
-                                    bgInfo.name = backgrounds[i].Name;
-                                    bgList.push(bgInfo);
-                                    //Do something
                             }
-                            settings["backgrounds"]=sourceList;
                         }
 					}
 					else {
@@ -572,7 +557,7 @@ var EventMasterRPC = {
 			};
 
 		
-			var data = JSON.stringify({"params":{"id":"0", "type":"1"}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
+			var data = JSON.stringify({"params":{"type":1}, "method":"listSources", "id":"1234", "jsonrpc":"2.0"});
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -611,11 +596,8 @@ var EventMasterRPC = {
 
                         if (fullResponse.result.success == 0 ) {
                             
-                            var screendestinations = fullResponse.result.response.ScreenDestination;
-                            var arrayLength = screendestinations.length;
-                            var destInfo = {id:-1, name:null, type:null};
-                            var screenList = [];
-                            var destList = [];
+                            var screendestinations = settings.screenDestinations = fullResponse.result.response.ScreenDestination;
+                            var arrayLength = settings.screenDestinations.length;
                             for (var i = 0; i < arrayLength; i++) {
                                     console.log("screen destinations #"+(i+1));
                                     console.log("  id:" + screendestinations[i].id);
@@ -624,10 +606,6 @@ var EventMasterRPC = {
                                     console.log("  VSize:"+ screendestinations[i].VSize);
                                     console.log("  Layers:"+ screendestinations[i].Layers);
                                     console.log("  OutMapColl:");
-                                    destInfo.id=screendestinations[i].id;
-                                    destInfo.name=screendestinations[i].Name;
-                                    destInfo.type="Screen";
-                                    screenList.push(destInfo);
                                     var outMapCol = screendestinations[i].DestOutMapCol;
                                     var outMap = outMapCol.DestOutMap;
                                     for (var i = 0; i < outMap.length; i++) {
@@ -641,25 +619,16 @@ var EventMasterRPC = {
                                         console.log("    Freeze:"+ outMap[i].Freeze);
                                     }
                             }
-                            destList["screen"] = screenList;
-
+                            
                             console.log("AuxDestination:");
-                            settings.auxDestinationList = fullResponse.result.response.AuxDestination;
-                            var auxDestinations = fullResponse.result.response.AuxDestination;
-                            var auxList = [];
-                            for (var i = 0; i < auxDestinations.length; i++) {
+                            var auxDestinations = settings.auxDestinations = fullResponse.result.response.AuxDestination;
+                            for (var i = 0; i < settings.auxDestinations.length; i++) {
                                 console.log("  AuxDestination #:"+(i+1));
                                 console.log("    id:" + auxDestinations[i].id);
                                 console.log("    Name: "+ auxDestinations[i].Name)
                                 console.log("    AuxStreamMode:" + auxDestinations[i].AuxStreamMode);
 
-                                destInfo.id=auxDestinations[i].id;
-                                destInfo.name=auxDestinations[i].Name;
-                                destInfo.type="Aux";
-                                auxList.push(destInfo)
                             }
-                            destList["aux"] = auxList;
-                            settings["destinations"]=destList;
                                     
                             console.log("--------------------------------------------------------");
 
@@ -687,7 +656,7 @@ var EventMasterRPC = {
 	
 	},
 
-	listContent: function( context ) {
+	listContent: function( context, destinationId ) {
 
         var settings = settingsCache[context];
         if( settings == null ) {
@@ -712,8 +681,8 @@ var EventMasterRPC = {
                         console.log("listContent response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            var destContent = fullResponse.result.response;
-                            settings.destinationContents[destContent.id] = destContent;
+                            var destContent= settings.destinationContents= fullResponse.result.response;
+                             
                             console.log("dest Content");
                             console.log("  id:" + destContent.id);
                             console.log("  Name:" + destContent.Name);
@@ -856,18 +825,23 @@ var EventMasterRPC = {
             return;
         }
 
-        if( settings["destinations"] != null ){
-            destList = settings["destinations"];
+        if( settings["screenDestinations"] != null ){
+            destList = settings["screenDestinations"];
+            if( destList.length==0)
+                console.log("getAllDestinationContent:  There are no destinations in the settings");
+                
             for(var i=0; i<destList.length; i++ ) {
-				listContent(context);
+				this.listContent(context, destList[i].id);
             }
         }
 	},
 
 	updateCache: function(context) {
+        this.getDestinations(context);
         this.getSources(context);
         this.getBackgrounds(context);
-		this.getDestinations(context);
+        
+		
 		this.getAllDestinationContent(context);
 	},
 };
@@ -887,8 +861,7 @@ var eventMasterAction = {
         // send notification to property_inspector to load saved settings
        if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
 
-            eventMasterAction.testEventMasterConnection( context )
-            
+            EventMasterRPC.updateCache(context);            
             var json = {
                 "event": "sendToPropertyInspector",
                 "context": context,
@@ -1076,6 +1049,12 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                 var unfreeze = jsonPayload.unfreeze;
                 updatedSettings["unfreeze"] = unfreeze;
             }
+            if( jsonPayload.hasOwnProperty('transLayer')) {
+                changed = true;
+                var layerTrans = jsonPayload.transLayer;
+                updatedSettings["transLayer"] = trans;
+            }
+            
 
             
             if( changed  ) {

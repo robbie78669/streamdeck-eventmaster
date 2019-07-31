@@ -92,7 +92,7 @@
     },
     {
       "Icon": "images/unfreezeActionImage",
-      "Name": "Freeze", 
+      "Name": "UnFreeze", 
       "States": [
         {
           "Image": "images/unfreezeKeyIcon",
@@ -106,19 +106,19 @@
       "UUID": "com.barco.eventmaster.unfreeze"
     },
     {
-      "Icon": "images/changeLayerSourceActionImage",
+      "Icon": "images/transLayerActionImage",
       "Name": "trans Layer", 
       "States": [
         {
-          "Image": "images/changeLayerSourceKeyIcon",
+          "Image": "images/transLayerKeyIcon",
           "TitleAlignment": "bottom", 
           "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": true,
       "Tooltip": "This action changes a source within a layer", 
-      "PropertyInspectorPath": "PropertyInspectors/changeLayerSource_pi.html",
-      "UUID": "com.barco.eventmaster.changeLayerSource"
+      "PropertyInspectorPath": "PropertyInspectors/transLayer_pi.html",
+      "UUID": "com.barco.eventmaster.transLayer"
     }
   ],
   "SDKVersion": 2,

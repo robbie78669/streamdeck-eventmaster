@@ -1,3 +1,5 @@
+
+
 var websocket = null,
     uuid = null,
     actionInfo = {},
@@ -32,64 +34,272 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         var jsonObj = JSON.parse(evt.data);
 
     
-        if (jsonObj.event === 'sendToPropertyInspector') {
+        if (jsonObj.event === 'didReceiveSettings') {
             var payload = jsonObj.payload;
+            var action = jsonObj.action;
+
+            // per instance
+            var context = jsonObj.context;
+        
+        }
+
+        else if (jsonObj.event === 'sendToPropertyInspector') {
+            var payload = jsonObj.payload;
+            var action = jsonObj.action;
+            var context = jsonObj.context;
+
+            // populate the html lists..
+            //  - freeze/unfreeze the object list (inputs, BGs, screen and aux dests)
+            //  - transLayer (input, screen destination and layer (preview / program))
 
             var ipAddress_payload = payload['ipAddress'];
             if( ipAddress_payload != null ) {
                 var ipAddresElement = document.getElementById('ipAddress');
-                ipAddresElement.value = payload['ipAddress'];
-            }
-            
-            var preset_payload = payload['activatePreset'];
-            if( preset_payload != null ) {
-                var presetNameElement = document.getElementById('presetName');
-                presetNameElement.value = preset_payload.presetName;
-                
-                var presetModeElement = document.getElementsByName('presetMode');
-                if( preset_payload.presetMode == null ) {
-                    if( presetModeElement != null ) 
-                        setChecked(presetModeElement, "presetMode_toPreview");
-                }
-                else {
-                    if( preset_payload.presetMode == 0  ) {
-                        setChecked(presetModeElement, "presetMode_toPreview");
-                    }
-                    else {
-                        setChecked(presetModeElement, "presetMode_toProgram");
-                    }
-                }
+                ipAddresElement.value = ipAddress_payload;
             }
 
-            var cue_payload = payload['activateCue'];
-            if( cue_payload != null ) {
-                var cueNameElement = document.getElementById('cueName');
-                cueNameElement.value = cue_payload.cueName;
-         
-                var cueModeElement = document.getElementsByName('cueMode');
-                if( cue_payload.cueMode == null ) {
-                    if( cueModeElement = null ) 
-                        setChecked(cueModeElement, "cueMode_Play");
+            var status = payload['status'];
+            if( status != null ) {
+                var statusElement = document.getElementById('status');
+                if( statusElement ) {
+                    statusElement.innerText = status;
                 }
-                else {
-                    if( cue_payload.cueMode == 0  ) {
-                        setChecked(cueModeElement, "cueMode_Play");
-                    }
-                    else if( cue_payload.cueMode == 1 ) {
-                        setChecked(cueModeElement, "cueMode_Pause");
+            }
+            
+            var sources = payload["sources"];
+            var backgrounds = payload["backgrounds"];
+            var screenDestinations = payload["screenDestinations"];
+            var auxDestinations = payload["auxDestinations"];
+            var destContent = payload["destinationContent"];
+            
+            if( action == "com.barco.eventmaster.recallPreset"){
+                var preset_payload = payload['activatePreset'];
+                if( preset_payload != null ) {
+                    var presetNameElement = document.getElementById('presetName');
+                    presetNameElement.value = preset_payload.presetName;
+                    
+                    var presetModeElement = document.getElementsByName('presetMode');
+                    if( preset_payload.presetMode == null ) {
+                        if( presetModeElement != null ) 
+                            setChecked(presetModeElement, "presetMode_toPreview");
                     }
                     else {
-                        setChecked(cueModeElement, "cueMode_Stop");
+                        if( preset_payload.presetMode == 0  ) {
+                            setChecked(presetModeElement, "presetMode_toPreview");
+                        }
+                        else {
+                            setChecked(presetModeElement, "presetMode_toProgram");
+                        }
                     }
                 }
             }
- 
-            var status_payload = payload['status'];
-            if( status_payload != null ) {
-                statusElement = document.getElementById('status');
-                statusElement.innerText = status_payload;
+            else if( action == "com.barco.eventmaster.recallCue") {
+                var cue_payload = payload['activateCue'];
+                if( cue_payload != null ) {
+                    var cueNameElement = document.getElementById('cueName');
+                    cueNameElement.value = cue_payload.cueName;
+             
+                    var cueModeElement = document.getElementsByName('cueMode');
+                    if( cue_payload.cueMode == null ) {
+                        if( cueModeElement = null ) 
+                            setChecked(cueModeElement, "cueMode_Play");
+                    }
+                    else {
+                        if( cue_payload.cueMode == 0  ) {
+                            setChecked(cueModeElement, "cueMode_Play");
+                        }
+                        else if( cue_payload.cueMode == 1 ) {
+                            setChecked(cueModeElement, "cueMode_Pause");
+                        }
+                        else {
+                            setChecked(cueModeElement, "cueMode_Stop");
+                        }
+                    }
+                }
             }
-        
+            else if( action == "com.barco.eventmaster.freeze") {
+                var freeze_payload = payload['freeze'];
+                var freezelist_Element = document.getElementById("freeze_list");
+
+                if( freezelist_Element != null ) {
+
+                    while(freezelist_Element.length)
+                        freezelist_Element.remove(0);
+
+                    if( sources ) {
+
+                        if( freeze_payload == null ) {
+                            freeze_payload = {id: sources[0].id, name: sources[0].Name}
+                        }
+
+                        for(var i=0; i<sources.length; i++) {
+                            var name = sources[i].Name;
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = freezelist_Element.appendChild( new Option(name) );
+                                var id = sourceElement.value = sources[i].id;
+
+                                if( freeze_payload && freeze_payload.id == id)
+                                    sourceElement.selected=true;
+                            }
+                        }
+                    }       
+                }
+            }
+            else if( action == "com.barco.eventmaster.unfreeze"){
+                var unfreeze_payload = payload['unfreeze'];
+                var unfreezelist_Element = document.getElementById("unfreeze_list");
+                if( unfreezelist_Element != null ) {
+
+                    while (unfreezelist_Element.length)
+                        unfreezelist_Element.remove(0);
+
+                    if( sources ) {
+
+                        if( unfreeze_payload == null ) {
+                            unfreeze_payload = {id: sources[0].id, name: sources[0].Name}
+                        }
+
+                        for(var i=0; i<sources.length; i++) {
+                            var name = sources[i].Name;
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = unfreezelist_Element.appendChild( new Option(name) );
+                                var id = sourceElement.value = sources[i].id;
+
+                                if( unfreeze_payload && unfreeze_payload.id == id)
+                                    sourceElement.selected=true;
+                            }
+                        }
+                    }       
+                } 
+            }
+            else if( action == "com.barco.eventmaster.transLayer") {
+                //
+                // Clear list, repopulate, and check selected item towards the end of this conditional
+                //
+                // The currenytly selected the GUI element
+                var transLayer_payload = payload["transLayer"];
+                                
+                // selected information
+                var destInfo = transLayer_payload.destInfo;
+                var layerInfo = transLayer_payload.layerInfo;
+                var srcInfo = transLayer_payload.srcInfo;
+              
+                // ---------------- dest refresh Gui elements ------------------------------------------------- 
+                // Clear old ones
+                var transLayer_dest_list_Element = document.getElementById("transLayer_dest_list");
+                while (transLayer_dest_list_Element.length)
+                    transLayer_dest_list_Element.remove(0);
+                
+                // populate with new ones
+                var screenDestinations = payload["screenDestinations"];
+                if( screenDestinations ) {
+                
+                    if( destInfo == null ) {
+                        destInfo = {id: -1, name: null};
+
+                        // grab the first one..
+                        destInfo.name = screenDestinations[0].Name;
+                        destInfo.id = screenDestinations[0].id;
+                    }
+
+                    for(var i=0; i<screenDestinations.length; i++) {
+                        var name = screenDestinations[i].Name;
+                        var destElement = transLayer_dest_list_Element.appendChild( new Option(name) );
+                        var id = destElement.value = screenDestinations[i].id;
+
+                        // if already selected
+                        if( destInfo && id==destInfo.id) {
+                            console.log("sendToPropertyInspector: found:. "+id);
+                            destElement.selected = true;
+                        }
+                    }
+                }
+
+                // ---------------- layer refresh of GUI elements ------------------------------------------------- 
+                // clear the old onext
+                var transLayer_layer_list_Element = document.getElementById("transLayer_layer_list");
+                while( transLayer_layer_list_Element.length )
+                    transLayer_layer_list_Element.remove(0);
+
+                // populate with new ones..
+                // if there is a selected destination.. 
+                var destinationContents = payload.destinationContents; // from listContents..
+                if( destinationContents && destInfo) {
+                
+                    // for the selected destination, populate all the layers for that destiantion
+                    for(var i=0; i<destinationContents.length; i++) {
+                        if( destinationContents[i].id == destInfo.id ) {
+                            if( destinationContents[i].Layers ) {
+                                if( layerInfo == null ) {
+                                    layerInfo = {id: -1, name: null};
+            
+                                    // grab the first one..
+                                    layerInfo.name = destinationContents[i].Layers[0].Name;
+                                    layerInfo.id = destinationContents[i].Layers[0].id;
+                                }
+            
+                                for( var j=0; j<destinationContents[i].Layers.length; j++ ) {
+                                    var layerName = destinationContents[i].Layers[j].Name;
+                                    var layerElement = transLayer_layer_list_Element.appendChild(new Option(layerName) );
+                                    var id = layerElement.value = destinationContents[i].Layers[j].id;
+
+                                    // if already selected
+                                    if( layerInfo && id == layerInfo.id)
+                                    {
+                                        console.log("sendToPropertyInspector: found:. "+id);
+                                        layerElement.selected = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // --------------- sources------------------------------------------
+                var transLayer_source_list_Element = document.getElementById("transLayer_source_list");
+                if( transLayer_source_list_Element != null ) {
+
+                    var options = transLayer_source_list_Element.getElementsByTagName("option");
+                    while (options.length)
+                        transLayer_source_list_Element.remove(0);
+                    
+                    // Inputs
+                    if( sources ) {
+                        var inputs_optG = document.getElementById('translayer_source_input');
+                        var stills_optG = document.getElementById('translayer_source_still');
+                        var destinations_optG = document.getElementById('translayer_source_screen');
+                        var backgrounds_optG = document.getElementById('translayer_source_backgrounds');
+
+                        if( srcInfo == null )
+                            srcInfo = {id: sources[0].id, name: sources[0].Name};
+
+                        for(var i=0; i<sources.length; i++) {
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 1 ) {
+                                var sourceElement = stills_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 2 ) { 
+                                var screenElement = destinations_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.parentNode.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 3 ) { 
+                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                        }
+
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<transLayer_source_list_Element.options.length; i++ ){
+                            if(transLayer_source_list_Element.options[i].value == srcInfo.id )
+                                transLayer_source_list_Element.options[i].selected = true;
+                        }
+                    }
+                }
+            }
         }
     };
 }
@@ -135,33 +345,18 @@ function setChecked(radioObj, newValue) {
 }
 
 function updateSettings() {
-    var ipAddressElement = document.getElementById('ipAddress');
-    
-    var activatePreset_presetNameElement = document.getElementById('presetName');
-    var activatePreset_presetModeElement = document.getElementsByName('presetMode');
-    
-    var activateCue_cueNameElement = document.getElementById('cueName');
-    var activateCue_cueModeElement = document.getElementsByName('cueMode');
-    
-    var freezeElement_typeElement = document.getElementById('freezeType');
-    var freezeElement_nameElement = document.getElementById('freezeName');
-    
-    var unfreezeElement_typeElement = document.getElementById('unfreezeType')
-    var unfreezeElement_nameElement = document.getElementById('unfreezeName');
-    
-    var changeLayerSource_destNameElement = document.getElementById('destName');
-    var changeLayerSource_sourceNameElement = document.getElementById('sourceName');
-    var changeLayerSource_layerNameElement = document.getElementById('layerName');
-    
-    
     var payload = {};
 
     payload.property_inspector = 'updateSettings';
 
+    /** ipaddress **/
+    var ipAddressElement = document.getElementById('ipAddress');
     if( ipAddressElement != null )
         payload.ipAddress = ipAddress.value;
 
     /** activatePreset */
+    var activatePreset_presetNameElement = document.getElementById('presetName');
+    var activatePreset_presetModeElement = document.getElementsByName('presetMode');
     if( activatePreset_presetNameElement != null){
         var activatePreset = {presetName: "null", presetMode: 0};
 
@@ -178,10 +373,9 @@ function updateSettings() {
         payload.activatePreset = activatePreset;
     }
 
-
- 
-
-    /* activateCue */
+    /** activateCue **/
+    var activateCue_cueNameElement = document.getElementById('cueName');
+    var activateCue_cueModeElement = document.getElementsByName('cueMode');
     if( activateCue_cueNameElement != null) {
         var activateCue = {cueName: "null", cueMode: 0 };
 
@@ -191,63 +385,79 @@ function updateSettings() {
             var cueMode=getChecked(activateCue_cueModeElement);
             if( cueMode && cueMode.length>0 ) { 
                 if (cueMode == "cueMode_Pause")
-                    payload.activateCue.cueMode = 1;                
+                    activateCue.cueMode = 1;                
                 else if( cueMode == "cueMode_Stop")  
                     activateCue.cueMode = 2;
             }
         }
 
         payload.activateCue = activateCue;
-
     }
-    
+ 
+    /** Freeze **/
+    var freeze_listElement = document.getElementById('freeze_list');
+    if( freeze_listElement != null && freeze_listElement.selectedIndex > 0) {
+
+        // determine which group (set the type based on the optgroup //
+        var selectedIndex = freeze_listElement.selectedIndex;
+        var op = freeze_listElement.options[selectedIndex];
+        var optGroup = op.parentNode;
         
-
-    //Freeze
-    if( freezeElement_nameElement != null) {
-        var freeze = { freezeType: 0, name: "null"}
-        freeze.name = freezeElement_nameElement.value
-
-        if( freezeElement_typeElement != null ) {
-            var freezeType=getChecked(freezeElement_typeElement);
-            
-            if( freezeType && freezeType.length>0 ) { 
-                if (freezeType == "freeze_BGSource")
-                    freeze.freezeType = 1;                
-                else if( freezeType == "freeze_screenSource")  
-                    freeze.freezeType = 2;
-                else if( freezeType == "freeze_auxSource")  
-                    freeze.freezeType = 3;
-            }
-        }
+        var freeze = { id: freeze_listElement.options[selectedIndex].value, name: freeze_listElement.options[selectedIndex].label};
         payload.freeze = freeze;
     }
-   
+    
+    /** UnFreeze **/
+    var unfreeze_listElement = document.getElementById('unfreeze_list');
+    if( unfreeze_listElement != null && unfreeze_listElement.selectedIndex > 0) {
 
-    //unFreeze
-    if( unfreezeElement_nameElement != null) {
-        var unfreeze = { unfreezeType: 0, name: "null"}
-        unfreeze.name = unfreezeElement_nameElement.value
-
-        if( unfreezeElement_typeElement != null ) {
-            var unfreezeType=getChecked(unfreezeElement_typeElement);
-            if( unfreezeType && unfreezeType.length>0 ) { 
-                if (unfreezeType == "unfreeze_BGSource")
-                    unfreeze.freezeType = 1;                
-                else if( unfreezeType == "unfreeze_screenSource")  
-                    unfreeze.freezeType = 2;
-                else if( unfreezeType == "unfreeze_auxSource")  
-                    unfreeze.freezeType = 3;
-            }
-        }
-
+        // determine which group (set the type based on the optgroup //
+        var selectedIndex = unfreeze_listElement.selectedIndex;
+        var op = unfreeze_listElement.options[selectedIndex];
+        
+        var unfreeze = { id: unfreeze_listElement.options[selectedIndex].value, name: unfreeze_listElement.options[selectedIndex].label};
         payload.unfreeze = unfreeze;
     }
-    
 
+    /** transLayer **/
+    var destInfo = {id: -1, name: ""};
+    var srcInfo = {id: -1, name: ""};
+    var layerInfo = {id: -1, name: ""};
+    var transLayer = { destInfo: null, srcInfo: null,layerInfo: null};
 
+    var transLayer_destElement = document.getElementById('transLayer_dest_list');
+    if( transLayer_destElement != null ) {
+        var selectedIndex = transLayer_destElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            destInfo.id = transLayer_destElement.options[selectedIndex].value;
+            destInfo.name = transLayer_destElement.options[selectedIndex].label;
+            transLayer.destInfo = destInfo;
+        } 
+    }
     
+    var transLayer_layerElement = document.getElementById('transLayer_layer_list');
+    if( transLayer_layerElement != null ) {
+        var selectedIndex = transLayer_layerElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            layerInfo.id = transLayer_layerElement.options[selectedIndex].value;
+            layerInfo.name = transLayer_layerElement.options[selectedIndex].label;
+            transLayer.layerInfo = layerInfo;
+        }
+    }
     
+    var transLayer_sourceElement = document.getElementById('transLayer_source_list');
+    if( transLayer_sourceElement != null ) {
+        var selectedIndex = transLayer_sourceElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            srcInfo.id = transLayer_sourceElement.options[selectedIndex].value;
+            srcInfo.name = transLayer_sourceElement.options[selectedIndex].label;
+            transLayer.srcInfo = srcInfo;
+        }
+    }
+    
+    payload.transLayer = transLayer;
+    
+        
     sendPayloadToPlugin(payload);
 }
 
