@@ -240,6 +240,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             
                                 for( var j=0; j<destinationContents[i].Layers.length; j++ ) {
                                     var layerName = destinationContents[i].Layers[j].Name;
+                                    
                                     var layerElement = cutlayer_layer_list_Element.appendChild(new Option(layerName) );
                                     var id = layerElement.value = destinationContents[i].Layers[j].id;
 
@@ -299,6 +300,22 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         }
                     }
                 }
+
+                
+                var layerModeElement = document.getElementsByName('layerMode');
+                if( cutlayer_payload.layerMode == null ) {
+                    if( layerModeElement != null ) 
+                        setChecked(layerModeElement, "layerMode_toPreview");
+                }
+                else {
+                    if( cutlayer_payload.layerMode  == 0  ) {
+                        setChecked(layerModeElement, "layerMode_toPreview");
+                    }
+                    else {
+                        setChecked(layerModeElement, "layerMode_toProgram");
+                    }
+                }
+
             }
         }
     };
@@ -423,7 +440,7 @@ function updateSettings() {
     var destInfo = {id: -1, name: ""};
     var srcInfo = {id: -1, name: ""};
     var layerInfo = {id: -1, name: ""};
-    var cutlayer = { destInfo: null, srcInfo: null,layerInfo: null};
+    var cutlayer = { destInfo: null, srcInfo: null,layerInfo: null, layerMode: 0};
 
     var cutlayer_destElement = document.getElementById('cutlayer_dest_list');
     if( cutlayer_destElement != null ) {
@@ -441,7 +458,16 @@ function updateSettings() {
         if( selectedIndex >= 0 ){
             layerInfo.id = cutlayer_layerElement.options[selectedIndex].value;
             layerInfo.name = cutlayer_layerElement.options[selectedIndex].label;
-            cutlayer.layerInfo = layerInfo;
+        }
+    }
+
+    var cutLayer_layerModeElement = document.getElementsByName('layerMode');
+    if( cutLayer_layerModeElement != null ) {
+        var layerMode=getChecked(cutLayer_layerModeElement);
+        if( layerMode && layerMode.length>0 ) { 
+            if (layerMode == "layerMode_toProgram") {
+                cutlayer.layerMode = 1;             
+            }   
         }
     }
     

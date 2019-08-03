@@ -831,10 +831,21 @@ var EventMasterRPC = {
             return;
         }
 
-        var layers = [{ "id": settings.cutlayer.layerInfo.id, "LastSrcIdx": settings.cutlayer.srcInfo.id, "PvwMode": 1-settings.cutlayer.layerInfo.layerMode, "PgmMode": settings.cutlayer.layerInfo.layerMode }];
-        var content = {"id": settings.cutlayer.destInfo.id, "Layers": layers};
+        if( settings.cutLayer &&
+            ( settings.cutLayer.destInfo && settings.cutLayer.destInfo.id ) &&
+            ( settings.cutLayer.srcInfo && settings.cutLayer.srcInfo.id ) &&
+            ( settings.cutLayer.layerInfo && settings.cutLayer.layerInfo.id ) ) {
 
-        this.changeContent(context, content);
+            var layers = [{ "id": parseInt(settings.cutlayer.layerInfo.id), "LastSrcIdx": parseInt(settings.cutlayer.srcInfo.id), "PvwMode": 1-settings.cutlayer.layerMode, "PgmMode": settings.cutlayer.layerMode }];
+            var content = {"id": parseInt(settings.cutlayer.destInfo.id), "Layers": layers};
+
+            this.changeContent(context, content);
+        }
+        else {
+            console.error( "Error: cutLayer() is missing some data! " + settings.cutLayer );
+        }
+
+        
 
     },
 
