@@ -823,6 +823,55 @@ var EventMasterRPC = {
         }
     },
 
+    changeAuxContent: function(context, content) {
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("changeContent error: settingCache is null!");
+            return;
+        }
+
+        
+        if( isValidIp( ipAddress ) ) {
+    
+            var url = "http://"+ipAddress+":9999";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Content-type", "application/json");
+
+            xhr.onload = function (e) { 
+                if (xhr.readyState === 4 ) {
+                    if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");					
+
+                        var fullResponse = JSON.parse(xhr.response);
+                        console.log("changeAuxContent response: "+xhr.response);
+
+                            if (fullResponse.result.success == 0 ) {
+
+                            }
+                    }
+                    else {
+                        console.error("changeAuxContent error: "+xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.onerror = function (e) {
+                console.error("changeAuxContent error: "+xhr.responseText);
+            };
+    
+            var data = JSON.stringify({"params": content, "method":"changeAuxContent", "id":"1234", "jsonrpc":"2.0"});
+
+            xhr.send(data);
+            console.log("sent: "+data);
+        }
+        else{
+            console.error("changeAuxContent: Invalid IP Address: " + ipAddress);
+        }
+    },
+
     cutLayer: function( context ) {
 
         var settings = settingsCache[context];
@@ -893,10 +942,43 @@ var EventMasterRPC = {
         else {
             console.error( "Error: cutLayer() is missing some data! " + settings.cutLayer );
         }
-
-        
-
     },
+
+    cutAux: function( context ) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            return;
+        }
+
+        if( settings.cutAux &&
+            ( settings.cutAux.destInfo && settings.cutAux.destInfo.id != -1 ) &&
+            ( settings.cutAux.srcInfo && settings.cutAux.srcInfo.id != -1 ) ) {
+                
+            // Look for the layer Id in the destationContents..
+            // Check to see whether it is a mix layer
+            // if so, check the flag of whether that layer is on preview / program and choose the layer based
+            // on the layerMode (preview or program)
+            var PvwLastSrcIndex = -1;
+            var PgmLastSrcIndex = -1;
+
+            if (settings.cutAux.cutMode == 0)
+                PvwLastSrcIndex = settings.cutAux.srcInfo.id;
+            else
+                PgmLastSrcIndex = settings.cutAux.srcInfo.id;
+           
+            var content = { "id": parseInt(settings.cutAux.destInfo.id), 
+                            "PvwLastSrcIndex":parseInt(settings.cutAux.srcInfo.id), 
+                            "PgmLastSrcIndex":parseInt(settings.cutAux.srcInfo.id)};
+
+            this.changeAuxContent(context, content);
+        }
+        else {
+            console.error( "Error: cutAux() is missing some data! " + settings.cutAux );
+        }
+    },
+
 
 	getAllDestinationContent: function(context) {
         var settings = settingsCache[context];
@@ -979,6 +1061,9 @@ var eventMasterAction = {
             } 
             else if( action == "com.barco.eventmaster.cutlayer") {
                 EventMasterRPC.cutLayer(context);
+            }
+            else if( action == "com.barco.eventmaster.cutaux") {
+                EventMasterRPC.cutAux(context);
             }
         }
     },
@@ -1118,6 +1203,10 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             if( jsonPayload.hasOwnProperty('cutLayer')) {
                 changed = true;
                 settings["cutLayer"] = jsonPayload.cutLayer;
+            }
+            if( jsonPayload.hasOwnProperty('cutAux')) {
+                changed = true;
+                settings["cutAux"] = jsonPayload.cutAux;
             }
                         
             if( changed  ) {

@@ -119,7 +119,23 @@
       "Tooltip": "This action changes a source within a layer", 
       "PropertyInspectorPath": "PropertyInspectors/cutlayer_pi.html",
       "UUID": "com.barco.eventmaster.cutlayer"
+    },
+    {
+      "Icon": "images/cutAuxActionImage",
+      "Name": "Cut Aux", 
+      "States": [
+        {
+          "Image": "images/cutAuxKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "This action changes a source within an Aux", 
+      "PropertyInspectorPath": "PropertyInspectors/cutaux_pi.html",
+      "UUID": "com.barco.eventmaster.cutaux"
     }
+
   ],
   "SDKVersion": 2,
   "Category": "Barco Event Master",

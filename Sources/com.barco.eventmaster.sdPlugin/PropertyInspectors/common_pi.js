@@ -177,8 +177,18 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 // Clear list, repopulate, and check selected item towards the end of this conditional
                 //
                 // The currenytly selected the GUI element
+                if( payload["cutLayer"] == null)
+                {
+                    var destInfo = {id: -1, name: ""};
+                    var srcInfo = {id: -1, name: ""};
+                    var layerInfo = {id: -1, name: ""};
+                    var cutLayer = { destInfo: null, srcInfo: null,layerInfo: null, layerMode: 0};
+                    payload["cutLayer"] = cutLayer;
+                
+                }
+ 
                 var cutLayer_payload = payload["cutLayer"];
-                                
+                               
                 // selected information
                 var destInfo = cutLayer_payload.destInfo;
                 var layerInfo = cutLayer_payload.layerInfo;
@@ -291,8 +301,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         var sourceElement = cutLayer_source_list_Element.appendChild( new Option("") );
                         sourceElement.value = -1;
 
-                        if( layerInfo == null ) {
-                            layerInfo = {id: -1, name: ""};
+                        if( srcInfo == null ) {
+                            srcInfo = {id: -1, name: ""};
                             sourceElement.selected = true;
                         }
 
@@ -340,6 +350,116 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     }
                 }
 
+            }
+
+            else if( action == "com.barco.eventmaster.cutaux") {
+                //
+                // Clear list, repopulate, and check selected item towards the end of this conditional
+                //
+                // The currenytly selected the GUI element
+                if( payload["cutAux"] == null)
+                {
+                    var destInfo = {id: -1, name: ""};
+                    var srcInfo = {id: -1, name: ""};
+                    var cutAux = { destInfo: null, srcInfo: null, auxMode: 0};
+                    payload["cutAux"] = cutAux;
+                
+                }
+                var cutAux_payload = payload["cutAux"];
+                                
+                // selected information
+                var destInfo = cutAux_payload.destInfo;
+                var srcInfo = cutAux_payload.srcInfo;
+              
+                // ---------------- dest refresh Gui elements ------------------------------------------------- 
+                // Clear old ones
+                var cutAux_dest_list_Element = document.getElementById("cutAux_dest_list");
+                while (cutAux_dest_list_Element.length)
+                    cutAux_dest_list_Element.remove(0);
+                
+                // populate with new ones
+                var auxDestinations = payload["auxDestinations"];
+                if( auxDestinations ) {
+                
+                    var destElement = cutAux_dest_list_Element.appendChild( new Option("") );
+                    destElement.value = -1;
+
+                    if( destInfo == null ) {
+                        destInfo = {id: -1, name: ""};
+                        destElement.selected = true;
+                    }
+                    
+                    for(var i=0; i<auxDestinations.length; i++) {
+                        destElement = cutAux_dest_list_Element.appendChild( new Option(auxDestinations[i].Name) );
+                        var id = destElement.value = auxDestinations[i].id;
+
+                        // if already selected
+                        if( destInfo && id==destInfo.id) {
+                            destElement.selected = true;
+                        }
+                    }
+                }
+
+                // --------------- sources------------------------------------------
+                var cutAux_source_list_Element = document.getElementById("cutAux_source_list");
+                if( cutAux_source_list_Element != null ) {
+
+                    var options = cutAux_source_list_Element.getElementsByTagName("option");
+                    while (options.length)
+                    cutAux_source_list_Element.remove(0);
+                    
+                    // Inputs
+                    if( sources ) {
+                        var inputs_optG = document.getElementById('cutAux_source_input');
+                        var stills_optG = document.getElementById('cutAux_source_still');
+                        var destinations_optG = document.getElementById('cutAux_source_screen');
+                        var backgrounds_optG = document.getElementById('cutAux_source_backgrounds');
+
+                        var sourceElement = cutAux_source_list_Element.appendChild( new Option("") );
+                        sourceElement.value = -1;
+
+                        if( srcInfo == null ) {
+                            srcInfo = {id: -1, name: ""};
+                            sourceElement.selected = true;
+                        }
+
+                        for(var i=0; i<sources.length; i++) {
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 1 ) {
+                                var sourceElement = stills_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 2 ) { 
+                                var screenElement = destinations_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.parentNode.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 3 ) { 
+                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                        }
+
+                        if( srcInfo ) {
+                            // select the previously selected item (from the plugin)
+                            for( var i=0; i<cutAux_source_list_Element.options.length; i++ ){
+                                if(cutAux_source_list_Element.options[i].value == srcInfo.id )
+                                    cutAux_source_list_Element.options[i].selected = true;
+                            }
+                        }
+                    }
+                }
+
+                
+                var auxModeElement = document.getElementsByName('auxMode');
+                if( cutAux_payload.auxMode  == 0  ) {
+                    setChecked(auxModeElement, "auxMode_toPreview");
+                }
+                else {
+                    setChecked(auxModeElement, "auxMode_toProgram");
+                }
             }
         }
     };
@@ -508,6 +628,41 @@ function updateSettings() {
     
     payload.cutLayer = cutLayer;
     
+    // cutAux---------------------------------------------------------------
+    var cutAux = { destInfo: null, srcInfo: null, auxMode: 0};
+
+    var cutAux_destElement = document.getElementById('cutAux_dest_list');
+    if( cutAux_destElement != null ) {
+        var selectedIndex = cutAux_destElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            destInfo.id = cutAux_destElement.options[selectedIndex].value;
+            destInfo.name = cutAux_destElement.options[selectedIndex].label;
+            cutAux.destInfo = destInfo;
+        } 
+    }
+    
+    var cutAux_auxModeElement = document.getElementsByName('auxMode');
+    if( cutAux_auxModeElement != null ) {
+        var auxMode=getChecked(cutAux_auxModeElement);
+        if( auxMode && auxMode.length>0 ) { 
+            if (auxMode == "auxMode_toProgram") {
+                cutAux.auxMode = 1;             
+            }   
+        }
+    }
+    
+    var cutAux_sourceElement = document.getElementById('cutAux_source_list');
+    if( cutAux_sourceElement != null ) {
+        var selectedIndex = cutAux_sourceElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            srcInfo.id = cutAux_sourceElement.options[selectedIndex].value;
+            srcInfo.name = cutAux_sourceElement.options[selectedIndex].label;
+            cutAux.srcInfo = srcInfo;
+        }
+    }
+    
+    payload.cutAux = cutAux;
+   
         
     sendPayloadToPlugin(payload);
 }
