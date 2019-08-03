@@ -832,12 +832,61 @@ var EventMasterRPC = {
         }
 
         if( settings.cutLayer &&
-            ( settings.cutLayer.destInfo && settings.cutLayer.destInfo.id ) &&
-            ( settings.cutLayer.srcInfo && settings.cutLayer.srcInfo.id ) &&
-            ( settings.cutLayer.layerInfo && settings.cutLayer.layerInfo.id ) ) {
+            ( settings.cutLayer.destInfo && settings.cutLayer.destInfo.id != -1 ) &&
+            ( settings.cutLayer.srcInfo && settings.cutLayer.srcInfo.id != -1 ) &&
+            ( settings.cutLayer.layerInfo && settings.cutLayer.layerInfo.id != -1 ) ) {
+                
+            // Look for the layer Id in the destationContents..
+            // Check to see whether it is a mix layer
+            // if so, check the flag of whether that layer is on preview / program and choose the layer based
+            // on the layerMode (preview or program)
 
-            var layers = [{ "id": parseInt(settings.cutlayer.layerInfo.id), "LastSrcIdx": parseInt(settings.cutlayer.srcInfo.id), "PvwMode": 1-settings.cutlayer.layerMode, "PgmMode": settings.cutlayer.layerMode }];
-            var content = {"id": parseInt(settings.cutlayer.destInfo.id), "Layers": layers};
+            var layerId = -1;
+            var destId = settings.cutLayer.destInfo.id;
+            if( settings.destinationContents ) {
+                for( var i=0; i<settings.destinationContents[destId].Layers.length; i++) {
+                    if (settings.destinationContents[destId].Layers[i].id == settings.cutLayer.layerInfo.id ) {
+                        var layerName = settings.destinationContents[destId].Layers[i].Name;
+                        var onProgram = settings.destinationContents[destId].Layers[i].PgmMode;
+
+                        // if the name has -A in it.. 
+                        if( layerName.includes ("-A")){
+                            // if the current layer is on PGM..
+                            if(onProgram) {
+                                // and I want to cut layer to PGM
+                                if(settings.cutLayer.layerMode == 1) {
+                                    // use this layer.
+                                    layerId = settings.destinationContents[destId].Layers[i].id;
+                                }
+                                else {
+                                    layerId = settings.destinationContents[destId].Layers[i].id+1;
+                                }
+                            }
+                            // layer in PVW
+                            else {
+                                // if want to cut layer to pvw
+                                if(settings.cutLayer.layerMode == 0) {
+                                    // use this layer.
+                                    layerId = settings.destinationContents[destId].Layers[i].id;
+                                }
+                                else {
+                                    layerId = settings.destinationContents[destId].Layers[i].id+1;
+                                }
+                            }
+                        }
+                        else {
+                            // nothing to do with non mix layers.
+                            layerId = settings.cutLayer.layerInfo.id;
+                        }
+
+                        // break out of the loops.
+                        break;
+                    }
+                }
+            }
+
+            var layers = [{ "id": parseInt(layerId), "LastSrcIdx": parseInt(settings.cutLayer.srcInfo.id), "PvwMode": 1-settings.cutLayer.layerMode, "PgmMode": settings.cutLayer.layerMode }];
+            var content = {"id": parseInt(settings.cutLayer.destInfo.id), "Layers": layers};
 
             this.changeContent(context, content);
         }
@@ -867,7 +916,8 @@ var EventMasterRPC = {
         }
     },
     
-    	updateCache: function(context) {
+    updateCache: function(context) {
+    
         this.getDestinations(context);
         this.getSources(context);
         this.getBackgrounds(context);
@@ -942,15 +992,8 @@ var eventMasterAction = {
             settingsCache[context] = settings;
         }
 
-        if( action == "com.barco.eventmaster.freeze" || 
-            action == "com.barco.eventmaster.unfreeze" || 
-            action == "com.barco.eventmaster.cutlayer" ) {
-                EventMasterRPC.updateCache(context);
-        }
-        else {
-            eventMasterAction.testEventMasterConnection( context )
-        }
-        
+        EventMasterRPC.updateCache(context);
+        eventMasterAction.testEventMasterConnection( context );
     },
 
     SetTitle: function (context, title) {
@@ -1072,12 +1115,13 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                 changed = true;
                 settings["unfreeze"] = jsonPayload.unfreeze;
             }
-            if( jsonPayload.hasOwnProperty('cutlayer')) {
+            if( jsonPayload.hasOwnProperty('cutLayer')) {
                 changed = true;
-                settings["cutlayer"] = jsonPayload.cutlayer;
+                settings["cutLayer"] = jsonPayload.cutLayer;
             }
                         
             if( changed  ) {
+                EventMasterRPC.updateCache(context);
                 eventMasterAction.testEventMasterConnection( context );
             }
         }

@@ -106,11 +106,11 @@
       "UUID": "com.barco.eventmaster.unfreeze"
     },
     {
-      "Icon": "images/cutlayerActionImage",
+      "Icon": "images/cutLayerActionImage",
       "Name": "Cut Layer", 
       "States": [
         {
-          "Image": "images/cutlayerKeyIcon",
+          "Image": "images/cutLayerKeyIcon",
           "TitleAlignment": "bottom", 
           "FontSize": "8"
         }

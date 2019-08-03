@@ -50,7 +50,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
             // populate the html lists..
             //  - freeze/unfreeze the object list (inputs, BGs, screen and aux dests)
-            //  - cutlayer (input, screen destination and layer (preview / program))
+            //  - cutLayer (input, screen destination and layer (preview / program))
 
             var ipAddress_payload = payload['ipAddress'];
             if( ipAddress_payload != null ) {
@@ -177,39 +177,37 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 // Clear list, repopulate, and check selected item towards the end of this conditional
                 //
                 // The currenytly selected the GUI element
-                var cutlayer_payload = payload["cutlayer"];
+                var cutLayer_payload = payload["cutLayer"];
                                 
                 // selected information
-                var destInfo = cutlayer_payload.destInfo;
-                var layerInfo = cutlayer_payload.layerInfo;
-                var srcInfo = cutlayer_payload.srcInfo;
+                var destInfo = cutLayer_payload.destInfo;
+                var layerInfo = cutLayer_payload.layerInfo;
+                var srcInfo = cutLayer_payload.srcInfo;
               
                 // ---------------- dest refresh Gui elements ------------------------------------------------- 
                 // Clear old ones
-                var cutlayer_dest_list_Element = document.getElementById("cutlayer_dest_list");
-                while (cutlayer_dest_list_Element.length)
-                    cutlayer_dest_list_Element.remove(0);
+                var cutLayer_dest_list_Element = document.getElementById("cutLayer_dest_list");
+                while (cutLayer_dest_list_Element.length)
+                    cutLayer_dest_list_Element.remove(0);
                 
                 // populate with new ones
                 var screenDestinations = payload["screenDestinations"];
                 if( screenDestinations ) {
                 
+                    var destElement = cutLayer_dest_list_Element.appendChild( new Option("") );
+                    destElement.value = -1;
+
                     if( destInfo == null ) {
-                        destInfo = {id: -1, name: null};
-
-                        // grab the first one..
-                        destInfo.name = screenDestinations[0].Name;
-                        destInfo.id = screenDestinations[0].id;
+                        destInfo = {id: -1, name: ""};
+                        destElement.selected = true;
                     }
-
+                    
                     for(var i=0; i<screenDestinations.length; i++) {
-                        var name = screenDestinations[i].Name;
-                        var destElement = cutlayer_dest_list_Element.appendChild( new Option(name) );
+                        destElement = cutLayer_dest_list_Element.appendChild( new Option(screenDestinations[i].Name) );
                         var id = destElement.value = screenDestinations[i].id;
 
                         // if already selected
                         if( destInfo && id==destInfo.id) {
-                            console.log("sendToPropertyInspector: found:. "+id);
                             destElement.selected = true;
                         }
                     }
@@ -217,9 +215,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                 // ---------------- layer refresh of GUI elements ------------------------------------------------- 
                 // clear the old onext
-                var cutlayer_layer_list_Element = document.getElementById("cutlayer_layer_list");
-                while( cutlayer_layer_list_Element.length )
-                    cutlayer_layer_list_Element.remove(0);
+                var cutLayer_layer_list_Element = document.getElementById("cutLayer_layer_list");
+                while( cutLayer_layer_list_Element.length ) {
+                    cutLayer_layer_list_Element.remove(0);
+                }
 
                 // populate with new ones..
                 // if there is a selected destination.. 
@@ -230,18 +229,32 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     for(var i=0; i<destinationContents.length; i++) {
                         if( destinationContents[i].id == destInfo.id ) {
                             if( destinationContents[i].Layers ) {
+            
+                                var layerElement = cutLayer_layer_list_Element.appendChild( new Option("") );
+                                layerElement.value = -1;
+
                                 if( layerInfo == null ) {
-                                    layerInfo = {id: -1, name: null};
-            
-                                    // grab the first one..
-                                    layerInfo.name = destinationContents[i].Layers[0].Name;
-                                    layerInfo.id = destinationContents[i].Layers[0].id;
+                                    layerInfo = {id: -1, name: ""};
+                                    layerElement.selected = true;
                                 }
-            
+
                                 for( var j=0; j<destinationContents[i].Layers.length; j++ ) {
                                     var layerName = destinationContents[i].Layers[j].Name;
                                     
-                                    var layerElement = cutlayer_layer_list_Element.appendChild(new Option(layerName) );
+                                    
+                                    // is it a mix layer..
+                                    //
+                                    var mix=false;
+                                    if( layerName.includes ("-A")){
+                                        mix =true;
+                                        layerName = layerName.slice( 0, layerName.length-2);
+                                        layerName += " (mix)";
+                                    }
+                                    else {
+                                        layerName += " (non mix)";
+                                    }
+                                    
+                                    var layerElement = cutLayer_layer_list_Element.appendChild(new Option(layerName) );
                                     var id = layerElement.value = destinationContents[i].Layers[j].id;
 
                                     // if already selected
@@ -250,6 +263,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                         console.log("sendToPropertyInspector: found:. "+id);
                                         layerElement.selected = true;
                                     }
+                                    
+                                    if (mix == true ) /* skip over layer#-B */
+                                        j++;
+
                                 }
                             }
                         }
@@ -257,22 +274,27 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 }
                 
                 // --------------- sources------------------------------------------
-                var cutlayer_source_list_Element = document.getElementById("cutlayer_source_list");
-                if( cutlayer_source_list_Element != null ) {
+                var cutLayer_source_list_Element = document.getElementById("cutLayer_source_list");
+                if( cutLayer_source_list_Element != null ) {
 
-                    var options = cutlayer_source_list_Element.getElementsByTagName("option");
+                    var options = cutLayer_source_list_Element.getElementsByTagName("option");
                     while (options.length)
-                        cutlayer_source_list_Element.remove(0);
+                        cutLayer_source_list_Element.remove(0);
                     
                     // Inputs
                     if( sources ) {
-                        var inputs_optG = document.getElementById('cutlayer_source_input');
-                        var stills_optG = document.getElementById('cutlayer_source_still');
-                        var destinations_optG = document.getElementById('cutlayer_source_screen');
-                        var backgrounds_optG = document.getElementById('cutlayer_source_backgrounds');
+                        var inputs_optG = document.getElementById('cutLayer_source_input');
+                        var stills_optG = document.getElementById('cutLayer_source_still');
+                        var destinations_optG = document.getElementById('cutLayer_source_screen');
+                        var backgrounds_optG = document.getElementById('cutLayer_source_backgrounds');
 
-                        if( srcInfo == null )
-                            srcInfo = {id: sources[0].id, name: sources[0].Name};
+                        var sourceElement = cutLayer_source_list_Element.appendChild( new Option("") );
+                        sourceElement.value = -1;
+
+                        if( layerInfo == null ) {
+                            layerInfo = {id: -1, name: ""};
+                            sourceElement.selected = true;
+                        }
 
                         for(var i=0; i<sources.length; i++) {
                             if( sources[i].SrcType  == 0 ) {
@@ -293,22 +315,24 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                             }
                         }
 
-                        // select the previously selected item (from the plugin)
-                        for( var i=0; i<cutlayer_source_list_Element.options.length; i++ ){
-                            if(cutlayer_source_list_Element.options[i].value == srcInfo.id )
-                                cutlayer_source_list_Element.options[i].selected = true;
+                        if( srcInfo ) {
+                            // select the previously selected item (from the plugin)
+                            for( var i=0; i<cutLayer_source_list_Element.options.length; i++ ){
+                                if(cutLayer_source_list_Element.options[i].value == srcInfo.id )
+                                    cutLayer_source_list_Element.options[i].selected = true;
+                            }
                         }
                     }
                 }
 
                 
                 var layerModeElement = document.getElementsByName('layerMode');
-                if( cutlayer_payload.layerMode == null ) {
+                if( cutLayer_payload.layerMode == null ) {
                     if( layerModeElement != null ) 
                         setChecked(layerModeElement, "layerMode_toPreview");
                 }
                 else {
-                    if( cutlayer_payload.layerMode  == 0  ) {
+                    if( cutLayer_payload.layerMode  == 0  ) {
                         setChecked(layerModeElement, "layerMode_toPreview");
                     }
                     else {
@@ -436,28 +460,29 @@ function updateSettings() {
         payload.unfreeze = unfreeze;
     }
 
-    /** cutlayer **/
+    /** cutLayer **/
     var destInfo = {id: -1, name: ""};
     var srcInfo = {id: -1, name: ""};
     var layerInfo = {id: -1, name: ""};
-    var cutlayer = { destInfo: null, srcInfo: null,layerInfo: null, layerMode: 0};
+    var cutLayer = { destInfo: null, srcInfo: null,layerInfo: null, layerMode: 0};
 
-    var cutlayer_destElement = document.getElementById('cutlayer_dest_list');
-    if( cutlayer_destElement != null ) {
-        var selectedIndex = cutlayer_destElement.selectedIndex;
+    var cutLayer_destElement = document.getElementById('cutLayer_dest_list');
+    if( cutLayer_destElement != null ) {
+        var selectedIndex = cutLayer_destElement.selectedIndex;
         if( selectedIndex >= 0 ){
-            destInfo.id = cutlayer_destElement.options[selectedIndex].value;
-            destInfo.name = cutlayer_destElement.options[selectedIndex].label;
-            cutlayer.destInfo = destInfo;
+            destInfo.id = cutLayer_destElement.options[selectedIndex].value;
+            destInfo.name = cutLayer_destElement.options[selectedIndex].label;
+            cutLayer.destInfo = destInfo;
         } 
     }
     
-    var cutlayer_layerElement = document.getElementById('cutlayer_layer_list');
-    if( cutlayer_layerElement != null ) {
-        var selectedIndex = cutlayer_layerElement.selectedIndex;
+    var cutLayer_layerElement = document.getElementById('cutLayer_layer_list');
+    if( cutLayer_layerElement != null ) {
+        var selectedIndex = cutLayer_layerElement.selectedIndex;
         if( selectedIndex >= 0 ){
-            layerInfo.id = cutlayer_layerElement.options[selectedIndex].value;
-            layerInfo.name = cutlayer_layerElement.options[selectedIndex].label;
+            layerInfo.id = cutLayer_layerElement.options[selectedIndex].value;
+            layerInfo.name = cutLayer_layerElement.options[selectedIndex].label;
+            cutLayer.layerInfo = layerInfo;
         }
     }
 
@@ -466,22 +491,22 @@ function updateSettings() {
         var layerMode=getChecked(cutLayer_layerModeElement);
         if( layerMode && layerMode.length>0 ) { 
             if (layerMode == "layerMode_toProgram") {
-                cutlayer.layerMode = 1;             
+                cutLayer.layerMode = 1;             
             }   
         }
     }
     
-    var cutlayer_sourceElement = document.getElementById('cutlayer_source_list');
-    if( cutlayer_sourceElement != null ) {
-        var selectedIndex = cutlayer_sourceElement.selectedIndex;
+    var cutLayer_sourceElement = document.getElementById('cutLayer_source_list');
+    if( cutLayer_sourceElement != null ) {
+        var selectedIndex = cutLayer_sourceElement.selectedIndex;
         if( selectedIndex >= 0 ){
-            srcInfo.id = cutlayer_sourceElement.options[selectedIndex].value;
-            srcInfo.name = cutlayer_sourceElement.options[selectedIndex].label;
-            cutlayer.srcInfo = srcInfo;
+            srcInfo.id = cutLayer_sourceElement.options[selectedIndex].value;
+            srcInfo.name = cutLayer_sourceElement.options[selectedIndex].label;
+            cutLayer.srcInfo = srcInfo;
         }
     }
     
-    payload.cutlayer = cutlayer;
+    payload.cutLayer = cutLayer;
     
         
     sendPayloadToPlugin(payload);
