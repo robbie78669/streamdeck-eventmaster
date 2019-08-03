@@ -23,37 +23,18 @@
             </div>
 
             <div class="sdpi-item" id="select_single">
-                    <div class="sdpi-item-label">Source</div> 
-                    <select class="sdpi-item-value select" id="freeze_list" onchange="updateSettings()">
-                           <optgroup id="freeze_type_input" label="Inputs">
-                           </optgroup>
-                           <optgroup id="freeze_type_background" label="Backgrounds">
-                           </optgroup>
-                           <optgroup id="freeze_type_screen" label="Screen Destinations">
-                           </optgroup>
-                           <optgroup id="freeze_type_aux" label="Aux Destinations">
-                           </optgroup>
-                    </select> 
-               </div>
-
-            <!-- SOURCE ID : Present a list of source based on the type..
-                    type 0 - input source
-                    type 1 - BG source
-                    type 2 - Screen Destination
-                    type 3 - Aux Destination
-            -->
-                     
+                <div class="sdpi-item-label">Source</div> 
+                <select class="sdpi-item-value select" id="freeze_list" onchange="updateSettings()"></select> 
+            </div>
             
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Status</div>
-                    <span class="sdpi-item-value" id="status">
-                        <b>Cannot detect Event Master on the the network</b>
-                    </span>
-                </div>
+                <span class="sdpi-item-value" id="status">
+                    <b>Cannot detect Event Master on the the network</b>
+                </span>
             </div>
         </div>
         <script src="common_pi.js"></script>
             
     </body>
-                
     </html>

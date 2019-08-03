@@ -106,19 +106,19 @@
       "UUID": "com.barco.eventmaster.unfreeze"
     },
     {
-      "Icon": "images/transLayerActionImage",
-      "Name": "trans Layer", 
+      "Icon": "images/cutlayerActionImage",
+      "Name": "Cut Layer", 
       "States": [
         {
-          "Image": "images/transLayerKeyIcon",
+          "Image": "images/cutlayerKeyIcon",
           "TitleAlignment": "bottom", 
           "FontSize": "8"
         }
       ], 
       "SupportedInMultiActions": true,
       "Tooltip": "This action changes a source within a layer", 
-      "PropertyInspectorPath": "PropertyInspectors/transLayer_pi.html",
-      "UUID": "com.barco.eventmaster.transLayer"
+      "PropertyInspectorPath": "PropertyInspectors/cutlayer_pi.html",
+      "UUID": "com.barco.eventmaster.cutlayer"
     }
   ],
   "SDKVersion": 2,
@@ -127,7 +127,7 @@
   "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
-  "Description": "Requires Event Master v6.2 or higher. Adds Event Master commend support to Stream Deck.", 
+  "Description": "Requires Event Master v7.0 or higher. Adds Event Master commend support to Stream Deck.", 
     "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
   "Version": "2.0",

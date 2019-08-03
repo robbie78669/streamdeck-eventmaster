@@ -681,12 +681,16 @@ var EventMasterRPC = {
                         console.log("listContent response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            var destContent= settings.destinationContents= fullResponse.result.response;
+                            if( settings.destinationContents == null )
+                                settings.destinationContents = [];
+
+                            settings.destinationContents[destinationId] = fullResponse.result.response;
+                            var destContent= fullResponse.result.response;
                              
                             console.log("dest Content");
                             console.log("  id:" + destContent.id);
                             console.log("  Name:" + destContent.Name);
-                            
+                    
                             var transitions = destContent.Transition;
                             for (var i = 0; i < transitions.length; i++) {
                                 console.log("   Transition #"+(i+1));
@@ -716,6 +720,7 @@ var EventMasterRPC = {
                             for (var i = 0; i < layers.length; i++) {
                                 console.log("Layer #"+(i+1));
                                 console.log("   id:" + layers[i].id);
+                                console.log("   Name:"+ layers[i].Name);
                                 console.log("   LastSrcIdx:" + layers[i].LastSrcIdx);
                                 console.log("   PvwMode:" + layers[i].PvwMode);
                                 console.log("   PgmMode:" + layers[i].PgmMode);
@@ -769,7 +774,7 @@ var EventMasterRPC = {
         }
     },
     
-    changeContent: function(context) {
+    changeContent: function(context, content) {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
@@ -808,7 +813,7 @@ var EventMasterRPC = {
                 console.error("changeContent error: "+xhr.responseText);
             };
     
-            var data = JSON.stringify({"params":{"id":settings.changeLayerSource.destId, "Layers": [{"id": settings.changeLayerSource.layerId,"LastSrcIdx":settings.changeLayerSource.sourceId}]}, "method":"changeContent", "id":"1234", "jsonrpc":"2.0"});
+            var data = JSON.stringify({"params": content, "method":"changeContent", "id":"1234", "jsonrpc":"2.0"});
 
             xhr.send(data);
             console.log("sent: "+data);
@@ -816,6 +821,21 @@ var EventMasterRPC = {
         else{
             console.error("changeContent: Invalid IP Address: " + ipAddress);
         }
+    },
+
+    cutLayer: function( context ) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            return;
+        }
+
+        var layers = [{ "id": settings.cutlayer.layerInfo.id, "LastSrcIdx": settings.cutlayer.srcInfo.id, "PvwMode": 1-settings.cutlayer.layerInfo.layerMode, "PgmMode": settings.cutlayer.layerInfo.layerMode }];
+        var content = {"id": settings.cutlayer.destInfo.id, "Layers": layers};
+
+        this.changeContent(context, content);
+
     },
 
 	getAllDestinationContent: function(context) {
@@ -834,15 +854,13 @@ var EventMasterRPC = {
 				this.listContent(context, destList[i].id);
             }
         }
-	},
-
-	updateCache: function(context) {
+    },
+    
+    	updateCache: function(context) {
         this.getDestinations(context);
         this.getSources(context);
         this.getBackgrounds(context);
-        
-		
-		this.getAllDestinationContent(context);
+        this.getAllDestinationContent(context);
 	},
 };
 
@@ -871,6 +889,8 @@ var eventMasterAction = {
             websocket.send(JSON.stringify(json));
         }
     },
+
+    
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
         var settings = settingsCache[context];
         if( settings ) {
@@ -896,8 +916,8 @@ var eventMasterAction = {
             else if (action == "com.barco.eventmaster.unfreeze"){
                 EventMasterRPC.unfreeze(context);
             } 
-            else if( action == "com.barco.eventmaster.transLayer") {
-                EventMasterRPC.transLayer(context);
+            else if( action == "com.barco.eventmaster.cutlayer") {
+                EventMasterRPC.cutLayer(context);
             }
         }
     },
@@ -913,7 +933,7 @@ var eventMasterAction = {
 
         if( action == "com.barco.eventmaster.freeze" || 
             action == "com.barco.eventmaster.unfreeze" || 
-            action == "com.barco.eventmaster.transLayer" ) {
+            action == "com.barco.eventmaster.cutlayer" ) {
                 EventMasterRPC.updateCache(context);
         }
         else {
@@ -1007,59 +1027,47 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             eventMasterAction.onWillAppear(action, context, settings, coordinates);
         }
         else if (event == "propertyInspectorDidAppear")  {
+            var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
             eventMasterAction.onPropertyInspectorDidAppear(action, context, settings, coordinates);
         }
-        else if (event == "didReceiveSettings") {
-            var settings = jsonPayload['settings'];
-            var coordinates = jsonPayload['coordinates'];
-            eventMasterAction.onDidReceiveSettings(action, context, settings, coordinates);
-        }
         else if (event == "sendToPlugin") {
 
-            var updatedSettings = {};
+            var settings;
             var changed = false;
+            settings = settingsCache[context];
 
             // event coming from the property inspector..
             if (jsonPayload.hasOwnProperty('ipAddress')) {
 
-                var ipAddress = jsonPayload.ipAddress;
                 changed = true;
-                updatedSettings["ipAddress"] = ipAddress;
+                settings["ipAddress"] = jsonPayload.ipAddress;
             }
             if (jsonPayload.hasOwnProperty('activatePreset')) {
 
                 changed = true;
-                var activatePreset = jsonPayload.activatePreset;
-                updatedSettings["activatePreset"] = activatePreset;
+                settings["activatePreset"] = jsonPayload.activatePreset;;
             }
-           if (jsonPayload.hasOwnProperty('activateCue')) {
+            if (jsonPayload.hasOwnProperty('activateCue')) {
 
                 changed = true;
-                var activateCue = jsonPayload.activateCue;
-                updatedSettings["activateCue"] = activateCue;
+                settings["activateCue"] = jsonPayload.activateCue;
             }
             if( jsonPayload.hasOwnProperty('freeze')) {
                 changed = true;
-                var freeze = jsonPayload.freeze;
-                updatedSettings["freeze"] = freeze;
+                settings["freeze"] = jsonPayload.freeze;
             }
             if( jsonPayload.hasOwnProperty('unfreeze')) {
                 changed = true;
-                var unfreeze = jsonPayload.unfreeze;
-                updatedSettings["unfreeze"] = unfreeze;
+                settings["unfreeze"] = jsonPayload.unfreeze;
             }
-            if( jsonPayload.hasOwnProperty('transLayer')) {
+            if( jsonPayload.hasOwnProperty('cutlayer')) {
                 changed = true;
-                var layerTrans = jsonPayload.transLayer;
-                updatedSettings["transLayer"] = trans;
+                settings["cutlayer"] = jsonPayload.cutlayer;
             }
-            
-
-            
+                        
             if( changed  ) {
-                eventMasterAction.SetSettings(context, updatedSettings);
-                eventMasterAction.testEventMasterConnection( context )
+                eventMasterAction.testEventMasterConnection( context );
             }
         }
     };

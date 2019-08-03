@@ -34,18 +34,36 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         var jsonObj = JSON.parse(evt.data);
 
     
-        if (jsonObj.event === 'sendToPropertyInspector') {
+        if (jsonObj.event === 'didReceiveSettings') {
             var payload = jsonObj.payload;
             var action = jsonObj.action;
 
+            // per instance
+            var context = jsonObj.context;
+        
+        }
+
+        else if (jsonObj.event === 'sendToPropertyInspector') {
+            var payload = jsonObj.payload;
+            var action = jsonObj.action;
+            var context = jsonObj.context;
+
             // populate the html lists..
             //  - freeze/unfreeze the object list (inputs, BGs, screen and aux dests)
-            //  - transLayer (input, screen destination and layer (preview / program))
+            //  - cutlayer (input, screen destination and layer (preview / program))
 
             var ipAddress_payload = payload['ipAddress'];
             if( ipAddress_payload != null ) {
                 var ipAddresElement = document.getElementById('ipAddress');
-                ipAddresElement.value = payload['ipAddress'];
+                ipAddresElement.value = ipAddress_payload;
+            }
+
+            var status = payload['status'];
+            if( status != null ) {
+                var statusElement = document.getElementById('status');
+                if( statusElement ) {
+                    statusElement.innerText = status;
+                }
             }
             
             var sources = payload["sources"];
@@ -100,311 +118,184 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 }
             }
             else if( action == "com.barco.eventmaster.freeze") {
-            
+                var freeze_payload = payload['freeze'];
                 var freezelist_Element = document.getElementById("freeze_list");
+
                 if( freezelist_Element != null ) {
 
-                    var options = freezelist_Element.getElementsByTagName("option");
-                    for (var i=0; i<options.length; i++){
-                        freezelist_Element.removeChild(options[i]);
-                        i--;
-                    }
+                    while(freezelist_Element.length)
+                        freezelist_Element.remove(0);
 
-                    // Inputs
-                    var optG = document.getElementById('freeze_type_input');
-                    for(var i=0; i<sources.length; i++) {
-                        var name = sources[i].Name;
-                        if( sources[i].SrcType  == 0 ) {
-                            var sourceElement = optG.appendChild( new Option(name) );
-                            sourceElement.id = sources[i].id;
+                    if( sources ) {
 
-                            console.log("sendToPropertyInspector: append freeze_list source label:" + sourceElement.label + ",value:" + sourceElement.value )
+                        if( freeze_payload == null ) {
+                            freeze_payload = {id: sources[0].id, name: sources[0].Name}
                         }
-                    }
-                    
-                        
-                    // Backgrounds
-                    var optG = document.getElementById('freeze_type_background');
-                    for(var i=0; i<backgrounds.length; i++) {
-                        var name = backgrounds[i].Name;
-                        if( backgrounds[i].BGSrcType  == 0 ) {
-                            var bgElement = optG.appendChild( new Option(name) );
-                            bgElement.id = backgrounds[i].id;
-                        }
-                    }
-                    
 
-                    // screen dests  
-                    var optG = document.getElementById('freeze_type_screen');
-                    for(var i=0; i<screenDestinations.length; i++) {
-                        var screenElement = optG.appendChild( new Option(screenDestinations[i].Name) );
-                        screenElement.id = screenDestinations[i].id;
-                    }
-                    
-                    // aux dests  
-                    var optG = document.getElementById('freeze_type_aux');
-                    for(var i=0; i<auxDestinations.length; i++) {
-                        var auxElement = optG.appendChild( new Option(auxDestinations[i].Name) );
-                        auxElement.id = auxDestinations[i].id;
-                    }
-                }
+                        for(var i=0; i<sources.length; i++) {
+                            var name = sources[i].Name;
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = freezelist_Element.appendChild( new Option(name) );
+                                var id = sourceElement.value = sources[i].id;
 
-                var freeze_payload = payload['freeze'];
-                if( freeze_payload != null ){
-    
-                    var optgroupElements = freezelist_Element.options;
-                    var arrayLength = optgroupElements.length;
-                    
-                    var id = freeze_payload.id;
-                    var type = freeze_payload.type;
-                    var label = freeze_payload.label;
-    
-                    console.log("sendToPropertyInspector: freeze_payload.id="+id+", type="+type+", group="+label);
-    
-                    for (var i=0; i<arrayLength; i++)
-                    {
-                        console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
-                        if( optgroupElements[i].parentNode.label==label)
-                        {
-                            console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
-                            optgroupElements[i].selected = true;
+                                if( freeze_payload && freeze_payload.id == id)
+                                    sourceElement.selected=true;
+                            }
                         }
-                    }
+                    }       
                 }
             }
             else if( action == "com.barco.eventmaster.unfreeze"){
+                var unfreeze_payload = payload['unfreeze'];
                 var unfreezelist_Element = document.getElementById("unfreeze_list");
                 if( unfreezelist_Element != null ) {
 
-                    var options = unfreezelist_Element.getElementsByTagName("option");
-                    for (var i=0; i<options.length; i++){
-                        unfreezelist_Element.removeChild(options[i]);
-                        i--;
-                    }
+                    while (unfreezelist_Element.length)
+                        unfreezelist_Element.remove(0);
 
-                    // Inputs
-                    var optG = document.getElementById('unfreeze_type_input');
-                    for(var i=0; i<sources.length; i++) {
-                        var name = sources[i].Name;
-                        if( sources[i].SrcType  == 0 ) {
-                            var sourceElement = optG.appendChild( new Option(name) );
-                            sourceElement.id = sources[i].id;
+                    if( sources ) {
 
-                            console.log("sendToPropertyInspector: append freeze_list source label:" + sourceElement.label + ",value:" + sourceElement.value )
+                        if( unfreeze_payload == null ) {
+                            unfreeze_payload = {id: sources[0].id, name: sources[0].Name}
                         }
-                    }
-                    
-                        
-                    // Backgrounds
-                    var optG = document.getElementById('unfreeze_type_background');
-                    for(var i=0; i<backgrounds.length; i++) {
-                        var name = backgrounds[i].Name;
-                        if( backgrounds[i].BGSrcType  == 0 ) {
-                            var bgElement = optG.appendChild( new Option(name) );
-                            bgElement.id = backgrounds[i].id;
-                        }
-                    }
-                    
 
-                    // screen dests  
-                    var optG = document.getElementById('unfreeze_type_screen');
-                    for(var i=0; i<screenDestinations.length; i++) {
-                        var screenElement = optG.appendChild( new Option(screenDestinations[i].Name) );
-                        screenElement.id = screenDestinations[i].id;
-                    }
-                    
-                    // aux dests  
-                    var optG = document.getElementById('unfreeze_type_aux');
-                    for(var i=0; i<auxDestinations.length; i++) {
-                        var auxElement = optG.appendChild( new Option(auxDestinations[i].Name) );
-                        auxElement.id = auxDestinations[i].id;
-                    }
-                }
-                // ----------------- select source --------------------
-                var unfreeze_payload = payload['unfreeze'];
-                if( unfreeze_payload != null ){
-    
-                    var optgroupElements = unfreezelist_Element.options;
-                    var arrayLength = optgroupElements.length;
-                    
-                    var id = unfreeze_payload.id;
-                    var type = unfreeze_payload.type;
-                    var label = unfreeze_payload.label;
-    
-                    console.log("sendToPropertyInspector: unfreeze_payload.id="+id+", type="+type+", group="+label);
-    
-                    for (var i=0; i<arrayLength; i++)
-                    {
-                        console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
-                        if( optgroupElements[i].parentNode.label==label)
-                        {
-                            console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
-                            optgroupElements[i].selected = true;
+                        for(var i=0; i<sources.length; i++) {
+                            var name = sources[i].Name;
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = unfreezelist_Element.appendChild( new Option(name) );
+                                var id = sourceElement.value = sources[i].id;
+
+                                if( unfreeze_payload && unfreeze_payload.id == id)
+                                    sourceElement.selected=true;
+                            }
                         }
-                    }
-                }
+                    }       
+                } 
             }
-            else if( action == "com.barco.eventmaster.transLayer") {
+            else if( action == "com.barco.eventmaster.cutlayer") {
                 //
-                // Clear list, repopulate, and check selected item
+                // Clear list, repopulate, and check selected item towards the end of this conditional
                 //
+                // The currenytly selected the GUI element
+                var cutlayer_payload = payload["cutlayer"];
+                                
+                // selected information
+                var destInfo = cutlayer_payload.destInfo;
+                var layerInfo = cutlayer_payload.layerInfo;
+                var srcInfo = cutlayer_payload.srcInfo;
+              
+                // ---------------- dest refresh Gui elements ------------------------------------------------- 
+                // Clear old ones
+                var cutlayer_dest_list_Element = document.getElementById("cutlayer_dest_list");
+                while (cutlayer_dest_list_Element.length)
+                    cutlayer_dest_list_Element.remove(0);
                 
-                // ---------------- dest ------------------------------------------------- 
-                var transLayer_dest_list_Element = document.getElementById("transLayer_dest_list");
-                for (var i=0; i<transLayer_dest_list_Element.length; i++){
-                        transLayer_dest_list_Element.remove(i);
-                        i--;
-                }    
+                // populate with new ones
+                var screenDestinations = payload["screenDestinations"];
+                if( screenDestinations ) {
                 
-                
-                for(var i=0; i<screenDestinations.length; i++) {
-                    var name = screenDestinations[i].Name;
-                    var destElement = transLayer_dest_list_Element.appendChild( new Option(name) );
-                    destElement.id = screenDestinations[i].id;
+                    if( destInfo == null ) {
+                        destInfo = {id: -1, name: null};
 
-                    console.log("sendToPropertyInspector: append trans_dest_list label:" + destElement.label + ",value:" + destElement.value )
-
-                }
-
-                // --------------- sources------------------------------------------
-                var transLayer_source_list_Element = document.getElementById("transLayer_source_list");
-                if( transLayer_source_list_Element != null ) {
-
-                    var options = transLayer_source_list_Element.getElementsByTagName("option");
-                    for (var i=0; i<options.length; i++){
-                        transLayer_source_list_Element.removeChild(options[i]);
-                        i--;
+                        // grab the first one..
+                        destInfo.name = screenDestinations[0].Name;
+                        destInfo.id = screenDestinations[0].id;
                     }
 
-                    // Inputs
-                    var optG = document.getElementById('translayer_source_type_input');
-                    for(var i=0; i<sources.length; i++) {
-                        var name = sources[i].Name;
-                        if( sources[i].SrcType  == 0 ) {
-                            var sourceElement = optG.appendChild( new Option(name) );
-                            sourceElement.id = sources[i].id;
-    
-                            console.log("append freeze_list source label:" + sourceElement.label + ",value:" + sourceElement.value )
-                        }
-                    }
-                                            
-                    // Backgrounds
-                    var optG = document.getElementById('translayer_source_background');
-                    for(var i=0; i<backgrounds.length; i++) {
-                        var name = backgrounds[i].Name;
-                        if( backgrounds[i].BGSrcType  == 0 ) {
-                            var bgElement = optG.appendChild( new Option(name) );
-                            bgElement.id = backgrounds[i].id;
-                        }
-                    }
-                        
-                    // screen dests  
-                    var optG = document.getElementById('translayer_source_screen');
                     for(var i=0; i<screenDestinations.length; i++) {
-                        var screenElement = optG.appendChild( new Option(screenDestinations[i].Name) );
-                        screenElement.id = screenDestinations[i].id;
-                    }
-                    
-                    // aux dests  
-                    var optG = document.getElementById('translayer_source_aux');
-                    for(var i=0; i<auxDestinations.length; i++) {
-                        var auxElement = optG.appendChild( new Option(auxDestinations[i].Name) );
-                        auxElement.id = auxDestinations[i].id;
+                        var name = screenDestinations[i].Name;
+                        var destElement = cutlayer_dest_list_Element.appendChild( new Option(name) );
+                        var id = destElement.value = screenDestinations[i].id;
+
+                        // if already selected
+                        if( destInfo && id==destInfo.id) {
+                            console.log("sendToPropertyInspector: found:. "+id);
+                            destElement.selected = true;
+                        }
                     }
                 }
 
-                // ---------------- layer ------------------------------------------------- 
-                var transLayer_layer_list_Element = document.getElementById("transLayer_layer_list");
-                for (var i=0; i<transLayer_layer_list_Element.length; i++){
+                // ---------------- layer refresh of GUI elements ------------------------------------------------- 
+                // clear the old onext
+                var cutlayer_layer_list_Element = document.getElementById("cutlayer_layer_list");
+                while( cutlayer_layer_list_Element.length )
+                    cutlayer_layer_list_Element.remove(0);
 
-                    transLayer_layer_list_Element.remove(i);
-                    i--;
-                }    
+                // populate with new ones..
+                // if there is a selected destination.. 
+                var destinationContents = payload.destinationContents; // from listContents..
+                if( destinationContents && destInfo) {
                 
-                /** add destination optGroup, followed by list of layers */
-                /*for(var i=0; i<destinationContents.length; i++) {
-                    
-                    var destOptGroup_Element = document.createElement('OPTGROUP');
-                    destOptGroup_Element.id = screenDestinations[i].id;
-                    destOptGroup_Element.label = screenDestinations[i].Name;
+                    // for the selected destination, populate all the layers for that destiantion
+                    for(var i=0; i<destinationContents.length; i++) {
+                        if( destinationContents[i].id == destInfo.id ) {
+                            if( destinationContents[i].Layers ) {
+                                if( layerInfo == null ) {
+                                    layerInfo = {id: -1, name: null};
+            
+                                    // grab the first one..
+                                    layerInfo.name = destinationContents[i].Layers[0].Name;
+                                    layerInfo.id = destinationContents[i].Layers[0].id;
+                                }
+            
+                                for( var j=0; j<destinationContents[i].Layers.length; j++ ) {
+                                    var layerName = destinationContents[i].Layers[j].Name;
+                                    var layerElement = cutlayer_layer_list_Element.appendChild(new Option(layerName) );
+                                    var id = layerElement.value = destinationContents[i].Layers[j].id;
 
-                    // OPTGROUP Screen Destination Name
-                    //      OPTGROUP BG
-                    //          OPTION BG-A (pvwMode == 1)
-                    //          OPTION BG-B (pvwMode == 0)
-                    //      OPTGROUP Layer$Zorder-$Capacity
-                    //         OPTION Layer$Zorder-A (pvwMode == 1)
-                    //         OPTION Layer$Zorder-B (pvwMode == 0)
-                    //         if no preview then
-                    //             OPTION Layer$Zorder
-                    //
-                    for (var j=0; j<destinationContent[i].Layers.length; j++) {
-                        var layerOptGroup_Element = document.createElement('OPTGROUP');
-                        if( screenDestinations[i].Layers[j].z )
-                        layerOptGroup_Element.id = screenDestinations[i].Layers[j].id;
-                        layerOptGroup_Element.label = "Layer"screenDestinations[i].Name +;
-                        var destElement = destOptGroup_Element.appendChild( new Option(destinationContent[i].Layers[j].) );
-                        destElement.id = screenDestinations[i].id;
-                    }
-                }*/
-                    
-                // Select the GUI element
-                var transLayer_payload = payload['transLayer'];
-                if( transLayer_payload != null ){
-                    var destId = transLayer_payload.destId;
-                    var destLabel = transLayer_payload.destLabel;
-                    var sourceId = transLayer_payload.sourceId;
-                    var sourceLabel = transLayer_payload.sourceLabel;
-                    var layerId = transLayer_payload.layerId;
-                    var layerLaber = transLayer_payload.layerLabel;
-                    
-                    // ----------------- select destination --------------------
-                    var destListElements = transLayer_dest_list_Element.transLayer_dest_list;
-                    var arrayLength = destListElements.length;
-                    
-                    console.log("sendToPropertyInspector: transLayer: destId="+destId+", destLabel="+destLabel);
-    
-                    for (var i=0; i<arrayLength; i++)
-                    {
-                        console.log("sendToPropertyInspector: comparing : "+destListElements[i].label);
-                        if( destListElements[i].label==label)
-                        {
-                            console.log("sendToPropertyInspector: found:. "+destListElements[i].label);
-                            destListElements[i].selected = true;
-                            break;
+                                    // if already selected
+                                    if( layerInfo && id == layerInfo.id)
+                                    {
+                                        console.log("sendToPropertyInspector: found:. "+id);
+                                        layerElement.selected = true;
+                                    }
+                                }
+                            }
                         }
                     }
-                    // ----------------- select source --------------------
-                    var optgroupElements = transLayer_source_list_Element.options;
-                    var arrayLength = optgroupElements.length;
+                }
+                
+                // --------------- sources------------------------------------------
+                var cutlayer_source_list_Element = document.getElementById("cutlayer_source_list");
+                if( cutlayer_source_list_Element != null ) {
+
+                    var options = cutlayer_source_list_Element.getElementsByTagName("option");
+                    while (options.length)
+                        cutlayer_source_list_Element.remove(0);
                     
-                    console.log("sendToPropertyInspector: transLayer: srcId="+sourceId+", sourceLabel="+sourceLabel);
-    
-                    for (var i=0; i<arrayLength; i++)
-                    {
-                        console.log("sendToPropertyInspector: comparing OPTGROUP: "+optgroupElements[i].parentNode.label);
-                        if( optgroupElements[i].parentNode.label==label)
-                        {
-                            console.log("sendToPropertyInspector: found:. "+optgroupElements[i].parentNode.label);
-                            optgroupElements[i].selected = true;
-                            break;
+                    // Inputs
+                    if( sources ) {
+                        var inputs_optG = document.getElementById('cutlayer_source_input');
+                        var stills_optG = document.getElementById('cutlayer_source_still');
+                        var destinations_optG = document.getElementById('cutlayer_source_screen');
+                        var backgrounds_optG = document.getElementById('cutlayer_source_backgrounds');
+
+                        if( srcInfo == null )
+                            srcInfo = {id: sources[0].id, name: sources[0].Name};
+
+                        for(var i=0; i<sources.length; i++) {
+                            if( sources[i].SrcType  == 0 ) {
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 1 ) {
+                                var sourceElement = stills_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 2 ) { 
+                                var screenElement = destinations_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.parentNode.value = sources[i].id;
+                            }
+                            else if( sources[i].SrcType == 3 ) { 
+                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
                         }
-                    }
-                    
-                    // ----------------- select layer --------------------
-                    var layerListElements = transLayer_layer_list_Element.transLayer_dest_list;
-                    var arrayLength = layerListElements.length;
-                    
-                    console.log("sendToPropertyInspector: transLayer: layerId="+layerId+", layerLabel="+layerLabel);
-    
-                    for (var i=0; i<arrayLength; i++)
-                    {
-                        console.log("sendToPropertyInspector: comparing : "+layerListElements[i].label);
-                        if( layerListElements[i].label==label)
-                        {
-                            console.log("sendToPropertyInspector: found:. "+layerListElements[i].label);
-                            layerListElements[i].selected = true;
-                            break;
+
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<cutlayer_source_list_Element.options.length; i++ ){
+                            if(cutlayer_source_list_Element.options[i].value == srcInfo.id )
+                                cutlayer_source_list_Element.options[i].selected = true;
                         }
                     }
                 }
@@ -511,33 +402,9 @@ function updateSettings() {
         var selectedIndex = freeze_listElement.selectedIndex;
         var op = freeze_listElement.options[selectedIndex];
         var optGroup = op.parentNode;
-
-        console.log( "freeze_listElement: group= "+optGroup.label+", name="+op.text+" ,id="+op.value);
         
-        if( optGroup.label == "Inputs") {
-            var freeze = { type: 0, id: -1, label: optGroup.label};
-            freeze.id = optGroup.value;
-            
-            payload.freeze = freeze;
-        }
-        else if (optGroup.label == "Backgrounds" ){
-            var freeze = { type: 1, id: -1, label: optGroup.label};
-            freeze.id = op.value;
-            
-            payload.freeze = freeze;
-        }
-        else if (optGroup.label == "ScreenDestinations") {
-            var freeze = { type: 2, id: -1, label: optGroup.label};
-            freeze.id = op.value;
-            
-            payload.freeze = freeze;
-        }
-        else if( optGroup.label == "AuxDestinations"){
-            var freeze = { type: 3, id: -1, label: optGroup.label};
-            freeze.id = op.value;
-            
-            payload.freeze = freeze;
-        }
+        var freeze = { id: freeze_listElement.options[selectedIndex].value, name: freeze_listElement.options[selectedIndex].label};
+        payload.freeze = freeze;
     }
     
     /** UnFreeze **/
@@ -547,72 +414,48 @@ function updateSettings() {
         // determine which group (set the type based on the optgroup //
         var selectedIndex = unfreeze_listElement.selectedIndex;
         var op = unfreeze_listElement.options[selectedIndex];
-        var optGroup = op.parentNode;
-
-        console.log( "unfreeze_listElement: group= "+optGroup.label+", name="+op.text+" ,id="+op.value);
-
-        if( optGroup.label == "Inputs") {
-            var unfreeze = { type: 0, id: -1, label: optGroup.label};
-            unfreeze.id = optGroup.value;
-            
-            payload.unfreeze = unfreeze;
-        }
-        else if (optGroup.label == "Backgrounds" ){
-            var unfreeze = { type: 1, id: -1, label: optGroup.label};
-            unfreeze.id = op.value;
-            
-            payload.unfreeze = unfreeze;
-        }
-        else if (optGroup.label == "ScreenDestinations") {
-            var unfreeze = { type: 2, id: -1, label: optGroup.label};
-            unfreeze.id = op.value;
-            
-            payload.unfreeze = unfreeze;
-        }
-        else if( optGroup.label == "AuxDestinations"){
-            var unfreeze = { type: 3, id: -1, label: optGroup.label};
-            unfreeze.id = op.value;
-            
-            payload.unfreeze = unfreeze;
-        }
+        
+        var unfreeze = { id: unfreeze_listElement.options[selectedIndex].value, name: unfreeze_listElement.options[selectedIndex].label};
+        payload.unfreeze = unfreeze;
     }
 
-    /** transLayer **/
-    var destInfo = {id: -1, label: null};
-    var srcInfo = {type: 0, id: -1, label: ""};
-    var layerInfo = {id: -1, label: ""};
-    var transLayer = { destInfo: null, srcInfo: null,layerInfo: null};
+    /** cutlayer **/
+    var destInfo = {id: -1, name: ""};
+    var srcInfo = {id: -1, name: ""};
+    var layerInfo = {id: -1, name: ""};
+    var cutlayer = { destInfo: null, srcInfo: null,layerInfo: null};
 
-    var transLayer_destElement = document.getElementById('transLayer_dest_list');
-    if( transLayer_destElement != null ) {
-        var selectedIndex = transLayer_destElement.selectedIndex;
-        if( selectedIndex > 0 ){
-            destInfo.id = transLayer_destElement[selectedIndex].value;
-            destInfo.label = transLayer_destElement[selectedIndex].label;
-            transLayer.transLayer_destInfo = destInfo;
+    var cutlayer_destElement = document.getElementById('cutlayer_dest_list');
+    if( cutlayer_destElement != null ) {
+        var selectedIndex = cutlayer_destElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            destInfo.id = cutlayer_destElement.options[selectedIndex].value;
+            destInfo.name = cutlayer_destElement.options[selectedIndex].label;
+            cutlayer.destInfo = destInfo;
         } 
     }
-    var transLayer_sourceElement = document.getElementById('transLayer_source_list');
-    if( transLayer_sourceElement != null ) {
-        var selectedIndex = transLayer_sourceElement.selectedIndex;
-        if( selectedIndex > 0 ){
-            srcInfo.id = transLayer_sourceElement[selectedIndex].value;
-            srcInfo.label = transLayer_sourceElement[selectedIndex].label;
-            srcInfo = transLayer_srcInfo;
-        }
-    }
-    var transLayer_layerElement = document.getElementById('translayer_layer_list');
-    if( transLayer_layerElement != null ) {
-        var selectedIndex = transLayer_layerElement.selectedIndex;
-        if( selectedIndex > 0 ){
-            layerInfo.id = transLayer_layerElement[selectedIndex].value;
-            layerInfo.label = transtransLayer_layerElementLayer_sourceElement[selectedIndex].label;
-            layerInfo = transLayer_srcInfo;
+    
+    var cutlayer_layerElement = document.getElementById('cutlayer_layer_list');
+    if( cutlayer_layerElement != null ) {
+        var selectedIndex = cutlayer_layerElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            layerInfo.id = cutlayer_layerElement.options[selectedIndex].value;
+            layerInfo.name = cutlayer_layerElement.options[selectedIndex].label;
+            cutlayer.layerInfo = layerInfo;
         }
     }
     
+    var cutlayer_sourceElement = document.getElementById('cutlayer_source_list');
+    if( cutlayer_sourceElement != null ) {
+        var selectedIndex = cutlayer_sourceElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            srcInfo.id = cutlayer_sourceElement.options[selectedIndex].value;
+            srcInfo.name = cutlayer_sourceElement.options[selectedIndex].label;
+            cutlayer.srcInfo = srcInfo;
+        }
+    }
     
-    
+    payload.cutlayer = cutlayer;
     
         
     sendPayloadToPlugin(payload);
