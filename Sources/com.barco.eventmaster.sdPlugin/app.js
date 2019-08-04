@@ -368,10 +368,34 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-					
-			var data = JSON.stringify({"params":{"id":sourceId, "type": settings.freezeSourceType, "screengroup": 0, "mode":1 /*freeze*/ }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
-			xhr.send(data);
-			console.log("sent: "+data);
+            var freeze = settings['freeze'];
+            if (freeze  &&
+                freeze.id ) {
+
+                var id = parseInt(freeze.id);
+                var name = freeze.name;
+                var type = parseInt(0);
+                var sources = settings["sources"];
+
+                if( sources) {
+                
+                    for (var i=0; i<sources.length; i++) {
+                        if (sources[i].id == id ) {
+                            // if background
+                            if ( sources[i].SrcType == 3 ) {
+                              type=1;
+                              break;
+                            }
+                        }
+                    }
+                    var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":1 /*freeze*/ }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
+                    xhr.send(data);
+                    console.log("sent: "+data);
+                }
+            }
+            else{
+                console.error( "Error: freeze_unfreeze() is missing some data! " + settings.freeze );
+            }
         }
         else{
             console.error("freezeDestSource: Invalid IP Address: " + ipAddress);
@@ -379,16 +403,19 @@ var EventMasterRPC = {
         
 	},
 
-	unfreeze: function(context ) {
+
+    unfreeze: function(context) {
         
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("unfreezeDestSource error: settingCache is null!");
+            console.error("freezeDestSource error: settingCache is null!");
+
             return;
         }
 
-        ipAddress = ipAddress;
+        ipAddress = settings.ipAddress;
+
 		if( isValidIp( ipAddress ) ) {
 			var url = "http://"+ipAddress+":9999";
 				
@@ -399,33 +426,60 @@ var EventMasterRPC = {
 			xhr.onload = function (e) { 
 				if (xhr.readyState === 4 ) {
 					if( xhr.status === 200) {
+						
                         var fullResponse = JSON.parse(xhr.response);
-                        console.log("unfreezeDestSource response: "+xhr.response);
+                        console.log("freezeDestSource response: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("unfreezeDestSource error: "+xhr.response);
+                        console.error("freeze error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("unfreezeDestSource error: "+xhr.response);
+                console.error("freezeDestSource error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-					
-			var data = JSON.stringify({"params":{"id":sourceId, "type": settings.freezeSourceType, "screengroup": 0, "mode":0 /*unfreeze*/ }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
-			xhr.send(data);
-			console.log("sent: "+data);
+            var unfreeze = settings['unfreeze'];
+            if (unfreeze  &&
+                unfreeze.id ) {
+
+                var id = parseInt(unfreeze.id);
+                var name = unfreeze.name;
+                var type = parseInt(0);
+                var sources = settings["sources"];
+
+                if( sources) {
+                
+                    for (var i=0; i<sources.length; i++) {
+                        if (sources[i].id == id ) {
+                            // if background
+                            if ( sources[i].SrcType == 3 ) {
+                              type=1;
+                              break;
+                            }
+                        }
+                    }
+                    var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":0 }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
+                    xhr.send(data);
+                    console.log("sent: "+data);
+                }
+            }
+            else{
+                console.error( "Error: freeze_unfreeze() is missing some data! " + settings.freeze );
+            }
         }
         else{
-            console.error("unfreezeDestSource: Invalid IP Address: " + ipAddress);
+            console.error("freezeDestSource: Invalid IP Address: " + ipAddress);
         }
+        
 	},
 
-	getSources: function( context ) {
+
+    getSources: function( context ) {
 
         var settings = settingsCache[context];
         if( settings == null ) {

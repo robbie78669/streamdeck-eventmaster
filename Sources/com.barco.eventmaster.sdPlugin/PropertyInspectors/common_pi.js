@@ -119,35 +119,53 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             }
             else if( action == "com.barco.eventmaster.freeze") {
                 var freeze_payload = payload['freeze'];
-                var freezelist_Element = document.getElementById("freeze_list");
-
+                
+                var freezelist_Element = document.getElementById("freeze_source_list");
                 if( freezelist_Element != null ) {
 
-                    while(freezelist_Element.length)
+                    while (freezelist_Element.length)
                         freezelist_Element.remove(0);
 
                     if( sources ) {
 
+                        var inputs_optG = document.getElementById('freeze_source_input');
+                        var backgrounds_optG = document.getElementById('freeze_source_background');
+
+                        var sourceElement = freezelist_Element.appendChild( new Option("") );
+                        sourceElement.value = -1;
+
                         if( freeze_payload == null ) {
-                            freeze_payload = {id: sources[0].id, name: sources[0].Name}
+                            freeze_payload = {id: -1, name: ""};
+                            sourceElement.selected = true;
                         }
 
                         for(var i=0; i<sources.length; i++) {
-                            var name = sources[i].Name;
+                            //inputs
                             if( sources[i].SrcType  == 0 ) {
-                                var sourceElement = freezelist_Element.appendChild( new Option(name) );
-                                var id = sourceElement.value = sources[i].id;
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            // backgrounds
+                            else if( sources[i].SrcType == 3 ) { 
+                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                        }
 
-                                if( freeze_payload && freeze_payload.id == id)
-                                    sourceElement.selected=true;
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<freezelist_Element.options.length; i++ ){
+                            if(freezelist_Element.options[i].value == freeze_payload.id ) {
+                                freezelist_Element.options[i].selected = true;
                             }
                         }
                     }       
-                }
+                } 
             }
             else if( action == "com.barco.eventmaster.unfreeze"){
+
                 var unfreeze_payload = payload['unfreeze'];
-                var unfreezelist_Element = document.getElementById("unfreeze_list");
+                
+                var unfreezelist_Element = document.getElementById("unfreeze_source_list");
                 if( unfreezelist_Element != null ) {
 
                     while (unfreezelist_Element.length)
@@ -155,18 +173,34 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                     if( sources ) {
 
+                        var inputs_optG = document.getElementById('unfreeze_source_input');
+                        var backgrounds_optG = document.getElementById('unfreeze_source_background');
+
+                        var sourceElement = unfreezelist_Element.appendChild( new Option("") );
+                        sourceElement.value = -1;
+                        sourceElement.selected = true;
+
                         if( unfreeze_payload == null ) {
-                            unfreeze_payload = {id: sources[0].id, name: sources[0].Name}
+                            unfreeze_payload = {id: -1, name: ""};
                         }
 
                         for(var i=0; i<sources.length; i++) {
-                            var name = sources[i].Name;
+                            //inputs
                             if( sources[i].SrcType  == 0 ) {
-                                var sourceElement = unfreezelist_Element.appendChild( new Option(name) );
-                                var id = sourceElement.value = sources[i].id;
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                            // backgrounds
+                            else if( sources[i].SrcType == 3 ) { 
+                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
+                        }
 
-                                if( unfreeze_payload && unfreeze_payload.id == id)
-                                    sourceElement.selected=true;
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<unfreezelist_Element.options.length; i++ ){
+                            if(unfreezelist_Element.options[i].value == unfreeze_payload.id ) {
+                                unfreezelist_Element.options[i].selected = true;
                             }
                         }
                     }       
@@ -245,7 +279,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                                 if( layerInfo == null ) {
                                     layerInfo = {id: -1, name: ""};
-                                    layerElement.selected = true;
                                 }
 
                                 for( var j=0; j<destinationContents[i].Layers.length; j++ ) {
@@ -303,7 +336,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                         if( srcInfo == null ) {
                             srcInfo = {id: -1, name: ""};
-                            sourceElement.selected = true;
                         }
 
                         for(var i=0; i<sources.length; i++) {
@@ -556,27 +588,28 @@ function updateSettings() {
     }
  
     /** Freeze **/
-    var freeze_listElement = document.getElementById('freeze_list');
-    if( freeze_listElement != null && freeze_listElement.selectedIndex > 0) {
+    var freeze = { id: -1, name:""};
+    var freeze_listElement = document.getElementById('freeze_source_list');
+    if( freeze_listElement != null && freeze_listElement.selectedIndex >= 0) {
 
         // determine which group (set the type based on the optgroup //
         var selectedIndex = freeze_listElement.selectedIndex;
-        var op = freeze_listElement.options[selectedIndex];
-        var optGroup = op.parentNode;
-        
-        var freeze = { id: freeze_listElement.options[selectedIndex].value, name: freeze_listElement.options[selectedIndex].label};
+              
+        freeze.id = freeze_listElement.options[selectedIndex].value;
+        freeze.name = freeze_listElement.options[selectedIndex].label;
         payload.freeze = freeze;
     }
     
     /** UnFreeze **/
-    var unfreeze_listElement = document.getElementById('unfreeze_list');
-    if( unfreeze_listElement != null && unfreeze_listElement.selectedIndex > 0) {
+    var unfreeze = { id: -1, name:""};
+    var unfreeze_listElement = document.getElementById('unfreeze_source_list');
+    if( unfreeze_listElement != null && unfreeze_listElement.selectedIndex >= 0) {
 
         // determine which group (set the type based on the optgroup //
         var selectedIndex = unfreeze_listElement.selectedIndex;
-        var op = unfreeze_listElement.options[selectedIndex];
+        unfreeze.id = unfreeze_listElement.options[selectedIndex].value;
+        unfreeze.name = unfreeze_listElement.options[selectedIndex].label;
         
-        var unfreeze = { id: unfreeze_listElement.options[selectedIndex].value, name: unfreeze_listElement.options[selectedIndex].label};
         payload.unfreeze = unfreeze;
     }
 
