@@ -7,6 +7,10 @@
 - activateNextPreset
 - activatePreset
 - activateCue
+- cutLayer
+- cutAux
+- freeze
+- unfreeze
 
 
 # Features
