@@ -107,7 +107,7 @@
     },
     {
       "Icon": "images/cutLayerActionImage",
-      "Name": "Cut Layer", 
+      "Name": "Source Replace On Layer", 
       "States": [
         {
           "Image": "images/cutLayerKeyIcon",
@@ -122,7 +122,7 @@
     },
     {
       "Icon": "images/cutAuxActionImage",
-      "Name": "Cut Aux", 
+      "Name": "Source Replace On Aux", 
       "States": [
         {
           "Image": "images/cutAuxKeyIcon",

@@ -32,11 +32,12 @@ function isValidIp(ipAddress) {
 	return false;
 }
 
-
 function validateNum (input, min, max) {
     var num = +input;
     return num >= min && num <= max && input === num.toString();
 }
+
+
 
 var EventMasterRPC = {
 
@@ -708,8 +709,141 @@ var EventMasterRPC = {
             console.error("getDestinations: Invalid IP Address: " + ipAddress);
         }
 	
+    },
+    
+    getPresets: function (context) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("getPresets error: settingCache is null!");
+            return;
+        }
+
+        ipAddress = settings.ipAddress;
+		if( isValidIp( ipAddress ) ) {
+		
+			var url = "http://"+ipAddress+":9999";
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-type", "application/json");
+
+			xhr.onload = function (e) { 
+				if (xhr.readyState === 4 ) {
+					if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");
+
+                        // Grab the content info..
+                        var fullResponse = JSON.parse(xhr.response);
+                        
+                        console.log("getPresets response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+                            
+                            var presets = settings.presets = fullResponse.result.response;
+                            var arrayLength = settings.presets.length;
+                            for (var i = 0; i < arrayLength; i++) {
+                                console.log("preset #"+(i+1));
+                                console.log("  id:" + presets[i].id);
+                                console.log("  Name:" + presets[i].Name);
+                                console.log("  LockMode:"+ presets[i].LockMode);
+                                console.log("  Preset Number"+ presets[i].presetSno);
+                            }
+                                    
+                            console.log("--------------------------------------------------------");
+
+                        }
+					}
+					else {
+                        console.error("getPresets error: "+xhr.responseText);
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+					}
+				}
+			};
+
+			xhr.onerror = function (e) {
+                console.error("getPresets error: "+xhr.responseText);
+                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+			};
+
+			var data = JSON.stringify({"params":{"id":"0"}, "method":"listPresets", "id":"1234", "jsonrpc":"2.0"});
+			xhr.send(data);
+			console.log("sent: "+data);
+        }
+        else{
+            console.error("getPresets: Invalid IP Address: " + ipAddress);
+        }
+	
 	},
 
+    
+    getCues: function (context) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("getPresets error: settingCache is null!");
+            return;
+        }
+
+        ipAddress = settings.ipAddress;
+		if( isValidIp( ipAddress ) ) {
+		
+			var url = "http://"+ipAddress+":9999";
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-type", "application/json");
+
+			xhr.onload = function (e) { 
+				if (xhr.readyState === 4 ) {
+					if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");
+
+                        // Grab the content info..
+                        var fullResponse = JSON.parse(xhr.response);
+                        
+                        console.log("getCues response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+                            
+                            var cues = settings.cues = fullResponse.result.response;
+                            var arrayLength = settings.cues.length;
+                            for (var i = 0; i < arrayLength; i++) {
+                                console.log("cue #"+(i+1));
+                                console.log("  id:" + cues[i].id);
+                                console.log("  Name:" + cues[i].Name);
+                                console.log("  LockMode:"+ cues[i].LockMode);
+                                console.log("  Cue Number"+ cues[i].cueSerialNo);
+                            }
+                                    
+                            console.log("--------------------------------------------------------");
+
+                        }
+					}
+					else {
+                        console.error("getCues error: "+xhr.responseText);
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+					}
+				}
+			};
+
+			xhr.onerror = function (e) {
+                console.error("getCues error: "+xhr.responseText);
+                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+			};
+
+			var data = JSON.stringify({"params":{"id":"0"}, "method":"listCues", "id":"1234", "jsonrpc":"2.0"});
+			xhr.send(data);
+			console.log("sent: "+data);
+        }
+        else{
+            console.error("getCues: Invalid IP Address: " + ipAddress);
+        }
+	
+    },
+    
 	listContent: function( context, destinationId ) {
 
         var settings = settingsCache[context];
@@ -1052,12 +1186,56 @@ var EventMasterRPC = {
         }
     },
     
-    updateCache: function(context) {
+    updateCache: function(context, action) {
     
         this.getDestinations(context);
         this.getSources(context);
         this.getBackgrounds(context);
         this.getAllDestinationContent(context);
+        this.getPresets(context);
+        this.getCues(context);
+       
+        var sourceId = -1;
+        if (action == "com.barco.eventmaster.freeze"){
+            if(settings.freeze != null )
+                sourceId = settings.freeze.id;           
+        }    
+        else if (action == "com.barco.eventmaster.unfreeze"){
+            if(settings.unfreeze != null )
+                sourceId = settings.unfreeze.id;
+        } 
+        else if( action == "com.barco.eventmaster.cutlayer") {
+            if(settings.cutLayer != null ) {
+                if( settings.cutLayer.srcInfo != null )
+                    sourceId = settings.cutLayer.srcInfo.id;
+                
+                if( settings.cutLayer.layerMode != null ) {
+                    //PVW
+                    if( settings.cutLayer.layerMode == 0 ){
+                        pathToFile = "/images/cutLayerDefaultImage-PVW.png"    
+                    } 
+                    else {
+                        pathToFile = "/images/cutLayerDefaultImage.png"    
+                    }
+                }
+            }
+        }
+        else if( action == "com.barco.eventmaster.cutaux") {
+            if(settings.cutAux != null ) {
+                if( settings.cutAux.srcInfo != null )
+                    sourceId = setting.cutAux.srcInfo.id;
+
+                    if( settings.cutAux.cutMode != null ) {
+                        //PVW
+                        if( settings.cutMode == 0 ){
+                            pathToFile = "/images/cutAuxDefaultImage-PVW.png"    
+                        } 
+                        else {
+                            pathToFile = "/images/cutAuxDefaultImage.png"    
+                        }
+                    }
+            }
+        }
 	},
 };
 
@@ -1076,7 +1254,7 @@ var eventMasterAction = {
         // send notification to property_inspector to load saved settings
        if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
 
-            EventMasterRPC.updateCache(context);            
+            EventMasterRPC.updateCache(context, action);            
             var json = {
                 "event": "sendToPropertyInspector",
                 "context": context,
@@ -1131,8 +1309,9 @@ var eventMasterAction = {
             settingsCache[context] = settings;
         }
 
-        EventMasterRPC.updateCache(context);
-        eventMasterAction.testEventMasterConnection( context );
+        EventMasterRPC.updateCache(context, action);
+       
+       
     },
 
     SetTitle: function (context, title) {
@@ -1167,6 +1346,51 @@ var eventMasterAction = {
 
         websocket.send(JSON.stringify(json));
     },
+
+    UpdateActionIcons: function(action, context, settings) {
+
+        var pathToFile= "";
+        
+        // check the status of sources and indicate there is an error being reported for
+        // cutlayer, cutaux, freeze, and unfreeze
+        if( action == "com.barco.eventmaster.cutlayer") {
+            if(settings.cutLayer != null ) {
+                if( settings.cutLayer.srcInfo != null )
+                    sourceId = settings.cutLayer.srcInfo.id;
+                
+                if( settings.cutLayer.layerMode != null ) {
+                    //PVW
+                    if( settings.cutLayer.layerMode == 0 ){
+                        pathToFile = "/images/cutLayerDefaultImage-PVW.png"    
+                    } 
+                    else {
+                        pathToFile = "/images/cutLayerDefaultImage.png"    
+                    }
+                }
+            }
+        }
+        else if( action == "com.barco.eventmaster.cutaux") {
+            if(settings.cutAux != null ) {
+                if( settings.cutAux.srcInfo != null )
+                    sourceId = setting.cutAux.srcInfo.id;
+
+                    if( settings.cutAux.cutMode != null ) {
+                        //PVW
+                        if( settings.cutMode == 0 ){
+                            pathToFile = "/images/cutAuxDefaultImage-PVW.png"    
+                        } 
+                        else {
+                            pathToFile = "/images/cutAuxDefaultImage.png"    
+                        }
+                    }
+            }
+        }
+
+        // check cutlayer and cutaux and determine whether it is set to preview or program for cutlayer and cutaux
+        // show blue colored icon for PVW and red for PGM
+        if( pathToFile.length > 0 )
+            loadAndSetImage( context, pathToFile );
+    }
 };
 
 
@@ -1264,7 +1488,7 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             }
                         
             if( changed  ) {
-                EventMasterRPC.updateCache(context);
+                EventMasterRPC.updateCache(context, action);
                 eventMasterAction.testEventMasterConnection( context );
             }
         }
