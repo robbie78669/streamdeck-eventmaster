@@ -767,7 +767,7 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-			var data = JSON.stringify({"params":{"id":"0"}, "method":"listPresets", "id":"1234", "jsonrpc":"2.0"});
+			var data = JSON.stringify({"params":{}, "method":"listPresets", "id":"1234", "jsonrpc":"2.0"});
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -834,7 +834,7 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-			var data = JSON.stringify({"params":{"id":"0"}, "method":"listCues", "id":"1234", "jsonrpc":"2.0"});
+			var data = JSON.stringify({"params":{}, "method":"listCues", "id":"1234", "jsonrpc":"2.0"});
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -1195,46 +1195,58 @@ var EventMasterRPC = {
         this.getPresets(context);
         this.getCues(context);
        
-        var sourceId = -1;
-        if (action == "com.barco.eventmaster.freeze"){
-            if(settings.freeze != null )
-                sourceId = settings.freeze.id;           
-        }    
-        else if (action == "com.barco.eventmaster.unfreeze"){
-            if(settings.unfreeze != null )
-                sourceId = settings.unfreeze.id;
-        } 
-        else if( action == "com.barco.eventmaster.cutlayer") {
-            if(settings.cutLayer != null ) {
-                if( settings.cutLayer.srcInfo != null )
-                    sourceId = settings.cutLayer.srcInfo.id;
-                
-                if( settings.cutLayer.layerMode != null ) {
-                    //PVW
-                    if( settings.cutLayer.layerMode == 0 ){
-                        pathToFile = "/images/cutLayerDefaultImage-PVW.png"    
+        var settings = settingsCache[context];
+
+        if( settings != null ) {
+
+            var sourceId = -1;
+            var pathToFile = null;
+            
+            if (action == "com.barco.eventmaster.freeze"){
+                if(settings.freeze != null )
+                    sourceId = settings.freeze.id;           
+            }    
+            else if (action == "com.barco.eventmaster.unfreeze"){
+                if(settings.unfreeze != null )
+                    sourceId = settings.unfreeze.id;
+            } 
+            else if ( action == "com.barco.eventmaster.recallpreset"){
+                if(settings.activatePreset != null ) {
+                    
+                    if( settings.activatePreset.presetMode == 0 ){
+                        pathToFile = "images/cutLayerDefaultImage-PVW.png"    
                     } 
                     else {
-                        pathToFile = "/images/cutLayerDefaultImage.png"    
+                        pathToFile = "images/cutLayerDefaultImage.png"    
                     }
                 }
             }
-        }
-        else if( action == "com.barco.eventmaster.cutaux") {
-            if(settings.cutAux != null ) {
-                if( settings.cutAux.srcInfo != null )
-                    sourceId = setting.cutAux.srcInfo.id;
-
-                    if( settings.cutAux.cutMode != null ) {
-                        //PVW
-                        if( settings.cutMode == 0 ){
-                            pathToFile = "/images/cutAuxDefaultImage-PVW.png"    
-                        } 
-                        else {
-                            pathToFile = "/images/cutAuxDefaultImage.png"    
-                        }
+            else if( action == "com.barco.eventmaster.cutlayer") {
+                if(settings.cutLayer != null ) {
+                    sourceId = settings.cutLayer.srcInfo.id;
+                    
+                    if( settings.cutLayer.layerMode == 0 ){
+                        pathToFile = "images/cutLayerDefaultImage-PVW.png"    
+                    } 
+                    else {
+                        pathToFile = "images/cutLayerDefaultImage.png"    
                     }
+                }
             }
+            else if( action == "com.barco.eventmaster.cutaux") {
+                if(settings.cutAux != null ) {
+                   sourceId = settings.cutAux.srcInfo.id;
+                   //PVW
+                   if( settings.cutAux.auxMode == 0 ){
+                        pathToFile = "images/cutAuxDefaultImage-PVW.png"    
+                    } 
+                    else {
+                        pathToFile = "images/cutAuxDefaultImage.png"    
+                    }
+                }
+            }
+            if( pathToFile != null )
+                eventMasterAction.loadAndSetImage(context, pathToFile) 
         }
 	},
 };
@@ -1347,53 +1359,92 @@ var eventMasterAction = {
         websocket.send(JSON.stringify(json));
     },
 
-    UpdateActionIcons: function(action, context, settings) {
+    
+    setImage: function (context, imgData) {
 
-        var pathToFile= "";
+        var json = {
+            'event': 'setImage',
+            'context': context,
+            'payload': {
+                'image': imgData,
+                'target': DestinationEnum.HARDWARE_AND_SOFTWARE
+            }
+        }
+        websocket.send(JSON.stringify(json));
+    },
         
-        // check the status of sources and indicate there is an error being reported for
-        // cutlayer, cutaux, freeze, and unfreeze
-        if( action == "com.barco.eventmaster.cutlayer") {
-            if(settings.cutLayer != null ) {
-                if( settings.cutLayer.srcInfo != null )
-                    sourceId = settings.cutLayer.srcInfo.id;
-                
-                if( settings.cutLayer.layerMode != null ) {
-                    //PVW
-                    if( settings.cutLayer.layerMode == 0 ){
-                        pathToFile = "/images/cutLayerDefaultImage-PVW.png"    
-                    } 
-                    else {
-                        pathToFile = "/images/cutLayerDefaultImage.png"    
-                    }
+        
+
+    loadAndSetImage: function (context, imageNameOrArr) {
+    
+        this.loadImage(imageNameOrArr, function (data) {
+            var json = {
+                'event': 'setImage',
+                'context': context,
+                'payload': {
+                    'image': data,
+                    'target': DestinationEnum.HARDWARE_AND_SOFTWARE
                 }
-            }
-        }
-        else if( action == "com.barco.eventmaster.cutaux") {
-            if(settings.cutAux != null ) {
-                if( settings.cutAux.srcInfo != null )
-                    sourceId = setting.cutAux.srcInfo.id;
+            };
+            websocket.send(JSON.stringify(json));
+        });
+    },
 
-                    if( settings.cutAux.cutMode != null ) {
-                        //PVW
-                        if( settings.cutMode == 0 ){
-                            pathToFile = "/images/cutAuxDefaultImage-PVW.png"    
-                        } 
-                        else {
-                            pathToFile = "/images/cutAuxDefaultImage.png"    
-                        }
+    loadImage: function (inUrl, callback, inCanvas, inFillcolor) {
+        /** Convert to array, so we may load multiple images at once */
+        const aUrl = !Array.isArray(inUrl) ? [inUrl] : inUrl;
+        const canvas = inCanvas && inCanvas instanceof HTMLCanvasElement
+            ? inCanvas
+            : document.createElement('canvas');
+        var imgCount = aUrl.length - 1;
+        const imgCache = {};
+    
+        var ctx = canvas.getContext('2d');
+        ctx.globalCompositeOperation = 'source-over';
+    
+        for (let url of aUrl) {
+            let image = new Image();
+            let cnt = imgCount;
+            let w = 144, h = 144;
+    
+            image.onload = function () {
+                imgCache[url] = this;
+                // look at the size of the first image
+                if (url === aUrl[0]) {
+                    canvas.width = this.naturalWidth; // or 'width' if you want a special/scaled size
+                    canvas.height = this.naturalHeight; // or 'height' if you want a special/scaled size
+                }
+                // if (Object.keys(imgCache).length == aUrl.length) {
+                if (cnt < 1) {
+                    if (inFillcolor) {
+                        ctx.fillStyle = inFillcolor;
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
-            }
+                    // draw in the proper sequence FIFO
+                    aUrl.forEach(e => {
+                        if (!imgCache[e]) {
+                            console.warn(imgCache[e], imgCache);
+                        }
+    
+                        if (imgCache[e]) {
+                            ctx.drawImage(imgCache[e], 0, 0);
+                            ctx.save();
+                        }
+                    });
+    
+                    callback(canvas.toDataURL('image/png'));
+                    // or to get raw image data
+                    // callback && callback(canvas.toDataURL('image/png').replace(/^data:image\/(png|jpg);base64,/, ''));
+                }
+            };
+    
+            imgCount--;
+            image.src = url;
         }
-
-        // check cutlayer and cutaux and determine whether it is set to preview or program for cutlayer and cutaux
-        // show blue colored icon for PVW and red for PGM
-        if( pathToFile.length > 0 )
-            loadAndSetImage( context, pathToFile );
-    }
+    },
 };
 
-
+    
 
 function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, inInfo)
 {

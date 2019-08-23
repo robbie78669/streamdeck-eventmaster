@@ -71,49 +71,105 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var screenDestinations = payload["screenDestinations"];
             var auxDestinations = payload["auxDestinations"];
             var destContent = payload["destinationContent"];
+            var presets = payload["presets"];
+            var cues = payload["cues"];
             
-            if( action == "com.barco.eventmaster.recallPreset"){
+            if( action == "com.barco.eventmaster.recallpreset"){
                 var preset_payload = payload['activatePreset'];
-                if( preset_payload != null ) {
-                    var presetNameElement = document.getElementById('presetName');
-                    presetNameElement.value = preset_payload.presetName;
-                    
-                    var presetModeElement = document.getElementsByName('presetMode');
-                    if( preset_payload.presetMode == null ) {
-                        if( presetModeElement != null ) 
-                            setChecked(presetModeElement, "presetMode_toPreview");
+                var presetNameElement = document.getElementById('presetName');
+                
+                if( presetNameElement != null ) {
+
+                    while (presetNameElement.length)
+                      presetNameElement.remove(0);
+
+                    if( presets ) {
+
+                        var presetElement = presetNameElement.appendChild( new Option("") );
+                        presetElement.value = -1;
+                        presetElement.selected = true;
+
+                        if( preset_payload == null ) {
+                            preset_payload = {id: -1, name: ""};
+                        }
+
+                        for(var i=0; i<presets.length; i++) {
+                            var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
+                            presetElement.value = presets[i].id;
+                        }
+
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<presetNameElement.length; i++ ){
+                            if(presetNameElement[i].value == preset_payload.id ) {
+                                presetNameElement[i].selected = true;
+                            }
+                        }
+                    }       
+                } 
+                
+                
+                var presetModeElement = document.getElementsByName('presetMode');
+                if( preset_payload.presetMode == null ) {
+                    if( presetModeElement != null ) 
+                        setChecked(presetModeElement, "presetMode_toPreview");
+                }
+                else {
+                    if( preset_payload.presetMode == 0  ) {
+                        setChecked(presetModeElement, "presetMode_toPreview");
                     }
                     else {
-                        if( preset_payload.presetMode == 0  ) {
-                            setChecked(presetModeElement, "presetMode_toPreview");
-                        }
-                        else {
-                            setChecked(presetModeElement, "presetMode_toProgram");
-                        }
+                        setChecked(presetModeElement, "presetMode_toProgram");
                     }
                 }
+
             }
             else if( action == "com.barco.eventmaster.recallCue") {
                 var cue_payload = payload['activateCue'];
-                if( cue_payload != null ) {
-                    var cueNameElement = document.getElementById('cueName');
-                    cueNameElement.value = cue_payload.cueName;
-             
-                    var cueModeElement = document.getElementsByName('cueMode');
-                    if( cue_payload.cueMode == null ) {
-                        if( cueModeElement = null ) 
-                            setChecked(cueModeElement, "cueMode_Play");
+                var cueNameElement = document.getElementById('cueName');
+
+                if( cueNameElement != null ) {
+
+                    while (cueNameElement.length)
+                    cueNameElement.remove(0);
+
+                    if( cues ) {
+
+                        var cueElement = cueNameElement.appendChild( new Option("") );
+                        cueElement.value = -1;
+                        cueElement.selected = true;
+
+                        if( cue_payload == null ) {
+                            cue_payload = {id: -1, name: ""};
+                        }
+
+                        for(var i=0; i<cues.length; i++) {
+                            var cueElement = cueNameElement.appendChild( new Option(cues[i].Name) );
+                            cueElement.value = cues[i].id;
+                        }
+
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<cueNameElement.length; i++ ){
+                            if(cueNameElement[i].value == cue_payload.id ) {
+                                cueNameElement[i].selected = true;
+                            }
+                        }
+                    }       
+                } 
+                
+                var cueModeElement = document.getElementsByName('cueMode');
+                if( cue_payload.cueMode == null ) {
+                    if( cueModeElement = null ) 
+                        setChecked(cueModeElement, "cueMode_Play");
+                }
+                else {
+                    if( cue_payload.cueMode == 0  ) {
+                        setChecked(cueModeElement, "cueMode_Play");
+                    }
+                    else if( cue_payload.cueMode == 1 ) {
+                        setChecked(cueModeElement, "cueMode_Pause");
                     }
                     else {
-                        if( cue_payload.cueMode == 0  ) {
-                            setChecked(cueModeElement, "cueMode_Play");
-                        }
-                        else if( cue_payload.cueMode == 1 ) {
-                            setChecked(cueModeElement, "cueMode_Pause");
-                        }
-                        else {
-                            setChecked(cueModeElement, "cueMode_Stop");
-                        }
+                        setChecked(cueModeElement, "cueMode_Stop");
                     }
                 }
             }
@@ -550,10 +606,12 @@ function updateSettings() {
     /** activatePreset */
     var activatePreset_presetNameElement = document.getElementById('presetName');
     var activatePreset_presetModeElement = document.getElementsByName('presetMode');
-    if( activatePreset_presetNameElement != null){
-        var activatePreset = {presetName: "null", presetMode: 0};
+    if( activatePreset_presetNameElement != null &&  activatePreset_presetNameElement.selectedIndex >= 0){
+        var activatePreset = {presetName: "null", presetMode: 0, id: -1};
 
-        activatePreset.presetName = activatePreset_presetNameElement.value;
+        var selectedIndex = activatePreset_presetNameElement.selectedIndex;
+        activatePreset.presetName = activatePreset_presetNameElement[selectedIndex].label;
+        activatePreset.id = activatePreset_presetNameElement[selectedIndex].value;
 
         if( activatePreset_presetModeElement != null ) {
             var presetMode=getChecked(activatePreset_presetModeElement);
@@ -569,10 +627,12 @@ function updateSettings() {
     /** activateCue **/
     var activateCue_cueNameElement = document.getElementById('cueName');
     var activateCue_cueModeElement = document.getElementsByName('cueMode');
-    if( activateCue_cueNameElement != null) {
-        var activateCue = {cueName: "null", cueMode: 0 };
+    if( activateCue_cueNameElement != null && activateCue_cueNameElement.selectedIndex >= 0) {
+        var activateCue = {cueName: "null", cueMode: 0, id: -1 };
 
-        activateCue.cueName = activateCue_cueNameElement.value
+        var selectedIndex = activateCue_cueNameElement.selectedIndex;
+        activateCue.cueName = activateCue_cueNameElement[selectedIndex].label;
+        activateCue.id = activateCue_cueNameElement[selectedIndex].value;
 
         if( activateCue_cueModeElement != null ) {
             var cueMode=getChecked(activateCue_cueModeElement);

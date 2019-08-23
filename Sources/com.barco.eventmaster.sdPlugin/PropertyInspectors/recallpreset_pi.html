@@ -23,7 +23,7 @@
             </div>
             <div class="sdpi-item" title="This field lets you enter the preset name.">
                 <div class="sdpi-item-label">Preset Name</div> 
-                <input id="presetName" class="sdpi-item-value" value="" placeholder="e.g. 1.0" oninput="updateSettings()">
+                <select class="sdpi-item-value select" id="presetName" onchange="updateSettings()"></select>
             </div>
             <div type="radio" id="presetMode" class="sdpi-item" onchange="updateSettings()">
                 <div class="sdpi-item-label">Recall To:</div>
