@@ -123,7 +123,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 }
 
             }
-            else if( action == "com.barco.eventmaster.recallCue") {
+            else if( action == "com.barco.eventmaster.recallcue") {
                 var cue_payload = payload['activateCue'];
                 var cueNameElement = document.getElementById('cueName');
 

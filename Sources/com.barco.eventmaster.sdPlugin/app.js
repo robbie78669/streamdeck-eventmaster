@@ -1122,7 +1122,18 @@ var EventMasterRPC = {
                 }
             }
 
-            var layers = [{ "id": parseInt(layerId), "LastSrcIdx": parseInt(settings.cutLayer.srcInfo.id), "PvwMode": 1-settings.cutLayer.layerMode, "PgmMode": settings.cutLayer.layerMode }];
+            var layers;
+
+            //PGM
+            if( settings.cutLayer.layerMode == 1 )   {
+                layers = [{ "id": parseInt(layerId), "LastSrcIdx": parseInt(settings.cutLayer.srcInfo.id),  "PgmMode":1 }];
+            }
+                
+            //PVW
+            else {
+                layers = [{ "id": parseInt(layerId), "LastSrcIdx": parseInt(settings.cutLayer.srcInfo.id), "PvwMode": 1 }];
+            }
+                
             var content = {"id": parseInt(settings.cutLayer.destInfo.id), "Layers": layers};
 
             this.changeContent(context, content);
@@ -1144,21 +1155,17 @@ var EventMasterRPC = {
             ( settings.cutAux.destInfo && settings.cutAux.destInfo.id != -1 ) &&
             ( settings.cutAux.srcInfo && settings.cutAux.srcInfo.id != -1 ) ) {
                 
-            // Look for the layer Id in the destationContents..
-            // Check to see whether it is a mix layer
-            // if so, check the flag of whether that layer is on preview / program and choose the layer based
-            // on the layerMode (preview or program)
             var PvwLastSrcIndex = -1;
             var PgmLastSrcIndex = -1;
+            var content;
 
-            if (settings.cutAux.cutMode == 0)
-                PvwLastSrcIndex = settings.cutAux.srcInfo.id;
-            else
-                PgmLastSrcIndex = settings.cutAux.srcInfo.id;
-           
-            var content = { "id": parseInt(settings.cutAux.destInfo.id), 
-                            "PvwLastSrcIndex":parseInt(settings.cutAux.srcInfo.id), 
-                            "PgmLastSrcIndex":parseInt(settings.cutAux.srcInfo.id)};
+            if (settings.cutAux.auxMode == 0) {
+                content = { "id": parseInt(settings.cutAux.destInfo.id), "PvwLastSrcIndex":parseInt(settings.cutAux.srcInfo.id)};
+            }
+                
+            else {
+                content = { "id": parseInt(settings.cutAux.destInfo.id), "PgmLastSrcIndex":parseInt(settings.cutAux.srcInfo.id)};
+            }
 
             this.changeAuxContent(context, content);
         }
@@ -1214,10 +1221,10 @@ var EventMasterRPC = {
                 if(settings.activatePreset != null ) {
                     
                     if( settings.activatePreset.presetMode == 0 ){
-                        pathToFile = "images/cutLayerDefaultImage-PVW.png"    
+                        pathToFile = "images/activatePresetDefaultImage-PVW.png"    
                     } 
                     else {
-                        pathToFile = "images/cutLayerDefaultImage.png"    
+                        pathToFile = "images/activatePresetDefaultImage.png"    
                     }
                 }
             }
@@ -1334,7 +1341,7 @@ var eventMasterAction = {
         var settings = settingsCache[context];
         if( settings ) {
             settings.status = status;
-            eventMasterAction.SetSettings(context, settings);
+            //eventMasterAction.SetSettings(context, settings);
         
             var json = {
                 "event": "sendToPropertyInspector",
