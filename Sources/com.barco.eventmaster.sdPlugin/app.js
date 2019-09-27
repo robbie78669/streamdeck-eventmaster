@@ -843,125 +843,7 @@ var EventMasterRPC = {
         }
 	
     },
-    
-	listContent: function( context, destinationId ) {
 
-        var settings = settingsCache[context];
-        if( settings == null ) {
-            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("listContent error: settingCache is null!");
-            return;
-        }
-
-        ipAddress = settings.ipAddress;
-		if( isValidIp( ipAddress ) ) {		
-			var url = "http://"+ipAddress+":9999";
-
-			var xhr = new XMLHttpRequest();
-			xhr.open("POST", url);
-			xhr.setRequestHeader("Content-type", "application/json");
-
-			xhr.onload = function (e) { 
-				if (xhr.readyState === 4 ) {
-					if( xhr.status === 200) {
-                        eventMasterAction.SetStatus(context, "Connection Established");					
-                        var fullResponse = JSON.parse(xhr.response);
-                        console.log("listContent response: "+xhr.response);
-
-                        if (fullResponse.result.success == 0 ) {
-                            if( settings.destinationContents == null )
-                                settings.destinationContents = [];
-
-                            settings.destinationContents[destinationId] = fullResponse.result.response;
-                            var destContent= fullResponse.result.response;
-                             
-                            console.log("dest Content");
-                            console.log("  id:" + destContent.id);
-                            console.log("  Name:" + destContent.Name);
-                    
-                            var transitions = destContent.Transition;
-                            for (var i = 0; i < transitions.length; i++) {
-                                console.log("   Transition #"+(i+1));
-                                console.log("     id:"+transitions[i].id);
-                                console.log("     TransTime:"+transitions[i].TransTime);
-                                console.log("     TransPos:"+transitions[i].TransPos);
-                            }
-                            
-                            var bGLayers = destContent.BGLyr;
-                            for (var i = 0; i < bGLayers.length; i++) {
-                                console.log("BGLayer #"+(i+1));
-                                console.log("   id:" + bGLayers[i].id);
-                                console.log("   LastBGSourceIndex:" + bGLayers[i].LastBGSourceIndex);
-                                console.log("   BGShowMatte:" + bGLayers[i].BGShowMatte);
-                                
-                                var bGColors = bGLayers[i].BGColor;
-                                for (var j = 0; j < bGColors.length; j++) {
-                                    console.log("BGColor #"+(j+1));
-                                    console.log("   id:" + bGColors[j].id);
-                                    console.log("   Red:" + bGColors[j].Red);
-                                    console.log("   Green:" + bGColors[j].Green);
-                                    console.log("   Blue:" + bGColors[j].Blue);
-                                }
-                            }
-
-                            var layers = destContent.Layers;
-                            for (var i = 0; i < layers.length; i++) {
-                                console.log("Layer #"+(i+1));
-                                console.log("   id:" + layers[i].id);
-                                console.log("   Name:"+ layers[i].Name);
-                                console.log("   LastSrcIdx:" + layers[i].LastSrcIdx);
-                                console.log("   PvwMode:" + layers[i].PvwMode);
-                                console.log("   PgmMode:" + layers[i].PgmMode);
-                                console.log("   Capacity:" + layers[i].Capacity);
-                                console.log("   PvwZOrder:" + layers[i].PvwZOrder);
-                                console.log("   PgmZOrder:" + layers[i].PgmZOrder);
-
-                                var windows = layers[i].Window;
-                                for (var j = 0; j < windows.length; j++) {
-                                    console.log("   Window #:"+(j+1));
-                                    console.log("     HPos:" + windows[j].HPos);
-                                    console.log("     VPos:" + windows[j].VPos);
-                                    console.log("     HSize:" + windows[j].HSize);
-                                    console.log("     VSize:" + windows[j].VSize);
-                                }
-
-                                var masks = layers[i].Mask;
-                                for (var j = 0; j < masks.length; j++) {
-                                    console.log("   Mask #"+(j+1));
-                                    console.log("   	id:"+masks[j].id);
-                                    console.log("   	Top:"+masks[j].Top);
-                                    console.log("   	Left:"+masks[j].Left);
-                                    console.log("   	Right:"+masks[j].Right);
-                                    console.log("   	Bottom:"+masks[j].Bottom);
-                                }
-                                
-                            }								
-
-                            console.log("--------------------------------------------------------");
-                        }
-					}
-					else {
-                        console.error("listContent error: "+xhr.responseText);
-                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-					}
-				}
-			};
-
-			xhr.onerror = function (e) {
-                console.error("listContent error: "+xhr.responseText);
-                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-			};
-
-			var data = JSON.stringify({"params":{"id":destinationId}, "method":"listContent", "id":"1234", "jsonrpc":"2.0"});
-
-			xhr.send(data);
-			console.log("sent: "+data);
-        }
-        else{
-            console.error("listContent: Invalid IP Address: " + ipAddress);
-        }
-    },
-    
     changeContent: function(context, content) {
         var settings = settingsCache[context];
         if( settings == null ) {
@@ -1085,32 +967,38 @@ var EventMasterRPC = {
                     if (settings.destinationContents[destId].Layers[i].id == settings.cutLayer.layerInfo.id ) {
                         var layerName = settings.destinationContents[destId].Layers[i].Name;
                         var onProgram = settings.destinationContents[destId].Layers[i].PgmMode;
+                        var onPreview = settings.destinationContents[destId].Layers[i].PvwMode;
 
-                        // if the name has -A in it.. 
+                        
+                        // If a mix layer 
                         if( layerName.includes ("-A")){
-                            // if the current layer is on PGM..
-                            if(onProgram) {
-                                // and I want to cut layer to PGM
-                                if(settings.cutLayer.layerMode == 1) {
-                                    // use this layer.
+                            // if intended for PVW
+                            if( settings.cutLayer.layerMode == 0 ) {
+                                
+                                if(!onProgram && !onPreview) {
                                     layerId = settings.destinationContents[destId].Layers[i].id;
-                                }
-                                else {
+                                 }
+                                 else if( onProgram ) {
                                     layerId = settings.destinationContents[destId].Layers[i].id+1;
+                                 }
+                                else if( onPreview ) {
+                                    layerId = settings.destinationContents[destId].Layers[i].id;
                                 }
                             }
-                            // layer in PVW
-                            else {
-                                // if want to cut layer to pvw
-                                if(settings.cutLayer.layerMode == 0) {
-                                    // use this layer.
+                            // or is it intended for PGM
+                            else if( settings.cutLayer.layerMode == 1) {
+                                if(!onProgram && !onPreview) {
                                     layerId = settings.destinationContents[destId].Layers[i].id;
                                 }
-                                else {
+                                else if( onProgram ) {
+                                    layerId = settings.destinationContents[destId].Layers[i].id;
+                                }
+                                else if( onPreview ) {
                                     layerId = settings.destinationContents[destId].Layers[i].id+1;
                                 }
                             }
                         }
+                        // a non mixing layer
                         else {
                             // nothing to do with non mix layers.
                             layerId = settings.cutLayer.layerInfo.id;
@@ -1173,6 +1061,145 @@ var EventMasterRPC = {
             console.error( "Error: cutAux() is missing some data! " + settings.cutAux );
         }
     },
+    
+	listContent: function( context, destinationId ) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("listContent error: settingCache is null!");
+            return;
+        }
+
+        ipAddress = settings.ipAddress;
+		if( isValidIp( ipAddress ) ) {		
+			var url = "http://"+ipAddress+":9999";
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-type", "application/json");
+
+			xhr.onload = function (e) { 
+				if (xhr.readyState === 4 ) {
+					if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");					
+                        var fullResponse = JSON.parse(xhr.response);
+                        console.log("listContent response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+                            if( settings.destinationContents == null )
+                                settings.destinationContents = [];
+
+                            settings.destinationContents[destinationId] = fullResponse.result.response;
+                            var destContent= fullResponse.result.response;
+                             
+                            console.log("dest Content");
+                            console.log("  id:" + destContent.id);
+                            console.log("  Name:" + destContent.Name);
+                    
+                            var transitions = destContent.Transition;
+                            for (var i = 0; i < transitions.length; i++) {
+                                console.log("   Transition #"+(i+1));
+                                console.log("     id:"+transitions[i].id);
+                                console.log("     TransTime:"+transitions[i].TransTime);
+                                console.log("     TransPos:"+transitions[i].TransPos);
+                            }
+                            
+                            var bGLayers = destContent.BGLyr;
+                            for (var i = 0; i < bGLayers.length; i++) {
+                                console.log("BGLayer #"+(i+1));
+                                console.log("   id:" + bGLayers[i].id);
+                                console.log("   LastBGSourceIndex:" + bGLayers[i].LastBGSourceIndex);
+                                console.log("   BGShowMatte:" + bGLayers[i].BGShowMatte);
+                                
+                                var bGColors = bGLayers[i].BGColor;
+                                for (var j = 0; j < bGColors.length; j++) {
+                                    console.log("BGColor #"+(j+1));
+                                    console.log("   id:" + bGColors[j].id);
+                                    console.log("   Red:" + bGColors[j].Red);
+                                    console.log("   Green:" + bGColors[j].Green);
+                                    console.log("   Blue:" + bGColors[j].Blue);
+                                }
+                            }
+
+                            var layers = destContent.Layers;
+                            for (var i = 0; i < layers.length; i++) {
+                                console.log("Layer #"+(i+1));
+                                console.log("   id:" + layers[i].id);
+                                console.log("   Name:"+ layers[i].Name);
+                                console.log("   LastSrcIdx:" + layers[i].LastSrcIdx);
+                                console.log("   PvwMode:" + layers[i].PvwMode);
+                                console.log("   PgmMode:" + layers[i].PgmMode);
+                                console.log("   Capacity:" + layers[i].Capacity);
+                                console.log("   PvwZOrder:" + layers[i].PvwZOrder);
+                                console.log("   PgmZOrder:" + layers[i].PgmZOrder);
+
+                                var windows = layers[i].Window;
+                                for (var j = 0; j < windows.length; j++) {
+                                    console.log("   Window #:"+(j+1));
+                                    console.log("     HPos:" + windows[j].HPos);
+                                    console.log("     VPos:" + windows[j].VPos);
+                                    console.log("     HSize:" + windows[j].HSize);
+                                    console.log("     VSize:" + windows[j].VSize);
+                                }
+
+                                var masks = layers[i].Mask;
+                                for (var j = 0; j < masks.length; j++) {
+                                    console.log("   Mask #"+(j+1));
+                                    console.log("   	id:"+masks[j].id);
+                                    console.log("   	Top:"+masks[j].Top);
+                                    console.log("   	Left:"+masks[j].Left);
+                                    console.log("   	Right:"+masks[j].Right);
+                                    console.log("   	Bottom:"+masks[j].Bottom);
+                                }
+                                
+                            }								
+
+                            console.log("--------------------------------------------------------");
+
+                            console.log("checking pendingAction state..");
+                            
+                            if( settings["pendingCutAction"] ==  "com.barco.eventmaster.cutlayer" ) {
+                                console.log("pendingCutLayer");
+                            
+                                settings["pendingCutAction"]="";
+                                EventMasterRPC.cutLayer(context);
+                                
+                            
+                            }
+                            if( settings["pendingCutAuxAction"] ==  "com.barco.eventmaster.cutaux") {
+                                console.log("pendingCutAux");
+                                
+                                settings["pendingCutAuxAction"]="";
+                                EventMasterRPC.cutAux(context);
+                                
+                            }
+                        }
+					}
+					else {
+                        console.error("listContent error: "+xhr.responseText);
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+					}
+				}
+			};
+
+			xhr.onerror = function (e) {
+                console.error("listContent error: "+xhr.responseText);
+                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+			};
+
+			var data = JSON.stringify({"params":{"id":destinationId}, "method":"listContent", "id":"1234", "jsonrpc":"2.0"});
+
+			xhr.send(data);
+			console.log("sent: "+data);
+        }
+        else{
+            console.error("listContent: Invalid IP Address: " + ipAddress);
+        }
+    },
+    
+ 
+
 
 
 	getAllDestinationContent: function(context) {
@@ -1206,18 +1233,9 @@ var EventMasterRPC = {
 
         if( settings != null ) {
 
-            var sourceId = -1;
             var pathToFile = null;
-            
-            if (action == "com.barco.eventmaster.freeze"){
-                if(settings.freeze != null )
-                    sourceId = settings.freeze.id;           
-            }    
-            else if (action == "com.barco.eventmaster.unfreeze"){
-                if(settings.unfreeze != null )
-                    sourceId = settings.unfreeze.id;
-            } 
-            else if ( action == "com.barco.eventmaster.recallpreset"){
+                         
+            if ( action == "com.barco.eventmaster.recallpreset"){
                 if(settings.activatePreset != null ) {
                     
                     if( settings.activatePreset.presetMode == 0 ){
@@ -1229,9 +1247,7 @@ var EventMasterRPC = {
                 }
             }
             else if( action == "com.barco.eventmaster.cutlayer") {
-                if(settings.cutLayer != null ) {
-                    sourceId = settings.cutLayer.srcInfo.id;
-                    
+                if(settings.cutLayer != null  ) {
                     if( settings.cutLayer.layerMode == 0 ){
                         pathToFile = "images/cutLayerDefaultImage-PVW.png"    
                     } 
@@ -1241,8 +1257,7 @@ var EventMasterRPC = {
                 }
             }
             else if( action == "com.barco.eventmaster.cutaux") {
-                if(settings.cutAux != null ) {
-                   sourceId = settings.cutAux.srcInfo.id;
+                if(settings.cutAux != null  ) {
                    //PVW
                    if( settings.cutAux.auxMode == 0 ){
                         pathToFile = "images/cutAuxDefaultImage-PVW.png"    
@@ -1311,10 +1326,16 @@ var eventMasterAction = {
                 EventMasterRPC.unfreeze(context);
             } 
             else if( action == "com.barco.eventmaster.cutlayer") {
-                EventMasterRPC.cutLayer(context);
+                // set pending flag - we need current content's state but it is async so must wait for the
+                // return of listContents.  
+                EventMasterRPC.getAllDestinationContent(context);
+
+                settings["pendingCutAction"] = action;
             }
             else if( action == "com.barco.eventmaster.cutaux") {
-                EventMasterRPC.cutAux(context);
+                EventMasterRPC.getAllDestinationContent(context);
+
+                settings["pendingCutAuxAction"] = action
             }
         }
     },
@@ -1327,7 +1348,22 @@ var eventMasterAction = {
         if(settings != null ){
             settingsCache[context] = settings;
         }
+        settings["pendingCutAction"]==""
+        settings["pendingCutAuxAction"]==""
+            
+        EventMasterRPC.updateCache(context, action);
+       
+       
+    },
 
+    onWillDisappear: function (action, context, settings, coordinates) {
+        if(settings != null ){
+            settingsCache[context] = settings;
+        }
+        settings["pendingCutAction"]==""
+        settings["pendingCutAuxAction"]==""
+        
+            
         EventMasterRPC.updateCache(context, action);
        
        
@@ -1483,25 +1519,39 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
         var action = jsonObj['action'];
         var context = jsonObj['context'];
         var jsonPayload = jsonObj['payload'] || {};
+
         
         if(event == "keyDown") {
             var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
             var userDesiredState = jsonPayload['userDesiredState'];
+            
             eventMasterAction.onKeyDown(action, context, settings, coordinates, userDesiredState);
         }
         else if(event == "keyUp") {
+            EventMasterRPC.getAllDestinationContent(context);
+
             var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
             var userDesiredState = jsonPayload['userDesiredState'];
+            
             eventMasterAction.onKeyUp(action, context, settings, coordinates, userDesiredState);
         }
         else if(event == "willAppear") {
             var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
+            
             eventMasterAction.onWillAppear(action, context, settings, coordinates);
         }
+        else if(event == "willDisappear") {
+            var settings = jsonPayload['settings'];
+            var coordinates = jsonPayload['coordinates'];
+
+            eventMasterAction.onWillDisappear(action, context, settings, coordinates);
+        }
         else if (event == "propertyInspectorDidAppear")  {
+            EventMasterRPC.getAllDestinationContent(context);
+
             var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
             eventMasterAction.onPropertyInspectorDidAppear(action, context, settings, coordinates);
