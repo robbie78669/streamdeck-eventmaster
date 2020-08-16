@@ -1637,9 +1637,10 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             }
                         
             if( changed  ) {
-                eventMasterAction.SetSettings(context, settings);
+                SetSettings(context,settings);
                 EventMasterRPC.updateCache(context, action);
                 eventMasterAction.testEventMasterConnection( context );
+                
             }
         }
     };

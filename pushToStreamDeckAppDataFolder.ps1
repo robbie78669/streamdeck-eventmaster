@@ -1,1 +1,1 @@
-Copy-Item  "Sources" -Destination "C:\Users\robbi\AppData\Roaming\Elgato\StreamDeck\Plugins\com.barco.eventmaster.sdPlugin" -Recurse -Force
+Copy-Item  "Sources\com.barco.eventmaster.sdPlugin" -Destination "C:\Users\robru\AppData\Roaming\Elgato\StreamDeck\Plugins\" -Recurse -Force

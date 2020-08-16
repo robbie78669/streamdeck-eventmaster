@@ -56,13 +56,13 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action recalls the next preset", 
+      "Tooltip": "This action recalls the next preset into PVW", 
       "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
       "UUID": "com.barco.eventmaster.recallnextpreset"
     },
     {
       "Icon": "images/activateCueActionImage",
-      "Name": "Go Cue", 
+      "Name": "Cue", 
       "States": [
         {
           "Image": "images/activateCueKeyIcon",
@@ -77,7 +77,7 @@
     },
     {
       "Icon": "images/freezeActionImage",
-      "Name": "Freeze", 
+      "Name": "Freeze Input", 
       "States": [
         {
           "Image": "images/freezeKeyIcon",
@@ -86,13 +86,13 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action recalls the freezes a source, BG, Screen Dest, or Aux Dest", 
+      "Tooltip": "This action freezes an input", 
       "PropertyInspectorPath": "PropertyInspectors/freeze_pi.html",
       "UUID": "com.barco.eventmaster.freeze"
     },
     {
       "Icon": "images/unfreezeActionImage",
-      "Name": "UnFreeze", 
+      "Name": "UnFreeze Input", 
       "States": [
         {
           "Image": "images/unfreezeKeyIcon",
@@ -101,7 +101,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action recalls the unfreezes a source, BG, Screen Dest, or Aux Dest", 
+      "Tooltip": "This action unfreezes an input.", 
       "PropertyInspectorPath": "PropertyInspectors/unfreeze_pi.html",
       "UUID": "com.barco.eventmaster.unfreeze"
     },
@@ -143,10 +143,11 @@
   "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
-  "Description": "Requires Event Master v7.0 or higher. Adds Event Master commend support to Stream Deck. Version 2.0 build 134", 
+  "Description": "Requires Event Master v7.1 or higher. Adds Event Master commend support to Stream Deck. Version 2.1 build 134", 
     "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
-  "Version": "2.0.1",
+
+  "Version": "2.2",
   "OS": [
     {
         "Platform": "mac", 
