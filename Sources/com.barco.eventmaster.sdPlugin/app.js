@@ -4,6 +4,7 @@ var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
 var socket = null;
+var debug = true;
 
     
        
@@ -49,7 +50,7 @@ var EventMasterRPC = {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("powerStatus error: settingCache is null!");
+            eventMasterAction.logMessage( context, "powerStatus error: settingCache is null!", 1);
             return;
         }
 
@@ -1267,6 +1268,22 @@ var EventMasterRPC = {
                     }
                 }
             }
+            else if( action == "com.barco.eventmaster.recallcue")
+            {
+                if(settings.activateCue != null  ) {
+                    //play
+                    if( settings.activateCue.cueMode == 0 ){
+                         pathToFile = "images/activateCueDefaultImage.png"    
+                     } 
+                     else if {settings.activateCue.cueMode == 1 ) {
+                         pathToFile = "images/activateCueDefaultImage-Pause.png"    
+                     }
+                     else if {settings.activateCue.cueMode == 2 ) {
+                        pathToFile = "images/activateCueDefaultImage-Stop.png"    
+                    }
+                 }
+            }
+
             if( pathToFile != null )
                 eventMasterAction.loadAndSetImage(context, pathToFile) 
         }
@@ -1415,6 +1432,30 @@ var eventMasterAction = {
         }
         websocket.send(JSON.stringify(json));
     },
+
+    logMessage: function( context, messageStr, errorLevel ) {
+     
+        if (errorLevel == 1 ) {
+            errorLevelStr = "ERROR";
+            textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
+            console.error(textStr);
+        }
+        else {
+            erroLevelStr = "INFO";
+            textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
+            console.log(textStr);
+        }
+
+        if( debug == true || errorLevel == 1) {
+            var json = {
+                'event': 'logMessage',
+                'payload': {
+                    'mesage': textStr,
+                }
+            }
+            websocket.send(JSON.stringify(json));
+        }
+    }
         
         
 

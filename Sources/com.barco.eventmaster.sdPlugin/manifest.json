@@ -146,7 +146,7 @@
   "Description": "Requires Event Master v7.0 or higher. Adds Event Master commend support to Stream Deck. Version 2.0 build 134", 
     "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
-  "Version": "2.0",
+  "Version": "2.0.1",
   "OS": [
     {
         "Platform": "mac", 
