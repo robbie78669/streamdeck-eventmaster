@@ -1275,10 +1275,10 @@ var EventMasterRPC = {
                     if( settings.activateCue.cueMode == 0 ){
                          pathToFile = "images/activateCueDefaultImage.png"    
                      } 
-                     else if {settings.activateCue.cueMode == 1 ) {
+                     else if (settings.activateCue.cueMode == 1 ) {
                          pathToFile = "images/activateCueDefaultImage-Pause.png"    
                      }
-                     else if {settings.activateCue.cueMode == 2 ) {
+                     else if (settings.activateCue.cueMode == 2 ) {
                         pathToFile = "images/activateCueDefaultImage-Stop.png"    
                     }
                  }
@@ -1394,7 +1394,7 @@ var eventMasterAction = {
         var settings = settingsCache[context];
         if( settings ) {
             settings.status = status;
-            //eventMasterAction.SetSettings(context, settings);
+            
         
             var json = {
                 "event": "sendToPropertyInspector",
@@ -1455,7 +1455,7 @@ var eventMasterAction = {
             }
             websocket.send(JSON.stringify(json));
         }
-    }
+    },
         
         
 
@@ -1637,7 +1637,7 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             }
                         
             if( changed  ) {
-                SetSettings(context,settings);
+                eventMasterAction.SetSettings(context, settings)
                 EventMasterRPC.updateCache(context, action);
                 eventMasterAction.testEventMasterConnection( context );
                 
