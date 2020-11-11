@@ -664,15 +664,15 @@ var EventMasterRPC = {
                                     console.log("  OutMapColl:");
                                     var outMapCol = screendestinations[i].DestOutMapCol;
                                     var outMap = outMapCol.DestOutMap;
-                                    for (var i = 0; i < outMap.length; i++) {
-                                        console.log("  DestOutMap #:"+(i+1));
-                                        console.log("    id:" + outMap[i].id);
-                                        console.log("    Name:" + outMap[i].Name);
-                                        console.log("    HPos:"+ outMap[i].HPos);
-                                        console.log("    VPos:"+ outMap[i].VPos);
-                                        console.log("    HSize:"+ outMap[i].HSize);
-                                        console.log("    VSize:"+ outMap[i].VSize);
-                                        console.log("    Freeze:"+ outMap[i].Freeze);
+                                    for (var j= 0; j < outMap.length; j++) {
+                                        console.log("  DestOutMap #:"+(j+1));
+                                        console.log("    id:" + outMap[j].id);
+                                        console.log("    Name:" + outMap[j].Name);
+                                        console.log("    HPos:"+ outMap[j].HPos);
+                                        console.log("    VPos:"+ outMap[j].VPos);
+                                        console.log("    HSize:"+ outMap[j].HSize);
+                                        console.log("    VSize:"+ outMap[j].VSize);
+                                        console.log("    Freeze:"+ outMap[j].Freeze);
                                     }
                             }
                             
@@ -1358,35 +1358,17 @@ var eventMasterAction = {
     },
     
     onKeyUp: function (action, context, settings, coordinates, userDesiredState) {
-
+        //  empty function
     },
 
     onWillAppear: function (action, context, settings, coordinates) {
         if(settings != null ){
             settingsCache[context] = settings;
         }
-        settings["pendingCutAction"]==""
-        settings["pendingCutAuxAction"]==""
+        settings["pendingCutAction"]=""
+        settings["pendingCutAuxAction"]=""
             
         EventMasterRPC.updateCache(context, action);
-       
-       
-    },
-
-    onWillDisappear: function (action, context, settings, coordinates) {
-        if(settings != null ){
-            settingsCache[context] = settings;
-        }
-        settings["pendingCutAction"]==""
-        settings["pendingCutAuxAction"]==""
-        
-            
-        EventMasterRPC.updateCache(context, action);
-       
-       
-    },
-
-    SetTitle: function (context, title) {
     },
   
 
@@ -1406,20 +1388,6 @@ var eventMasterAction = {
         }
     },
 
-    SetSettings: function (context, settings) {
-        
-        settingsCache[context] = settings;
-        
-        var json = {
-            "event": "setSettings",
-            "context": context,
-            "payload": settings
-        };
-
-        websocket.send(JSON.stringify(json));
-    },
-
-    
     setImage: function (context, imgData) {
 
         var json = {
@@ -1584,12 +1552,6 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             
             eventMasterAction.onWillAppear(action, context, settings, coordinates);
         }
-        else if(event == "willDisappear") {
-            var settings = jsonPayload['settings'];
-            var coordinates = jsonPayload['coordinates'];
-
-            eventMasterAction.onWillDisappear(action, context, settings, coordinates);
-        }
         else if (event == "propertyInspectorDidAppear")  {
             EventMasterRPC.getAllDestinationContent(context);
 
@@ -1637,7 +1599,8 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             }
                         
             if( changed  ) {
-                eventMasterAction.SetSettings(context, settings)
+                settingsCache[context] = settings;
+
                 EventMasterRPC.updateCache(context, action);
                 eventMasterAction.testEventMasterConnection( context );
                 
