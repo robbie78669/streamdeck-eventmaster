@@ -273,10 +273,14 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-					
-			var data = JSON.stringify({"params": {"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
-			xhr.send(data);
-			console.log("sent: "+data);
+            if ( settings.activatePreset && settings.activatePreset.presetName ){
+                var data = JSON.stringify({"params": {"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+                xhr.send(data);
+                console.log("sent: "+data);
+            }
+            else{
+                console.error("activatePreset: Invalid activePreset data or invalid preset name. ");
+            }    
         }
         else{
             console.error("activatePreset: Invalid IP Address: " + ipAddress);
@@ -321,10 +325,14 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-					
-			var data = JSON.stringify({"params":{"cueName":settings.activateCue.cueName, "type":settings.activateCue.cueMode}, "method":"activateCue", "id":"1234", "jsonrpc":"2.0"});
-			xhr.send(data);
-			console.log("sent: "+data);
+            if( settings.activateCue && settings.activateCue.cueName ) {
+                var data = JSON.stringify({"params":{"cueName":settings.activateCue.cueName, "type":settings.activateCue.cueMode}, "method":"activateCue", "id":"1234", "jsonrpc":"2.0"});
+                xhr.send(data);
+                console.log("sent: "+data);
+            }
+            else {
+                console.error("activateCue: Invalid activateCue data or cuename. ");    
+            }
         }
         else{
             console.error("activateCue: Invalid IP Address: " + ipAddress);
