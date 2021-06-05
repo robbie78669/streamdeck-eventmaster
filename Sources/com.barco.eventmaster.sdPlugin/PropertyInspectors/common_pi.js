@@ -157,19 +157,22 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 } 
                 
                 var cueModeElement = document.getElementsByName('cueMode');
-                if( cue_payload.cueMode == null ) {
-                    if( cueModeElement = null ) 
-                        setChecked(cueModeElement, "cueMode_Play");
-                }
-                else {
-                    if( cue_payload.cueMode == 0  ) {
-                        setChecked(cueModeElement, "cueMode_Play");
+                if( cue_payload ) {
+                    if( cue_payload.cueMode == null ) {
+                        if( cueModeElement = null ) 
+                            setChecked(cueModeElement, "cueMode_Play");
                     }
-                    else if( cue_payload.cueMode == 1 ) {
-                        setChecked(cueModeElement, "cueMode_Pause");
-                    }
+                
                     else {
-                        setChecked(cueModeElement, "cueMode_Stop");
+                        if( cue_payload.cueMode == 0  ) {
+                            setChecked(cueModeElement, "cueMode_Play");
+                        }
+                        else if( cue_payload.cueMode == 1 ) {
+                            setChecked(cueModeElement, "cueMode_Pause");
+                        }
+                        else {
+                            setChecked(cueModeElement, "cueMode_Stop");
+                        }
                     }
                 }
             }

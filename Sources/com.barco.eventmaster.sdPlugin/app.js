@@ -71,14 +71,14 @@ var EventMasterRPC = {
                             eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                            console.error("powerStatus error: "+xhr.response);
+                            console.warn("powerStatus error: "+xhr.response);
                             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("powerStatus error: "+xhr.response);
+                console.warn("powerStatus error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -88,7 +88,7 @@ var EventMasterRPC = {
 			console.log("url: " + url + " sent: "+data);
         }
         else{
-            console.error("powerStatus: Invalid IP Address: " + ipAddress);
+            console.warn("powerStatus: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -128,7 +128,7 @@ var EventMasterRPC = {
 			};
 
 			xhr.onerror = function (e) {
-                console.error("allTrans error: "+xhr.response);
+                console.warn("allTrans error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -138,7 +138,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("allTrans: Invalid IP Address: " + ipAddress);
+            console.warn("allTrans: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -169,14 +169,14 @@ var EventMasterRPC = {
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("cut error: "+xhr.response);
+                        console.warn("cut error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("cut error: "+xhr.response);
+                console.warn("cut error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -186,7 +186,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("cut: Invalid IP Address: " + ipAddress);
+            console.warn("cut: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -214,14 +214,14 @@ var EventMasterRPC = {
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("recallNextPreset error: "+xhr.response);
+                        console.warn("recallNextPreset error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("recallNextPreset error: "+xhr.response);
+                console.warn("recallNextPreset error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -231,7 +231,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("recallNextPreset: Invalid IP Address: " + ipAddress);
+            console.warn("recallNextPreset: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -262,14 +262,14 @@ var EventMasterRPC = {
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("activatePreset error: "+xhr.response);
+                        console.warn("activatePreset error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("activatePreset error: "+xhr.response);
+                console.warn("activatePreset error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -283,7 +283,7 @@ var EventMasterRPC = {
             }    
         }
         else{
-            console.error("activatePreset: Invalid IP Address: " + ipAddress);
+            console.warn("activatePreset: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -314,14 +314,14 @@ var EventMasterRPC = {
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("activateCue error: "+xhr.response);
+                        console.warn("activateCue error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("activateCue error: "+xhr.response);
+                console.warn("activateCue error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -335,7 +335,7 @@ var EventMasterRPC = {
             }
         }
         else{
-            console.error("activateCue: Invalid IP Address: " + ipAddress);
+            console.warn("activateCue: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -367,14 +367,14 @@ var EventMasterRPC = {
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("freeze error: "+xhr.response);
+                        console.warn("freeze error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("freezeDestSource error: "+xhr.response);
+                console.warn("freezeDestSource error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -408,7 +408,7 @@ var EventMasterRPC = {
             }
         }
         else{
-            console.error("freezeDestSource: Invalid IP Address: " + ipAddress);
+            console.warn("freezeDestSource: Invalid IP Address: " + ipAddress);
         }
         
 	},
@@ -442,14 +442,14 @@ var EventMasterRPC = {
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.error("freeze error: "+xhr.response);
+                        console.warn("freeze error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("freezeDestSource error: "+xhr.response);
+                console.warn("freezeDestSource error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -483,7 +483,7 @@ var EventMasterRPC = {
             }
         }
         else{
-            console.error("freezeDestSource: Invalid IP Address: " + ipAddress);
+            console.warn("freezeDestSource: Invalid IP Address: " + ipAddress);
         }
         
 	},
@@ -538,14 +538,14 @@ var EventMasterRPC = {
                         }
 					}
 					else {
-                        console.error("getSources error: "+xhr.responseText);
+                        console.warn("getSources error: "+xhr.responseText);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("getSources error: "+xhr.responseText);
+                console.warn("getSources error: "+xhr.responseText);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -555,7 +555,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("getSources: Invalid IP Address: " + ipAddress);
+            console.warn("getSources: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -609,14 +609,14 @@ var EventMasterRPC = {
                         }
 					}
 					else {
-                        console.error("getBackgrounds error: "+xhr.responseText);
+                        console.warn("getBackgrounds error: "+xhr.responseText);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("getBackgrounds error: "+xhr.responseText);
+                console.warn("getBackgrounds error: "+xhr.responseText);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -626,7 +626,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("getBackgrounds: Invalid IP Address: " + ipAddress);
+            console.warn("getBackgrounds: Invalid IP Address: " + ipAddress);
         }
 	},
 
@@ -699,14 +699,14 @@ var EventMasterRPC = {
                         }
 					}
 					else {
-                        console.error("getDestinations error: "+xhr.responseText);
+                        console.warn("getDestinations error: "+xhr.responseText);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("getDestinations error: "+xhr.responseText);
+                console.warn("getDestinations error: "+xhr.responseText);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -715,7 +715,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("getDestinations: Invalid IP Address: " + ipAddress);
+            console.warn("getDestinations: Invalid IP Address: " + ipAddress);
         }
 	
     },
@@ -772,7 +772,7 @@ var EventMasterRPC = {
 			};
 
 			xhr.onerror = function (e) {
-                console.error("getPresets error: "+xhr.responseText);
+                console.warn("getPresets error: "+xhr.responseText);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -781,7 +781,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("getPresets: Invalid IP Address: " + ipAddress);
+            console.warn("getPresets: Invalid IP Address: " + ipAddress);
         }
 	
 	},
@@ -832,14 +832,14 @@ var EventMasterRPC = {
                         }
 					}
 					else {
-                        console.error("getCues error: "+xhr.responseText);
+                        console.warn("getCues error: "+xhr.responseText);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("getCues error: "+xhr.responseText);
+                console.warn("getCues error: "+xhr.responseText);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -848,7 +848,7 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("getCues: Invalid IP Address: " + ipAddress);
+            console.warn("getCues: Invalid IP Address: " + ipAddress);
         }
 	
     },
@@ -898,7 +898,7 @@ var EventMasterRPC = {
             console.log("sent: "+data);
         }
         else{
-            console.error("changeContent: Invalid IP Address: " + ipAddress);
+            console.warn("changeContent: Invalid IP Address: " + ipAddress);
         }
     },
 
@@ -947,7 +947,7 @@ var EventMasterRPC = {
             console.log("sent: "+data);
         }
         else{
-            console.error("changeAuxContent: Invalid IP Address: " + ipAddress);
+            console.warn("changeAuxContent: Invalid IP Address: " + ipAddress);
         }
     },
 
@@ -1186,14 +1186,14 @@ var EventMasterRPC = {
                         }
 					}
 					else {
-                        console.error("listContent error: "+xhr.responseText);
+                        console.warn("listContent error: "+xhr.responseText);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.error("listContent error: "+xhr.responseText);
+                console.warn("listContent error: "+xhr.responseText);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -1203,12 +1203,10 @@ var EventMasterRPC = {
 			console.log("sent: "+data);
         }
         else{
-            console.error("listContent: Invalid IP Address: " + ipAddress);
+            console.warn("listContent: Invalid IP Address: " + ipAddress);
         }
     },
     
- 
-
 
 
 	getAllDestinationContent: function(context) {
@@ -1309,21 +1307,13 @@ var eventMasterAction = {
         EventMasterRPC.powerStatus(context);
     },
 
-    onPropertyInspectorDidAppear: function (action, context, settings, coordinates) {
-        // send notification to property_inspector to load saved settings
-       if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
-
-            EventMasterRPC.updateCache(context, action);            
-            var json = {
-                "event": "sendToPropertyInspector",
-                "context": context,
-                "payload": settingsCache[context]
-            };
-
-            websocket.send(JSON.stringify(json));
-        }
+    onPropertyInspectorDidAppear: function (action, context, settings ) {
+        this.getSettings(context);
     },
 
+    onPropertyInspectorDidDisappear: function (action, context, settings ) {
+        this.setSettings(context);
+    },
     
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
         var settings = settingsCache[context];
@@ -1369,18 +1359,60 @@ var eventMasterAction = {
         //  empty function
     },
 
+   
     onWillAppear: function (action, context, settings, coordinates) {
-        if(settings != null ){
-            settingsCache[context] = settings;
-        }
-        settings["pendingCutAction"]=""
-        settings["pendingCutAuxAction"]=""
-            
-        EventMasterRPC.updateCache(context, action);
+        this.getSettings(context);
     },
-  
 
-    SetStatus: function (context, status) {
+    onWillDisappear: function (action, context, settings, coordinates) {
+        this.setSettings(context);
+    },
+
+    onDidReceiveSettings: function(action, context, settings) {
+
+        if (settingsCache != null ) {
+            if( settings != null )
+                settingsCache[context] = settings;
+
+            // send notification to property_inspector to load saved settings
+            if( !isEmpty(settingsCache[context]) )  {
+            
+                EventMasterRPC.updateCache(context, action);            
+                var json = {
+                    "event": "sendToPropertyInspector",
+                    "context": context,
+                    "payload": settingsCache[context]
+                };
+
+                websocket.send(JSON.stringify(json));
+            }
+        }
+   },
+
+    getSettings: function (context) {
+        var json = {
+            "event": "getSettings",
+            "context": context,
+        };
+    
+        websocket.send(JSON.stringify(json));
+    },
+
+    setSettings: function (context) {
+        var settings = settingsCache[context];
+        if( settings ) {
+        
+            var json = {
+                "event": "setSettings",
+                "context": context,
+                "payload": settingsCache[context]
+            };
+    
+            websocket.send(JSON.stringify(json));
+        }    
+    },
+
+        SetStatus: function (context, status) {
         var settings = settingsCache[context];
         if( settings ) {
             settings.status = status;
@@ -1413,6 +1445,11 @@ var eventMasterAction = {
      
         if (errorLevel == 1 ) {
             errorLevelStr = "ERROR";
+            textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
+            console.error(textStr);
+        }
+        else if (errorlevel == 2 ) {
+            errorLevelStr = "WARN";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.error(textStr);
         }
@@ -1535,6 +1572,7 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
         var event = jsonObj['event'];
         var action = jsonObj['action'];
         var context = jsonObj['context'];
+        var device = jsonObj['device'];
         var jsonPayload = jsonObj['payload'] || {};
 
         
@@ -1560,58 +1598,77 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
             
             eventMasterAction.onWillAppear(action, context, settings, coordinates);
         }
+        else if(event == "willDisappear") {
+            var settings = jsonPayload['settings'];
+            var coordinates = jsonPayload['coordinates'];
+            
+            eventMasterAction.onWillDisappear(action, context, settings, coordinates);
+        }
         else if (event == "propertyInspectorDidAppear")  {
             EventMasterRPC.getAllDestinationContent(context);
 
             var settings = jsonPayload['settings'];
-            var coordinates = jsonPayload['coordinates'];
-            eventMasterAction.onPropertyInspectorDidAppear(action, context, settings, coordinates);
+            
+            eventMasterAction.onPropertyInspectorDidAppear(action, context, settings );
         }
+        else if (event == "propertyInspectorDidDisappear")  {
+            var settings = jsonPayload['settings'];
+            
+            eventMasterAction.onPropertyInspectorDidDisappear(action, context, settings );
+        }
+        else if (event == "didReceiveSettings")  {
+            var settings = jsonPayload['settings'];
+
+            eventMasterAction.onDidReceiveSettings(action, context, settings);        }
+        
         else if (event == "sendToPlugin") {
 
             var settings;
             var changed = false;
             settings = settingsCache[context];
 
-            // event coming from the property inspector..
-            if (jsonPayload.hasOwnProperty('ipAddress')) {
+            if( settings!=null )
+            {
+                // event coming from the property inspector..
+                if (jsonPayload.hasOwnProperty('ipAddress')) {
 
-                changed = true;
-                settings["ipAddress"] = jsonPayload.ipAddress;
-            }
-            if (jsonPayload.hasOwnProperty('activatePreset')) {
+                    changed = true;
+                    settings["ipAddress"] = jsonPayload.ipAddress;
+                }
+                if (jsonPayload.hasOwnProperty('activatePreset')) {
 
-                changed = true;
-                settings["activatePreset"] = jsonPayload.activatePreset;;
-            }
-            if (jsonPayload.hasOwnProperty('activateCue')) {
+                    changed = true;
+                    settings["activatePreset"] = jsonPayload.activatePreset;;
+                }
+                if (jsonPayload.hasOwnProperty('activateCue')) {
 
-                changed = true;
-                settings["activateCue"] = jsonPayload.activateCue;
-            }
-            if( jsonPayload.hasOwnProperty('freeze')) {
-                changed = true;
-                settings["freeze"] = jsonPayload.freeze;
-            }
-            if( jsonPayload.hasOwnProperty('unfreeze')) {
-                changed = true;
-                settings["unfreeze"] = jsonPayload.unfreeze;
-            }
-            if( jsonPayload.hasOwnProperty('cutLayer')) {
-                changed = true;
-                settings["cutLayer"] = jsonPayload.cutLayer;
-            }
-            if( jsonPayload.hasOwnProperty('cutAux')) {
-                changed = true;
-                settings["cutAux"] = jsonPayload.cutAux;
-            }
-                        
-            if( changed  ) {
-                settingsCache[context] = settings;
+                    changed = true;
+                    settings["activateCue"] = jsonPayload.activateCue;
+                }
+                if( jsonPayload.hasOwnProperty('freeze')) {
+                    changed = true;
+                    settings["freeze"] = jsonPayload.freeze;
+                }
+                if( jsonPayload.hasOwnProperty('unfreeze')) {
+                    changed = true;
+                    settings["unfreeze"] = jsonPayload.unfreeze;
+                }
+                if( jsonPayload.hasOwnProperty('cutLayer')) {
+                    changed = true;
+                    settings["cutLayer"] = jsonPayload.cutLayer;
+                }
+                if( jsonPayload.hasOwnProperty('cutAux')) {
+                    changed = true;
+                    settings["cutAux"] = jsonPayload.cutAux;
+                }
+                            
+                if( changed  ) {
+                    settingsCache[context] = settings;
 
-                EventMasterRPC.updateCache(context, action);
-                eventMasterAction.testEventMasterConnection( context );
-                
+                    EventMasterRPC.updateCache(context, action);
+                    eventMasterAction.testEventMasterConnection( context );
+                    
+                }
             }
         }
     };
