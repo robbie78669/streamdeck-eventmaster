@@ -143,7 +143,7 @@
   "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
-  "Description": "Requires Event Master v7.1 or higher. Adds Event Master commend support to Stream Deck. Version 2.1 build 134", 
+  "Description": "Requires Event Master v7.1 or higher. Adds Event Master commend support to Stream Deck.", 
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 
