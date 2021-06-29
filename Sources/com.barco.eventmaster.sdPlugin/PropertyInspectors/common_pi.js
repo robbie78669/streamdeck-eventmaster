@@ -48,24 +48,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var action = jsonObj.action;
             var context = jsonObj.context;
 
-            // populate the html lists..
-            //  - freeze/unfreeze the object list (inputs, BGs, screen and aux dests)
-            //  - cutLayer (input, screen destination and layer (preview / program))
-
-            var ipAddress_payload = payload['ipAddress'];
-            if( ipAddress_payload != null ) {
-                var ipAddresElement = document.getElementById('ipAddress');
-                ipAddresElement.value = ipAddress_payload;
-            }
-
-            var status = payload['status'];
-            if( status != null ) {
-                var statusElement = document.getElementById('status');
-                if( statusElement ) {
-                    statusElement.innerText = status;
-                }
-            }
-            
             var sources = payload["sources"];
             var backgrounds = payload["backgrounds"];
             var screenDestinations = payload["screenDestinations"];
@@ -73,11 +55,66 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var destContent = payload["destinationContent"];
             var presets = payload["presets"];
             var cues = payload["cues"];
+            var operators = payload["operators"]
+            var ipAddress = payload['ipAddress'];
+            var status = payload['status'];
+
+            // Global html properties
+            // these 2 are used in every action
+            if( ipAddress != null ) {
+                var ipAddresElement = document.getElementById('ipAddress');
+                ipAddresElement.value = ipAddress;
+            }
             
+            if( status != null ) {
+                var statusElement = document.getElementById('status');
+                if( statusElement ) {
+                    statusElement.innerText = status;
+                }
+            }
+
             if( action == "com.barco.eventmaster.recallpreset"){
+
                 var preset_payload = payload['activatePreset'];
+                if( preset_payload == null ) {
+                    preset_payload = {id: -1, name: ""};
+                }
+
+                // load operators into the dropdown first, select the operator, then filter presets based on preset no range settings
+                // 
+                var selectedOperatorId = -1;
+                var operatorElement = document.getElementById('operator');
+                if( operatorElement != null ) {
+
+                    while (operatorElement.length)
+                        operatorElement.remove(0);
+
+                    // if no operators enabled, then add a global value with no other choices
+                    if( operators == null ) {   
+                        var operatorElement = operatorElement.appendChild( new Option("Global") );
+                        operatorElement.value = -2;
+                        operatorElement.selected = true;
+                    }
+                    else{
+
+                        var operatorElement = operatorElement.appendChild( new Option("Super Operator") );
+                        operatorElement.value = -1;
+                        operatorElement.selected = true;
+
+                        for(var i=0; i<operators.length; i++) {
+                            var operatorElement = operatorNameElement.appendChild( new Option(operator[i].Name) );
+                            presetElement.value = operator[i].id;
+                        }
+     
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<operatorNameElement.length; i++ ){
+                            if(operatorNameElement[i].value == preset_payload.operator_id ) {
+                                operatorNameElement[i].selected = true;
+                            }
+                         }       
+                    }
+                }
                 var presetNameElement = document.getElementById('presetName');
-                
                 if( presetNameElement != null ) {
 
                     while (presetNameElement.length)
@@ -88,11 +125,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         var presetElement = presetNameElement.appendChild( new Option("") );
                         presetElement.value = -1;
                         presetElement.selected = true;
-
-
-                        if( preset_payload == null ) {
-                            preset_payload = {id: -1, name: ""};
-                        }
 
                         for(var i=0; i<presets.length; i++) {
                             var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
@@ -107,38 +139,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         }
                     }       
                 } 
+                               
                 
-                var presetOperatorElement = document.getElementsByName('presetOperator');
-                if( preset_payload.operator != null ){
-
-                    if( preset_payload.operator == -1 ) {
-                        if( presetOperatorElement != null ) 
-                        {   
-                            setChecked(presetOperatorElement, "presetMode_operator_super");
-
-                            // password
-                            var presetPasswordElement = document.getElementsByName('presetPassword');
-                            if( preset_payload.password == null ) {
-                               presetPasswordElement.value = "";
-                            }
-                            else {
-                                presetPasswordElement.value = preset_payload.password; 
-                            }
-                        }
-                    }
-                    else {
-                        if( preset_payload.presetOperator == 1  ) {
-                         setChecked(presetOperatorElement, "presetMode_operator_2");
-                        }
-                        else if( preset_payload.presetOperator == 2 ) {
-                         setChecked(presetOperatorElement, "presetMode_operator_3");
-                        }
-                        else { 
-                         setChecked(presetOperatorElement, "presetMode_operator_1");
-                        }
-                    }
-                }
-
                 var presetModeElement = document.getElementsByName('presetMode');
                 if( preset_payload.presetMode == null ) {
                     if( presetModeElement != null ) 
@@ -638,14 +640,19 @@ function updateSettings() {
         payload.ipAddress = ipAddress.value;
 
     /** activatePreset */
+    var activatePreset_operatorNameElement = document.getElementById('operator');
     var activatePreset_presetNameElement = document.getElementById('presetName');
     var activatePreset_presetModeElement = document.getElementsByName('presetMode');
     if( activatePreset_presetNameElement != null &&  activatePreset_presetNameElement.selectedIndex >= 0){
-        var activatePreset = {presetName: "null", presetMode: 0, id: -1};
+        var activatePreset = {presetName: "null", presetMode: 0, id: -1, operatorId: -2};
+
+        var selectedOperatorIndex = activatePreset_operatorNameElement.selectedIndex;
+        activatePreset.operatorId = activatePreset_operatorNameElement[selectedOperatorIndex].value;
 
         var selectedIndex = activatePreset_presetNameElement.selectedIndex;
         activatePreset.presetName = activatePreset_presetNameElement[selectedIndex].label;
         activatePreset.id = activatePreset_presetNameElement[selectedIndex].value;
+        
 
         if( activatePreset_presetModeElement != null ) {
             var presetMode=getChecked(activatePreset_presetModeElement);
