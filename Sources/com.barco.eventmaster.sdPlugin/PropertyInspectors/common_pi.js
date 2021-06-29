@@ -89,6 +89,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         presetElement.value = -1;
                         presetElement.selected = true;
 
+
                         if( preset_payload == null ) {
                             preset_payload = {id: -1, name: ""};
                         }
@@ -107,7 +108,37 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     }       
                 } 
                 
-                
+                var presetOperatorElement = document.getElementsByName('presetOperator');
+                if( preset_payload.operator != null ){
+
+                    if( preset_payload.operator == -1 ) {
+                        if( presetOperatorElement != null ) 
+                        {   
+                            setChecked(presetOperatorElement, "presetMode_operator_super");
+
+                            // password
+                            var presetPasswordElement = document.getElementsByName('presetPassword');
+                            if( preset_payload.password == null ) {
+                               presetPasswordElement.value = "";
+                            }
+                            else {
+                                presetPasswordElement.value = preset_payload.password; 
+                            }
+                        }
+                    }
+                    else {
+                        if( preset_payload.presetOperator == 1  ) {
+                         setChecked(presetOperatorElement, "presetMode_operator_2");
+                        }
+                        else if( preset_payload.presetOperator == 2 ) {
+                         setChecked(presetOperatorElement, "presetMode_operator_3");
+                        }
+                        else { 
+                         setChecked(presetOperatorElement, "presetMode_operator_1");
+                        }
+                    }
+                }
+
                 var presetModeElement = document.getElementsByName('presetMode');
                 if( preset_payload.presetMode == null ) {
                     if( presetModeElement != null ) 
