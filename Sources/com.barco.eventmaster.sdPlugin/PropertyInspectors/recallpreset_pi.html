@@ -21,10 +21,22 @@
                 <div class="sdpi-item-label">IP Address</div> 
                 <input id="ipAddress" class="sdpi-item-value" value="" placeholder="e.g. 192.168.61.1" required pattern="\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}" oninput="updateSettings()">
             </div>
-            <div class="sdpi-item" title="This field lets you enter the preset name.">
+            
+            <div class="sdpi-item" title="This field lets you select the operator."></div>
+                <div class="sdpi-item-label">User</div> 
+                <input id="user" class="sdpi-item-value select" oninput="updateSettings()">
+            </div>
+
+            <div class="sdpi-item" title="This field lets you enter the super operator password.">
+                <div class="sdpi-item-label">Password</div> 
+                <select id="password" class="sdpi-item-value select" onchange="updateSettings()"></select>
+            </div>
+
+            <div class="sdpi-item" title="This field lets you select the preset.">
                 <div class="sdpi-item-label">Preset Name</div> 
                 <select class="sdpi-item-value select" id="presetName" onchange="updateSettings()"></select>
             </div>
+            
             <div type="radio" id="presetMode" class="sdpi-item" onchange="updateSettings()">
                 <div class="sdpi-item-label">Recall To:</div>
                 <div class="sdpi-item-value ">
