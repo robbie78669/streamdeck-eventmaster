@@ -1,4 +1,11 @@
 
+  const OPERATOR = {
+    ALL: -2,
+    SUPER: -1,
+    ONE: 0,
+    TWO: 1,
+    THREE: 2
+}
 
 var websocket = null,
     uuid = null,
@@ -55,17 +62,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var destContent = payload["destinationContent"];
             var presets = payload["presets"];
             var cues = payload["cues"];
-            var operators = payload["operators"]
+            var operators = payload["operators"];
             var ipAddress = payload['ipAddress'];
+            var operator = payload['operator'];
             var status = payload['status'];
-            const OPERATOR = {
-                ALL: -2,
-                SUPER: -1,
-                ONE: 0,
-                TWO: 1,
-                THREE: 2
-            }
-
+          
             
             // Global html properties
             // these 2 are used in every action
@@ -80,48 +81,61 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     statusElement.innerText = status;
                 }
             }
+            
+            var operatorsNameElement = document.getElementById('operators');
+            if( operatorsNameElement != null ) {
+                while (operatorsNameElement.length)
+                    operatorsNameElement.remove(0);
+
+                // if no operators enabled, then add "all" value with no other choices
+                if( operators == null ) {   
+                    var operatorElement = operatorNamesElement.appendChild( new Option("All") );
+                    operatorElement.value = OPERATOR.ALL;
+                    operatorElement.selected = true;
+                }
+                else {
+                    // there is a list of operators available to choose from
+                    // if there is no selected operator then auto select the super and show the password field
+                    selectedOperator = operator;
+
+                    var operatorElement = operatorsNameElement.appendChild( new Option("Super Operator") );
+                    operatorElement.value = OPERATOR.SUPER;
+                        
+                    if( selectedOperator == null ) {
+                        // selected is super
+                        selectedOperator = {"id": OPERATOR.SUPER, 
+                                            "Name": "Super Operator", 
+                                            "InvertedColor": 0, 
+                                            "Enable": 1, 
+                                            "DestCollection": [] };
+                    }
+                     
+                    // go through each operator that is enabled in the frame and add it to the list
+                    // the plugin filters out disabled operators.
+                    for(var i=0; i<operators.length; i++) {
+                        var operatorElement = operatorsNameElement.appendChild( new Option(operators[i].Name) );
+                        operatorElement.value = operators[i].id;
+                    }
+
+                    // select the previously selected item (from the plugin)
+                    for( var i=0; i<operatorsNameElement.length; i++ ){
+                        if(operatorsNameElement[i].value == selectedOperator.id ) {
+                            operatorsNameElement[i].selected = true;
+                        }
+                    }       
+                }
+            }
+
 
             if( action == "com.barco.eventmaster.recallpreset"){
 
-                var preset_payload = payload['activatePreset'];
-                if( preset_payload == null ) {
-                    preset_payload = {id: -1, name: ""};
+                var activatePreset_payload = payload['activatePreset'];
+                if( activatePreset_payload == null ) {
+                    activatePreset_payload = {id: -1, name: ""};
                 }
 
                 // load operators into the dropdown first, select the operator, then filter presets based on preset no range settings
                 // 
-                var selectedOperatorId = OPERATOR.ALL;
-                var operatorElement = document.getElementById('operator');
-                if( operatorElement != null ) {
-
-                    while (operatorElement.length)
-                        operatorElement.remove(0);
-
-                    // if no operators enabled, then add "all" value with no other choices
-                    if( operators == null ) {   
-                        var operatorElement = operatorElement.appendChild( new Option("All") );
-                        operatorElement.value = OPERATOR.ALL;
-                        operatorElement.selected = true;
-                    }
-                    else{
-
-                        var operatorElement = operatorElement.appendChild( new Option("Super Operator") );
-                        operatorElement.value = OPERATOR.SUPER;
-                        operatorElement.selected = true;
-
-                        for(var i=0; i<operators.length; i++) {
-                            var operatorElement = operatorNameElement.appendChild( new Option(operator[i].Name) );
-                            presetElement.value = operator[i].id;
-                        }
-     
-                        // select the previously selected item (from the plugin)
-                        for( var i=0; i<operatorNameElement.length; i++ ){
-                            if(operatorNameElement[i].value == preset_payload.operator_id ) {
-                                operatorNameElement[i].selected = true;
-                            }
-                         }       
-                    }
-                }
                 var presetNameElement = document.getElementById('presetName');
                 if( presetNameElement != null ) {
 
@@ -135,34 +149,36 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         presetElement.selected = true;
 
                         for(var i=0; i<presets.length; i++) {
-                            var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
-                            presetElement.value = presets[i].id;
+                            if( selectedOperator && 
+                                    (selectedOperator.id <= OPERATOR.SUPER || 
+                                        (selectedOperator.id  >= selectedOperator.StartRange && selectedOperator <= selectedOperator.EndRange ) ) ) {
+                                var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
+                                presetElement.value = presets[i].id;
+                            }
                         }
 
                         // select the previously selected item (from the plugin)
                         for( var i=0; i<presetNameElement.length; i++ ){
-                            if(presetNameElement[i].value == preset_payload.id ) {
+                            if(presetNameElement[i].value == activatePreset_payload.id ) {
                                 presetNameElement[i].selected = true;
                             }
                         }
                     }       
                 } 
-                               
                 
                 var presetModeElement = document.getElementsByName('presetMode');
-                if( preset_payload.presetMode == null ) {
+                if( activatePreset_payload.presetMode == null ) {
                     if( presetModeElement != null ) 
                         setChecked(presetModeElement, "presetMode_toPreview");
                 }
                 else {
-                    if( preset_payload.presetMode == 0  ) {
+                    if( activatePreset_payload.presetMode == 0  ) {
                         setChecked(presetModeElement, "presetMode_toPreview");
                     }
                     else {
                         setChecked(presetModeElement, "presetMode_toProgram");
                     }
                 }
-
             }
             else if( action == "com.barco.eventmaster.recallcue") {
                 var cue_payload = payload['activateCue'];
@@ -647,15 +663,19 @@ function updateSettings() {
     if( ipAddressElement != null )
         payload.ipAddress = ipAddress.value;
 
+    //** operator **/
+    var operatorsElement = document.getElementById('operators');
+    if( operatorsElement != null ) {
+        var selectedOperatorIndex = operatorsElement.selectedIndex;
+        payload.operatorId = operatorsElement[selectedOperatorIndex].value;
+        payload.operatorPassword = "";
+    }
+
     /** activatePreset */
-    var activatePreset_operatorElement = document.getElementById('operator');
     var activatePreset_presetNameElement = document.getElementById('presetName');
     var activatePreset_presetModeElement = document.getElementsByName('presetMode');
     if( activatePreset_presetNameElement != null &&  activatePreset_presetNameElement.selectedIndex >= 0){
-        var activatePreset = {presetName: "null", presetMode: 0, id: -1, operatorId: OPERATOR.ALL};
-
-        var selectedOperatorIndex = activatePreset_operatorElement.selectedIndex;
-        activatePreset.operatorId = activatePreset_operatorElement[selectedOperatorIndex].value;
+        var activatePreset = {presetName: "null", presetMode: 0, id: -1 };
 
         var selectedIndex = activatePreset_presetNameElement.selectedIndex;
         activatePreset.presetName = activatePreset_presetNameElement[selectedIndex].label;
