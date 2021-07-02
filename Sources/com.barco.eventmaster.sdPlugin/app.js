@@ -274,7 +274,22 @@ var EventMasterRPC = {
 			};
 
             if ( settings.activatePreset && settings.activatePreset.presetName ){
-                var data = JSON.stringify({"params": {"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+
+                var data;
+                // if super operator, send password instead of operatorId.
+                if( settings.activatePreset.operatorId )
+                {
+                    if( settings.activatePreset.operatorId == -1 ) {
+                        data = JSON.stringify({"params": {"password": settings.activatePreset.password, "presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+                    }
+                    else {
+                        data = JSON.stringify({"params": {"operatorId": settings.activatePreset.operatorId,"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+                    }
+                } 
+                else {
+                    data = JSON.stringify({"params": {"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+                }
+                    
                 xhr.send(data);
                 console.log("sent: "+data);
             }
@@ -719,6 +734,93 @@ var EventMasterRPC = {
         }
 	
     },
+
+    /**
+     * Multi-Operator Mode:
+     * – New parameters are introduced to work with multi-operator mode along with the above parameters.
+     * – These parameters are used only when one or more operators are enabled.
+     * – params: {"presetName": "NewPreset", "operatorId": y} (for normal operator)
+     *       “operatorId”— operator index (For current release only 0, 1, 2 are valid indexes). 
+             
+              If user wants to use “super-operator” mode, its password is required which is passed as a parameter.
+                – params: {"presetName": "NewPreset", "password": "xyz"} (for super operator)
+                "password"— Super user password saved. When this is passed, actions will be performed as if no operator is enabled
+     **/
+    getOperators: function (context) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("getPresets error: settingCache is null!");
+            return;
+        }
+
+        ipAddress = settings.ipAddress;
+		if( isValidIp( ipAddress ) ) {
+		
+			var url = "http://"+ipAddress+":9999";
+
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-type", "application/json");
+
+			xhr.onload = function (e) { 
+				if (xhr.readyState === 4 ) {
+					if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");
+
+                        // Grab the content info..
+                        var fullResponse = JSON.parse(xhr.response);
+                        
+                        console.log("getOperators response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+                            
+                            var operators = fullResponse.result.response;
+                            if( operators ) {
+                                var arrayLength = operators.length;
+                                for (var i = 0; i < arrayLength; i++) {
+                                    console.log("operator #"+(i+1));
+                                    console.log("  id:" + operators[i].id);
+                                    console.log("  Name:" + operators[i].Name);
+                                    console.log("  Enable:" + operators[i].Enable)
+                                    console.log("  InvertColor:"+ operators[i].InvertColor);
+                                    console.log("  DestCollection"+ operators[i].DestCollection);
+    
+                                    if( operators[i].Enable ){
+                                        settings.operators += operators[i];
+                                    }
+    
+                                }
+                                        
+                                console.log("--------------------------------------------------------");
+                            }
+                            else{
+                                console.error("getOperators error: system returned empty operator list");
+                            }
+                        }
+					}
+					else {
+                        console.error("getOperators error: "+xhr.responseText);
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+					}
+				}
+			};
+
+			xhr.onerror = function (e) {
+                console.warn("getOperators error: "+xhr.responseText);
+                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+			};
+
+			var data = JSON.stringify({"params":{}, "method":"listOperators", "id":"1234", "jsonrpc":"2.0"});
+			xhr.send(data);
+			console.log("sent: "+data);
+        }
+        else{
+            console.warn("getOperators: Invalid IP Address: " + ipAddress);
+        }
+	
+	},
     
     getPresets: function (context) {
 
@@ -1235,6 +1337,7 @@ var EventMasterRPC = {
         this.getAllDestinationContent(context);
         this.getPresets(context);
         this.getCues(context);
+        this.getOperators(context);
        
         var settings = settingsCache[context];
 

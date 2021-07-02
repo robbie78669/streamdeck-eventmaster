@@ -58,7 +58,15 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var operators = payload["operators"]
             var ipAddress = payload['ipAddress'];
             var status = payload['status'];
+            const OPERATOR = {
+                ALL: -2,
+                SUPER: -1,
+                ONE: 0,
+                TWO: 1,
+                THREE: 2
+            }
 
+            
             // Global html properties
             // these 2 are used in every action
             if( ipAddress != null ) {
@@ -82,23 +90,23 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                 // load operators into the dropdown first, select the operator, then filter presets based on preset no range settings
                 // 
-                var selectedOperatorId = -1;
+                var selectedOperatorId = OPERATOR.ALL;
                 var operatorElement = document.getElementById('operator');
                 if( operatorElement != null ) {
 
                     while (operatorElement.length)
                         operatorElement.remove(0);
 
-                    // if no operators enabled, then add a global value with no other choices
+                    // if no operators enabled, then add "all" value with no other choices
                     if( operators == null ) {   
-                        var operatorElement = operatorElement.appendChild( new Option("Global") );
-                        operatorElement.value = -2;
+                        var operatorElement = operatorElement.appendChild( new Option("All") );
+                        operatorElement.value = OPERATOR.ALL;
                         operatorElement.selected = true;
                     }
                     else{
 
                         var operatorElement = operatorElement.appendChild( new Option("Super Operator") );
-                        operatorElement.value = -1;
+                        operatorElement.value = OPERATOR.SUPER;
                         operatorElement.selected = true;
 
                         for(var i=0; i<operators.length; i++) {
@@ -640,14 +648,14 @@ function updateSettings() {
         payload.ipAddress = ipAddress.value;
 
     /** activatePreset */
-    var activatePreset_operatorNameElement = document.getElementById('operator');
+    var activatePreset_operatorElement = document.getElementById('operator');
     var activatePreset_presetNameElement = document.getElementById('presetName');
     var activatePreset_presetModeElement = document.getElementsByName('presetMode');
     if( activatePreset_presetNameElement != null &&  activatePreset_presetNameElement.selectedIndex >= 0){
-        var activatePreset = {presetName: "null", presetMode: 0, id: -1, operatorId: -2};
+        var activatePreset = {presetName: "null", presetMode: 0, id: -1, operatorId: OPERATOR.ALL};
 
-        var selectedOperatorIndex = activatePreset_operatorNameElement.selectedIndex;
-        activatePreset.operatorId = activatePreset_operatorNameElement[selectedOperatorIndex].value;
+        var selectedOperatorIndex = activatePreset_operatorElement.selectedIndex;
+        activatePreset.operatorId = activatePreset_operatorElement[selectedOperatorIndex].value;
 
         var selectedIndex = activatePreset_presetNameElement.selectedIndex;
         activatePreset.presetName = activatePreset_presetNameElement[selectedIndex].label;
