@@ -755,6 +755,7 @@ var EventMasterRPC = {
             return;
         }
 
+        
         ipAddress = settings.ipAddress;
 		if( isValidIp( ipAddress ) ) {
 		
@@ -775,28 +776,34 @@ var EventMasterRPC = {
                         console.log("getOperators response: "+xhr.response);
 
                         if (fullResponse.result.success == 0 ) {
-                            
                             var operators = fullResponse.result.response;
+                            settings.operators = operators;
+  
                             if( operators ) {
+
+                                // initialize the operator list by manually adding the super user
+                                //settings.operators = operators;// {"id":-1, "Name": "Super Operator", "Enable": 1, "InvertColor": 0, "DestCollection": []};
+
                                 var arrayLength = operators.length;
                                 for (var i = 0; i < arrayLength; i++) {
-                                    console.log("operator #"+(i+1));
-                                    console.log("  id:" + operators[i].id);
-                                    console.log("  Name:" + operators[i].Name);
-                                    console.log("  Enable:" + operators[i].Enable)
-                                    console.log("  InvertColor:"+ operators[i].InvertColor);
-                                    console.log("  DestCollection"+ operators[i].DestCollection);
-    
-                                    if( operators[i].Enable ){
-                                        settings.operators += operators[i];
-                                    }
-    
+                                    //if( operators[i].Enable ){
+                                    //    if( settings.operators )
+                                     //     settings.operators += operators[i];
+
+                                        console.log("adding operator #"+(i+1));
+                                        console.log("  id:" + operators[i].id);
+                                        console.log("  Name:" + operators[i].Name);
+                                        console.log("  Enable:" + operators[i].Enable)
+                                        console.log("  InvertColor:"+ operators[i].InvertColor);
+                                        console.log("  DestCollection"+ operators[i].DestCollection);
+                                    //}
                                 }
                                         
                                 console.log("--------------------------------------------------------");
                             }
                             else{
                                 console.error("getOperators error: system returned empty operator list");
+                                settings.operators = null;
                             }
                         }
 					}
