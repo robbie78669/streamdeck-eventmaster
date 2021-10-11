@@ -61,10 +61,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var auxDestinations = payload["auxDestinations"];
             var destContent = payload["destinationContent"];
             var presets = payload["presets"];
-            var cues = payload["cues"];
+            var cues = payload["cues"]
             var operators = payload["operators"];
+            var selectedOperator = payload["operator"];
+            var superOperatorPassword = payload["password"];
             var ipAddress = payload['ipAddress'];
-            var operator = payload['operator'];
             var status = payload['status'];
           
             
@@ -82,39 +83,45 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 }
             }
             
-            var operatorsNameElement = document.getElementById('operators');
+            var operatorsNameElement = document.getElementById('operator');
             if( operatorsNameElement != null ) {
                 while (operatorsNameElement.length)
                     operatorsNameElement.remove(0);
 
-                // if no operators enabled, then add "all" value with no other choices
+                // if no operator enabled, then add "all" value with no other choices
                 if( operators == null ) {   
-                    var operatorElement = operatorNamesElement.appendChild( new Option("All") );
+                    var operatorElement = operatorsNameElement.appendChild( new Option("All") )
                     operatorElement.value = OPERATOR.ALL;
                     operatorElement.selected = true;
                 }
                 else {
+
                     // there is a list of operators available to choose from
                     // if there is no selected operator then auto select the super and show the password field
-                    selectedOperator = operator;
-
+                    
                     var operatorElement = operatorsNameElement.appendChild( new Option("Super Operator") );
                     operatorElement.value = OPERATOR.SUPER;
                         
                     if( selectedOperator == null ) {
-                        // selected is super
+                        // set selected to super
                         selectedOperator = {"id": OPERATOR.SUPER, 
-                                            "Name": "Super Operator", 
-                                            "InvertedColor": 0, 
+                                            "Name": "Super Operator",
                                             "Enable": 1, 
+                                            "StartRange": 0,
+                                            "EndRange": 1000,
+                                            "InvertColor": 0, 
                                             "DestCollection": [] };
                     }
+                    
                      
                     // go through each operator that is enabled in the frame and add it to the list
                     // the plugin filters out disabled operators.
                     for(var i=0; i<operators.length; i++) {
                         var operatorElement = operatorsNameElement.appendChild( new Option(operators[i].Name) );
                         operatorElement.value = operators[i].id;
+                        if( selectedOperator && selectedOperator.id == operators[i].id ) {
+                            selectedOperator = operators[i];                            
+                        }
                     }
 
                     // select the previously selected item (from the plugin)
@@ -122,7 +129,26 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         if(operatorsNameElement[i].value == selectedOperator.id ) {
                             operatorsNameElement[i].selected = true;
                         }
-                    }       
+                    }    
+                }
+                var passwordDivElement = document.getElementById("password_div");
+                if( passwordDivElement ) {
+                    if( selectedOperator && selectedOperator.id == OPERATOR.SUPER ) {
+                        passwordDivElement.style.display = "flex";
+                        passwordDivElement.style.flexDirection = "row" ;
+                        passwordDivElement.style.minHeight = "32px";
+                        passwordDivElement.style.alignItems = "center";
+                        passwordDivElement.style.marginTop = "2px";
+                        passwordDivElement.style.maxWidth ="344px";
+                       
+                        if( superOperatorPassword ) {
+                            //passwordElement.value = superOperatorPassword;
+                        }
+                    } 
+                    else {
+                        passwordDivElement.style.display = "none";
+                        passwordElement.value = "";
+                    }
                 }
             }
 
@@ -148,15 +174,16 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         presetElement.value = -1;
                         presetElement.selected = true;
 
-                        for(var i=0; i<presets.length; i++) {
-                            if( selectedOperator && 
-                                    (selectedOperator.id <= OPERATOR.SUPER || 
-                                        (selectedOperator.id  >= selectedOperator.StartRange && selectedOperator <= selectedOperator.EndRange ) ) ) {
-                                var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
-                                presetElement.value = presets[i].id;
-                            }
+                        if( selectedOperator ){
+                            for(var i=0; i<presets.length; i++) {
+                                if( selectedOperator.id <= OPERATOR.SUPER || 
+                                        (presets[i].id >= selectedOperator.StartRange && presets[i].id <= selectedOperator.EndRange ) ) {
+                                    var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
+                                    presetElement.value = presets[i].id;
+                                }
+                            }    
                         }
-
+                        
                         // select the previously selected item (from the plugin)
                         for( var i=0; i<presetNameElement.length; i++ ){
                             if(presetNameElement[i].value == activatePreset_payload.id ) {
@@ -180,6 +207,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     }
                 }
             }
+
             else if( action == "com.barco.eventmaster.recallcue") {
                 var cue_payload = payload['activateCue'];
                 var cueNameElement = document.getElementById('cueName');
@@ -187,7 +215,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 if( cueNameElement != null ) {
 
                     while (cueNameElement.length)
-                    cueNameElement.remove(0);
+                      cueNameElement.remove(0);
 
                     if( cues ) {
 
@@ -664,11 +692,32 @@ function updateSettings() {
         payload.ipAddress = ipAddress.value;
 
     //** operator **/
-    var operatorsElement = document.getElementById('operators');
+    var operator = {"id":0, "password": ""};
+    var operatorsElement = document.getElementById('operator');
     if( operatorsElement != null ) {
         var selectedOperatorIndex = operatorsElement.selectedIndex;
-        payload.operatorId = operatorsElement[selectedOperatorIndex].value;
-        payload.operatorPassword = "";
+                    
+        if( operatorsElement[selectedOperatorIndex] != null ) {
+            operator.id = operatorsElement[selectedOperatorIndex].value;
+        }
+
+
+        var passwordDivElement = document.getElementById("password_div");
+        if( passwordDivElement ) {
+            if( operator  && operator.id == OPERATOR.SUPER ) {
+                passwordDivElement.style.display = "flex";
+                passwordDivElement.style.flexDirection = "row" ;
+                passwordDivElement.style.minHeight = "32px";
+                passwordDivElement.style.alignItems = "center";
+                passwordDivElement.style.marginTop = "2px";
+                passwordDivElement.style.maxWidth ="344px";
+                operator.password = passwordDivElement.value;                 //passwordElement.value = superOperatorPassword;
+            } 
+            else {
+                passwordDivElement.style.display = "none";
+                operator.password="";
+            }
+        }
     }
 
     /** activatePreset */

@@ -781,22 +781,16 @@ var EventMasterRPC = {
   
                             if( operators ) {
 
-                                // initialize the operator list by manually adding the super user
-                                //settings.operators = operators;// {"id":-1, "Name": "Super Operator", "Enable": 1, "InvertColor": 0, "DestCollection": []};
-
                                 var arrayLength = operators.length;
                                 for (var i = 0; i < arrayLength; i++) {
-                                    //if( operators[i].Enable ){
-                                    //    if( settings.operators )
-                                     //     settings.operators += operators[i];
-
                                         console.log("adding operator #"+(i+1));
                                         console.log("  id:" + operators[i].id);
                                         console.log("  Name:" + operators[i].Name);
                                         console.log("  Enable:" + operators[i].Enable)
+                                        console.log("  StartRange:" + operators[i].StartRange);
+                                        console.log("  EndRange:" + operators[i].StartRange);
                                         console.log("  InvertColor:"+ operators[i].InvertColor);
                                         console.log("  DestCollection"+ operators[i].DestCollection);
-                                    //}
                                 }
                                         
                                 console.log("--------------------------------------------------------");
@@ -1522,7 +1516,7 @@ var eventMasterAction = {
         }    
     },
 
-        SetStatus: function (context, status) {
+    SetStatus: function (context, status) {
         var settings = settingsCache[context];
         if( settings ) {
             settings.status = status;
@@ -1744,6 +1738,10 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
 
                     changed = true;
                     settings["ipAddress"] = jsonPayload.ipAddress;
+                }
+                if( jsonPayload.hasOwnProperty('operator')) {
+                    changed=true;
+                    settings["operator"] = jsonPayload.operator;
                 }
                 if (jsonPayload.hasOwnProperty('activatePreset')) {
 

@@ -6,7 +6,7 @@
         <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
         <meta name=apple-mobile-web-app-capable content=yes>
         <meta name=apple-mobile-web-app-status-bar-style content=black>
-        <title>Property Inspector Samples PI</title>
+        <title>Recall Preseet Property Inspector</title>
         <link rel="stylesheet" href="../css/sdpi.css">
         <!--link rel="stylesheet" 
               media="screen and (max-width: 1025px)" 
@@ -24,12 +24,12 @@
             
             <div class="sdpi-item" title="This field lets you select the operator.">
                 <div class="sdpi-item-label">Operator</div> 
-                <select class="sdpi-item-value select" id="operators"  onchange="updateSettings()"></select>
+                <select class="sdpi-item-value select" id="operator" onchange="updateSettings()"></select>
             </div>
 
-            <div class="sdpi-item" title="This field lets you enter the super operator password.">
+            <div class="sdpi-item" id="password_div" title="This field lets you enter the super operator password.">
                 <div class="sdpi-item-label">Password</div> 
-                <input id="password" class="sdpi-item-value" oninput="updateSettings()"></select>
+                <input class="sdpi-item-value" id="password" value="" oninput="updateSettings()"></select>
             </div>
 
             <div class="sdpi-item" title="This field lets you select the preset.">
