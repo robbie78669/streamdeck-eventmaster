@@ -1,4 +1,16 @@
+const OPERATOR = {
+    ALL: -2,
+    SUPER: -1,
+    ONE: 0,
+    TWO: 1,
+    THREE: 2
+}
 
+const ERROR_LEVEL = {
+    ERROR: 1,
+    WARN: 2,
+    INFO: 3
+}
 
 var websocket = null;
 var pluginUUID = null;
@@ -24,20 +36,19 @@ function isEmpty( obj ) {
 function isValidIp(ipAddress) {
     
 	var ipformat = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-	
-	if( ipAddress ) {
-			if( ipAddress.match(ipformat) )
-			return true;
+	    
+	if( ipAddress && ipAddress.match(ipformat) ) {
+		return true;
 	}
 	
 	return false;
 }
 
+
 function validateNum (input, min, max) {
     var num = +input;
     return num >= min && num <= max && input === num.toString();
 }
-
 
 
 var EventMasterRPC = {
@@ -67,28 +78,35 @@ var EventMasterRPC = {
 					if( xhr.status === 200) {
 						
 							var fullResponse = JSON.parse(xhr.response);
-                            console.log("powerStatus response: "+xhr.response);
+                            
+                            var txt = "powerStatus response: "+xhr.response;
+                            eventMasterAction.logMessage(context, txt, ERROR_LEVEL.INFO)
                             eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                            console.warn("powerStatus error: "+xhr.response);
+                            var txt = "powerStatus: "+xhr.response;
+                            eventMasterAction.logMessage(context, txt, ERROR_LEVEL.WARN)
                             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.warn("powerStatus error: "+xhr.response);
+                var txt = "powerStatus: "+xhr.response;
+                eventMasterAction.logMessage(context, txt, ERROR_LEVEL.ERROR)
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
 					
 			var data = JSON.stringify({"params": {}, "method":"powerStatus", "id":"1234", "jsonrpc":"2.0"});
 			xhr.send(data);
-			console.log("url: " + url + " sent: "+data);
+
+			var txt = "url: " + url + " sent: "+data;
+            eventMasterAction.logMessage(context, txt, ERROR_LEVEL.INFO)
         }
         else{
-            console.warn("powerStatus: Invalid IP Address: " + ipAddress);
+            var txt = "powerStatus: Invalid IP Address: " + ipAddress;
+            eventMasterAction.logMessage(context, txt, ERROR_LEVEL.WARN)
         }
 	},
 
@@ -276,14 +294,14 @@ var EventMasterRPC = {
             if ( settings.activatePreset && settings.activatePreset.presetName ){
 
                 var data;
-                // if super operator, send password instead of operatorId.
-                if( settings.activatePreset.operatorId )
+                // if super operator, send password instead of id.
+                if( settings.operator )
                 {
-                    if( settings.activatePreset.operatorId == -1 ) {
-                        data = JSON.stringify({"params": {"password": settings.activatePreset.password, "presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+                    if( settings.operator.id <= OPERATOR.SUPER ) {
+                        data = JSON.stringify({"params": {"password": settings.operator.password, "presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
                     }
                     else {
-                        data = JSON.stringify({"params": {"operatorId": settings.activatePreset.operatorId,"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
+                        data = JSON.stringify({"params": {"operatorId": settings.operator.id,"presetName": settings.activatePreset.presetName, "type": settings.activatePreset.presetMode}, "method":"activatePreset", "id":"1234", "jsonrpc":"2.0"});
                     }
                 } 
                 else {
@@ -1087,6 +1105,7 @@ var EventMasterRPC = {
                             // if intended for PVW
                             if( settings.cutLayer.layerMode == 0 ) {
                                 
+                                
                                 if(!onProgram && !onPreview) {
                                     layerId = settings.destinationContents[destId].Layers[i].id;
                                  }
@@ -1096,6 +1115,7 @@ var EventMasterRPC = {
                                 else if( onPreview ) {
                                     layerId = settings.destinationContents[destId].Layers[i].id;
                                 }
+                                console.log("cutLayer Mix to PVW: LayerId="+layerId+" LayerName="+layerName);
                             }
                             // or is it intended for PGM
                             else if( settings.cutLayer.layerMode == 1) {
@@ -1108,12 +1128,15 @@ var EventMasterRPC = {
                                 else if( onPreview ) {
                                     layerId = settings.destinationContents[destId].Layers[i].id+1;
                                 }
+                                console.log("cutLayer Mix to PGM: LayerId="+layerId+" LayerName="+layerName);
                             }
                         }
                         // a non mixing layer
                         else {
                             // nothing to do with non mix layers.
                             layerId = settings.cutLayer.layerInfo.id;
+                            console.log("cutLayer SL to PGM: LayerId="+layerId+" LayerName="+layerName);
+
                         }
 
                         // break out of the loops.
@@ -1268,23 +1291,26 @@ var EventMasterRPC = {
                             }								
 
                             console.log("--------------------------------------------------------");
-
                             console.log("checking pendingAction state..");
                             
-                            if( settings["pendingCutAction"] ==  "com.barco.eventmaster.cutlayer" ) {
+                            if( settings["pendingCutAction"] &&
+                                settings["pendingCutAction"].action ==  "com.barco.eventmaster.cutlayer" && 
+                                settings["pendingCutAction"].destId == destinationId ) {
+                                
                                 console.log("pendingCutLayer");
-                            
+                                
                                 settings["pendingCutAction"]="";
                                 EventMasterRPC.cutLayer(context);
                                 
-                            
                             }
-                            if( settings["pendingCutAuxAction"] ==  "com.barco.eventmaster.cutaux") {
+                            if( settings["pendingCutAuxAction"] &&
+                                settings["pendingCutAuxAction"].action ==  "com.barco.eventmaster.cutaux" && 
+                                settings["pendingCutAuxAction"].destId == destinationId ) {
+
                                 console.log("pendingCutAux");
                                 
                                 settings["pendingCutAuxAction"]="";
                                 EventMasterRPC.cutAux(context);
-                                
                             }
                         }
 					}
@@ -1412,11 +1438,22 @@ var eventMasterAction = {
     },
 
     onPropertyInspectorDidAppear: function (action, context, settings ) {
-        this.getSettings(context);
+        // send notification to property_inspector to load saved settings
+        if( settingsCache != null && !isEmpty(settingsCache[context]) )  {
+
+            EventMasterRPC.updateCache(context, action);            
+            var json = {
+                "event": "sendToPropertyInspector",
+                "context": context,
+                "payload": settingsCache[context]
+            };
+
+            websocket.send(JSON.stringify(json))
+        }
     },
 
     onPropertyInspectorDidDisappear: function (action, context, settings ) {
-        this.setSettings(context);
+       this.setSettings(context);
     },
     
     onKeyDown: function (action, context, settings, coordinates, userDesiredState) {
@@ -1446,15 +1483,47 @@ var eventMasterAction = {
             } 
             else if( action == "com.barco.eventmaster.cutlayer") {
                 // set pending flag - we need current content's state but it is async so must wait for the
-                // return of listContents.  
+                // return of listContents to know which mix layer is on PGM or PVW
                 EventMasterRPC.getAllDestinationContent(context);
+                console.log("Qeueing pendingCutLayer");
+ 
+                if( settings.cutLayer &&
+                    ( settings.cutLayer.destInfo && settings.cutLayer.destInfo.id != -1 ) &&
+                    ( settings.cutLayer.srcInfo && settings.cutLayer.srcInfo.id != -1 ) &&
+                    ( settings.cutLayer.layerInfo && settings.cutLayer.layerInfo.id != -1 ) ) {
+                        
+                    // Look for the layer Id in the destationContents..
+                    // Check to see whether it is a mix layer
+                    // if so, check the flag of whether that layer is on preview / program and choose the layer based
+                    // on the layerMode (preview or program)
+        
+                    var layerId = -1;
+                    var destId = settings.cutLayer.destInfo.id;
+                    var pendingCutLayerAction = {"action":action,"destId":destId}; 
 
-                settings["pendingCutAction"] = action;
+                    settings["pendingCutAction"] = pendingCutLayerAction;;
+                }
             }
             else if( action == "com.barco.eventmaster.cutaux") {
                 EventMasterRPC.getAllDestinationContent(context);
+                console.log("Qeueing pendingCutAux");
 
-                settings["pendingCutAuxAction"] = action
+                if( settings.cutAux &&
+                    ( settings.cutAux.destInfo && settings.cutAux.destInfo.id != -1 ) &&
+                    ( settings.cutAux.srcInfo && settings.cutAux.srcInfo.id != -1 ) &&
+                    ( settings.cutAux.layerInfo && settings.cutAux.layerInfo.id != -1 ) ) {
+                        
+                    // Look for the layer Id in the destationContents..
+                    // Check to see whether it is a mix layer
+                    // if so, check the flag of whether that layer is on preview / program and choose the layer based
+                    // on the layerMode (preview or program)
+        
+                    var layerId = -1;
+                    var destId = settings.cutAux.destInfo.id;
+                    var pendingCutAuxAction = {"action":action,"destId":destId}; 
+
+                    settings["pendingCutAuxAction"] = pendingCutAuxAction;;
+                }
             }
         }
     },
@@ -1465,6 +1534,12 @@ var eventMasterAction = {
 
    
     onWillAppear: function (action, context, settings, coordinates) {
+        if(settings != null ){
+            settingsCache[context] = settings;
+        }
+        settings["pendingCutAction"]=""
+        settings["pendingCutAuxAction"]=""
+        
         this.getSettings(context);
     },
 
@@ -1472,26 +1547,26 @@ var eventMasterAction = {
         this.setSettings(context);
     },
 
-    onDidReceiveSettings: function(action, context, settings) {
+    // property inspector saved the settings.
+    // should pull out the settings
+    // But we are using SendToPlugin to do this.
+    //
+    // An Actions persistence is handled in the onwillappear/disappear
+    // and nowhere else.
+    onDidReceiveSettings: function (action, context, settings) {
+      this.settingsChanged( action, context, settings)
+    },
 
-        if (settingsCache != null ) {
-            if( settings != null )
-                settingsCache[context] = settings;
+    settingsChanged: function( action, context, settings ){
 
-            // send notification to property_inspector to load saved settings
-            if( !isEmpty(settingsCache[context]) )  {
-            
-                EventMasterRPC.updateCache(context, action);            
-                var json = {
-                    "event": "sendToPropertyInspector",
-                    "context": context,
-                    "payload": settingsCache[context]
-                };
+        settingsCache[context] = settings;
 
-                websocket.send(JSON.stringify(json));
-            }
-        }
-   },
+        EventMasterRPC.updateCache(context, action);
+                
+        // This will trigger a set setting command (to disk), the propertyinspector will keep the UX up to date
+        this.testEventMasterConnection( context );
+
+    },
 
     getSettings: function (context) {
         var json = {
@@ -1527,7 +1602,7 @@ var eventMasterAction = {
                 "context": context,
                 "payload": settingsCache[context]
             };
-    
+        
             websocket.send(JSON.stringify(json));
         }
     },
@@ -1547,12 +1622,12 @@ var eventMasterAction = {
 
     logMessage: function( context, messageStr, errorLevel ) {
      
-        if (errorLevel == 1 ) {
+        if (v == 1 ) {
             errorLevelStr = "ERROR";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.error(textStr);
         }
-        else if (errorlevel == 2 ) {
+        else if (errorLevel == 2 ) {
             errorLevelStr = "WARN";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.error(textStr);
@@ -1722,20 +1797,18 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
         }
         else if (event == "didReceiveSettings")  {
             var settings = jsonPayload['settings'];
-
-            eventMasterAction.onDidReceiveSettings(action, context, settings);        }
+            eventMasterAction.onDidReceiveSettings(action, context, settings);        
+        }
         
         else if (event == "sendToPlugin") {
-
-            var settings;
             var changed = false;
-            settings = settingsCache[context];
-
+            var settings = settingsCache[context];
+    
             if( settings!=null )
             {
                 // event coming from the property inspector..
                 if (jsonPayload.hasOwnProperty('ipAddress')) {
-
+    
                     changed = true;
                     settings["ipAddress"] = jsonPayload.ipAddress;
                 }
@@ -1744,12 +1817,12 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                     settings["operator"] = jsonPayload.operator;
                 }
                 if (jsonPayload.hasOwnProperty('activatePreset')) {
-
+    
                     changed = true;
                     settings["activatePreset"] = jsonPayload.activatePreset;;
                 }
                 if (jsonPayload.hasOwnProperty('activateCue')) {
-
+    
                     changed = true;
                     settings["activateCue"] = jsonPayload.activateCue;
                 }
@@ -1772,11 +1845,10 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                             
                 if( changed  ) {
                     settingsCache[context] = settings;
-
+    
                     EventMasterRPC.updateCache(context, action);
                     eventMasterAction.testEventMasterConnection( context );
-                    
-                }
+                }                
             }
         }
     };

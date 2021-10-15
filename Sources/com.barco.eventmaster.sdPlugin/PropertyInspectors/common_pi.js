@@ -41,16 +41,9 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
         var jsonObj = JSON.parse(evt.data);
 
     
-        if (jsonObj.event === 'didReceiveSettings') {
-            var payload = jsonObj.payload;
-            var action = jsonObj.action;
-
-            // per instance
-            var context = jsonObj.context;
-        
-        }
-
-        else if (jsonObj.event === 'sendToPropertyInspector') {
+        if (jsonObj.event === 'sendToPropertyInspector' ||
+            jsonObj.event === 'didReceiveSettings') {
+            
             var payload = jsonObj.payload;
             var action = jsonObj.action;
             var context = jsonObj.context;
@@ -63,8 +56,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var presets = payload["presets"];
             var cues = payload["cues"]
             var operators = payload["operators"];
-            var selectedOperator = payload["operator"];
-            var superOperatorPassword = payload["password"];
+            var operator = payload["operator"];
             var ipAddress = payload['ipAddress'];
             var status = payload['status'];
           
@@ -102,15 +94,16 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     var operatorElement = operatorsNameElement.appendChild( new Option("Super Operator") );
                     operatorElement.value = OPERATOR.SUPER;
                         
-                    if( selectedOperator == null ) {
+                    if( operator == null ) {
                         // set selected to super
-                        selectedOperator = {"id": OPERATOR.SUPER, 
-                                            "Name": "Super Operator",
-                                            "Enable": 1, 
-                                            "StartRange": 0,
-                                            "EndRange": 1000,
-                                            "InvertColor": 0, 
-                                            "DestCollection": [] };
+                        operator = {"id": OPERATOR.SUPER, 
+                                    "password": "",
+                                    "Name": "Super Operator",
+                                    "Enable": 1, 
+                                    "StartRange": 0,
+                                    "EndRange": 10000,
+                                    "InvertColor": 0, 
+                                    "DestCollection": [] };
                     }
                     
                      
@@ -119,21 +112,18 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     for(var i=0; i<operators.length; i++) {
                         var operatorElement = operatorsNameElement.appendChild( new Option(operators[i].Name) );
                         operatorElement.value = operators[i].id;
-                        if( selectedOperator && selectedOperator.id == operators[i].id ) {
-                            selectedOperator = operators[i];                            
-                        }
                     }
 
                     // select the previously selected item (from the plugin)
                     for( var i=0; i<operatorsNameElement.length; i++ ){
-                        if(operatorsNameElement[i].value == selectedOperator.id ) {
+                        if(operatorsNameElement[i].value == operator.id ) {
                             operatorsNameElement[i].selected = true;
                         }
                     }    
                 }
                 var passwordDivElement = document.getElementById("password_div");
                 if( passwordDivElement ) {
-                    if( selectedOperator && selectedOperator.id == OPERATOR.SUPER ) {
+                    if( operator && operator.id == OPERATOR.SUPER ) {
                         passwordDivElement.style.display = "flex";
                         passwordDivElement.style.flexDirection = "row" ;
                         passwordDivElement.style.minHeight = "32px";
@@ -141,13 +131,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         passwordDivElement.style.marginTop = "2px";
                         passwordDivElement.style.maxWidth ="344px";
                        
-                        if( superOperatorPassword ) {
-                            //passwordElement.value = superOperatorPassword;
-                        }
+                        passwordDivElement.value = operator.password;
                     } 
                     else {
                         passwordDivElement.style.display = "none";
-                        passwordElement.value = "";
+                        passwordDivElement.value = "";
                     }
                 }
             }
@@ -174,10 +162,21 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         presetElement.value = -1;
                         presetElement.selected = true;
 
-                        if( selectedOperator ){
+                        if( operator && operators){
+                            for( var i=0; i<operators.length; i++ ) {
+                                if( operators[i].id == operator.id) {
+                                    // it's one of the configured operators on the frame as opposed to
+                                    // Super or All..
+                                    //
+                                    // We need to get the preset ranges for the logic below.
+                                    operator = operators[i];        
+                                    break;
+                                }
+                            }
+
                             for(var i=0; i<presets.length; i++) {
-                                if( selectedOperator.id <= OPERATOR.SUPER || 
-                                        (presets[i].id >= selectedOperator.StartRange && presets[i].id <= selectedOperator.EndRange ) ) {
+                                if( operator.id <= OPERATOR.SUPER || 
+                                        (presets[i].id >= (operator.StartRange-1) && presets[i].id <= (operator.EndRange-1) ) ) {
                                     var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
                                     presetElement.value = presets[i].id;
                                 }
@@ -702,6 +701,10 @@ function updateSettings() {
         }
 
 
+        // hide the password entry if the user is not super operator
+        // these come from the style sheet definition.  Otherwise if you don't
+        // set these style elements it will muck up the input field and put
+        // it on the next line instead of inline.
         var passwordDivElement = document.getElementById("password_div");
         if( passwordDivElement ) {
             if( operator  && operator.id == OPERATOR.SUPER ) {
@@ -711,13 +714,19 @@ function updateSettings() {
                 passwordDivElement.style.alignItems = "center";
                 passwordDivElement.style.marginTop = "2px";
                 passwordDivElement.style.maxWidth ="344px";
-                operator.password = passwordDivElement.value;                 //passwordElement.value = superOperatorPassword;
+
+                var passwordElement = document.getElementById("password");
+                if( passwordElement ) {
+                    operator.password = passwordElement.value;         
+                }
+
             } 
             else {
                 passwordDivElement.style.display = "none";
                 operator.password="";
             }
         }
+        payload.operator= operator;
     }
 
     /** activatePreset */
@@ -874,9 +883,19 @@ function updateSettings() {
     
     payload.cutAux = cutAux;
    
-        
     sendPayloadToPlugin(payload);
 }
+
+function setSettings(payload) {
+    var json = {
+        "event": "setSettings",
+        "context": uuid,
+        "payload": payload
+    };
+
+    websocket.send(JSON.stringify(json));
+}
+
 
 function sendPayloadToPlugin(payload) {
     if (websocket && (websocket.readyState === 1)) {
