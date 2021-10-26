@@ -521,6 +521,73 @@ var EventMasterRPC = {
         
 	},
 
+    getInputs: function( context ) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("getInputs error: settingCache is null!");
+            return;
+        }
+
+        ipAddress = settings.ipAddress;
+		if( isValidIp( ipAddress ) ) {
+		
+			var url = "http://"+ipAddress+":9999";
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.setRequestHeader("Content-type", "application/json");
+
+			xhr.onload = function (e) { 
+				if (xhr.readyState === 4 ) {
+					if( xhr.status === 200) {
+                        
+                        eventMasterAction.SetStatus(context, "Connection Established");
+						var fullResponse = JSON.parse(xhr.response);
+						console.log("getInputs response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+                            var inputs = settings.inputs = fullResponse.result.response;
+                            var arrayLength = inputs.length;
+                            for (var i = 0; i < arrayLength; i++) {
+                                console.log("input #"+(i+1))
+                                console.log("id:" + inputs[i].id);
+                                console.log("Name:" + inputs[i].Name);
+                                console.log("SyncStatus:" + inputs[i].SyncStatus);
+                                console.log("VideoStatus:" + inputs[i].VideoStatus);
+                                console.log("Format:" + inputs[i].Format);
+                                console.log("ColorSampleBit:" + inputs[i].ColorSampleBit);
+                                console.log("Color_Space:" + inputs[i].Color_Status);
+                                console.log("Colorimetry:" + inputs[i].Colorimetry);
+                                console.log("GammaFx:" + inputs[i].GammaFx);
+                                console.log("ColorDepth:" + inputs[i].ColorDepth);
+                                console.log("Capacity:" + inputs[i].Capacity);
+                                console.log("--------------------------------------------------------");
+                            }
+                        }
+					}
+					else {
+                        console.warn("getInputs error: "+xhr.responseText);
+                        eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+					}
+				}
+			};
+
+			xhr.onerror = function (e) {
+                console.warn("getInputs error: "+xhr.responseText);
+                eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+			};
+
+		
+			var data = JSON.stringify({"params":{"type":0}, "method":"listInputs", "id":"1234", "jsonrpc":"2.0"});
+			xhr.send(data);
+			console.log("sent: "+data);
+        }
+        else{
+            console.warn("getInputs: Invalid IP Address: " + ipAddress);
+        }
+	},
 
     getSources: function( context ) {
 
@@ -1355,10 +1422,80 @@ var EventMasterRPC = {
             }
         }
     },
+
+    resetSourceBackup: function( context ) {
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            return;
+        }
+
+        if( settings.resetSourceBackup &&
+            ( settings.resetSourceBackup.srcInfo && settings.resetSourceBackup.srcInfo.id != -1 ) ) {
+            content = { "id": parseInt(settings.resetSourceBackup.srcInfo.id) };
+          
+        }
+        else {
+            console.error( "Error: resetSourceBackup() is missing some data! " + settings.resetSourceBackup );
+        }
+
+
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            console.error("resetSourceBackup error: settingCache is null!");
+            return;
+        }
+
+        
+        if( isValidIp( ipAddress ) ) {
+    
+            var url = "http://"+ipAddress+":9999";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Content-type", "application/json");
+
+            xhr.onload = function (e) { 
+                if (xhr.readyState === 4 ) {
+                    if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");					
+
+                        var fullResponse = JSON.parse(xhr.response);
+                        console.log("resetSourceBackup response: "+xhr.response);
+
+                            if (fullResponse.result.success && fullResponse.result.success == 0 ) {
+
+                            }
+                            else if( fullResponse.result.error ) {
+                                console.error("resetSourceBackup error: "+fullResponse.result.error);        
+                            }
+                    }
+                    else {
+                        console.error("resetSourceBackup error: "+xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.onerror = function (e) {
+                console.error("resetSourceBackup error: "+xhr.responseText);
+            };
+    
+            var data = JSON.stringify({"params": content, "method":"resetSourceMainBackup", "id":"1234", "jsonrpc":"2.0"});
+
+            xhr.send(data);
+            console.log("sent: "+data);
+        }
+        else{
+            console.warn("resetSourceBackup: Invalid IP Address: " + ipAddress);
+        }
+    },
     
     updateCache: function(context, action) {
     
         this.getDestinations(context);
+        this.getInputs(context);
         this.getSources(context);
         this.getBackgrounds(context);
         this.getAllDestinationContent(context);
@@ -1522,8 +1659,11 @@ var eventMasterAction = {
                     var destId = settings.cutAux.destInfo.id;
                     var pendingCutAuxAction = {"action":action,"destId":destId}; 
 
-                    settings["pendingCutAuxAction"] = pendingCutAuxAction;;
+                    settings["pendingCutAuxAction"] = pendingCutAuxAction;
                 }
+            }
+            else if( action == "com.barco.eventmaster.resetsourcebackup" ) {
+                EventMasterRPC.resetSourceBackup(context);
             }
         }
     },
@@ -1622,7 +1762,7 @@ var eventMasterAction = {
 
     logMessage: function( context, messageStr, errorLevel ) {
      
-        if (v == 1 ) {
+        if (errorLevel == 1 ) {
             errorLevelStr = "ERROR";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.error(textStr);
@@ -1633,7 +1773,7 @@ var eventMasterAction = {
             console.error(textStr);
         }
         else {
-            erroLevelStr = "INFO";
+            errorLevelStr = "INFO";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.log(textStr);
         }
@@ -1841,6 +1981,10 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                 if( jsonPayload.hasOwnProperty('cutAux')) {
                     changed = true;
                     settings["cutAux"] = jsonPayload.cutAux;
+                }
+                if( jsonPayload.hasOwnProperty('resetSourceBackup')) {
+                    changed = true;
+                    settings["resetSourceBackup"] = jsonPayload.resetSourceBackup;
                 }
                             
                 if( changed  ) {

@@ -48,6 +48,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var action = jsonObj.action;
             var context = jsonObj.context;
 
+            var inputs = payload["inputs"];
             var sources = payload["sources"];
             var backgrounds = payload["backgrounds"];
             var screenDestinations = payload["screenDestinations"];
@@ -59,6 +60,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var operator = payload["operator"];
             var ipAddress = payload['ipAddress'];
             var status = payload['status'];
+            var sourceBackups = payload['sourceBackups'];
           
             
             // Global html properties
@@ -203,6 +205,74 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     }
                     else {
                         setChecked(presetModeElement, "presetMode_toProgram");
+                    }
+                }
+            }
+
+            else if( action == "com.barco.eventmaster.resetsourcebackup"){
+                //
+                // Clear list, repopulate, and check selected item towards the end of this conditional
+                //
+                // The currenytly selected the GUI element
+                if( payload["resetSourceBackup"] == null)
+                {
+                    payload["resetSourceBackup"] = {id: -1, "name":""};
+                }
+                var resetSourceBackup_payload = payload["resetSourceBackup"];
+                                
+                // selected information
+                var srcInfo = resetSourceBackup_payload.srcInfo;
+              
+                // --------------- sources------------------------------------------
+                var reset_sourcebackup_list_Element = document.getElementById("reset_sourcebackup_list");
+                if( reset_sourcebackup_list_Element != null ) {
+
+                    var options = reset_sourcebackup_list_Element.getElementsByTagName("option");
+                    while (options.length)
+                       reset_sourcebackup_list_Element.remove(0);
+                    
+                    // Inputs
+                    if( inputs ) {
+                        var inputs_optG = document.getElementById('reset_sourcebackup_input');
+                        var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option("") );
+                        sourceElement.value = -1;
+
+                        if( srcInfo == null ) {
+                            srcInfo = {id: -1, name: ""};
+                            sourceElement.selected = true;
+                        }
+
+                        for(var i=0; i<inputs.length; i++) {
+                            var sourceElement = inputs_optG.appendChild( new Option(inputs[i].Name) );
+                            sourceElement.value = inputs[i].id;
+                        }
+                    }
+
+                    // backgrounds
+                    if( backgrounds ) {
+                        var backgrounds_optG = document.getElementById('reset_sourcebackup_background');
+                        var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option("") );
+                        sourceElement.value = -1;
+ 
+                        if( srcInfo == null ) {
+                            srcInfo = {id: -1, name: ""};
+                            sourceElement.selected = true;
+                        }
+                        
+                        for(var i=0; i<backgrounds.length; i++) {
+                            var sourceElement = inputs_optG.appendChild( new Option(backgrounds[i].Name) );
+                            sourceElement.value = backgrounds[i].id;
+                        }
+                    }
+
+                    if( srcInfo ) {
+                        // select the previously selected item (from the plugin)
+                        for( var i=0; i<reset_sourcebackup_list_Element.options.length; i++ ){
+                            if(reset_sourcebackup_list_Element.options[i].value == srcInfo.id ){
+                                reset_sourcebackup_list_Element.options[i].selected = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -491,11 +561,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                 sourceElement.value = sources[i].id;
                             }
                             else if( sources[i].SrcType == 2 ) { 
-                                var screenElement = destinations_optG.appendChild( new Option(sources[i].Name) );
+                                var sourceElement = destinations_optG.appendChild( new Option(sources[i].Name) );
                                 sourceElement.parentNode.value = sources[i].id;
                             }
                             else if( sources[i].SrcType == 3 ) { 
-                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                var sourceElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
                                 sourceElement.value = sources[i].id;
                             }
                         }
@@ -608,11 +678,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                 sourceElement.value = sources[i].id;
                             }
                             else if( sources[i].SrcType == 2 ) { 
-                                var screenElement = destinations_optG.appendChild( new Option(sources[i].Name) );
+                                var sourceElement = destinations_optG.appendChild( new Option(sources[i].Name) );
                                 sourceElement.parentNode.value = sources[i].id;
                             }
                             else if( sources[i].SrcType == 3 ) { 
-                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
+                                var sourceElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
                                 sourceElement.value = sources[i].id;
                             }
                         }
@@ -880,8 +950,22 @@ function updateSettings() {
             cutAux.srcInfo = srcInfo;
         }
     }
+
+      
+    // resetSourceBackup ---------------------------------------------------------------
+    var resetSourceBackup = { srcInfo: null};
+ 
+    var resetSourceBackupElement = document.getElementById('reset_sourcebackup_list');
+    if( resetSourceBackupElement != null ) {
+        var selectedIndex = resetSourceBackupElement.selectedIndex;
+        if( selectedIndex >= 0 ){
+            srcInfo.id = resetSourceBackupElement.options[selectedIndex].value;
+            srcInfo.name = resetSourceBackupElement.options[selectedIndex].label;
+            resetSourceBackup.srcInfo = srcInfo;
+        }
+    }
     
-    payload.cutAux = cutAux;
+    payload.resetSourceBackup = resetSourceBackup;
    
     sendPayloadToPlugin(payload);
 }

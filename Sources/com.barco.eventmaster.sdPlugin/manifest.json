@@ -134,6 +134,22 @@
       "Tooltip": "This action changes a source within an Aux", 
       "PropertyInspectorPath": "PropertyInspectors/cutaux_pi.html",
       "UUID": "com.barco.eventmaster.cutaux"
+    },
+
+    {
+      "Icon": "images/resetSourceBackupActionImage",
+      "Name": "Reset Source Backup", 
+      "States": [
+        {
+          "Image": "images/resetSourceBackupKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "Reset the backup source to the primary", 
+      "PropertyInspectorPath": "PropertyInspectors/resetsourcebackup_pi.html",
+      "UUID": "com.barco.eventmaster.resetsourcebackup"
     }
 
   ],
