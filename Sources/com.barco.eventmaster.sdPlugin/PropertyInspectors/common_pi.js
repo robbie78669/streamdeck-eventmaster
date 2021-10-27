@@ -7,6 +7,13 @@
     THREE: 2
 }
 
+const FREEZE_SRC_TYPE = {
+    INPUT: 0,
+    BACKGROUND: 1,
+    SCREEN_DEST: 2,
+    AUX_DEST : 3
+}
+
 var websocket = null,
     uuid = null,
     actionInfo = {},
@@ -339,39 +346,57 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     while (freezelist_Element.length)
                         freezelist_Element.remove(0);
 
+                    var sourceElement = freezelist_Element.appendChild( new Option("") );
+                    sourceElement.value = -1;
+
+                    // SrcType = 0 -> Input Source
+                    //         = 1 -> Background Source 
+                    //         = 2 -> Screen Destination
+                    //         = 3 -> Aux Destination 
+                    if( freeze_payload == null ) {
+                        freeze_payload = {id: -1, srcType: FREEZE_SRC_TYPE.INPUT, name: ""};
+                        sourceElement.selected = true;
+                    }
+
                     if( sources ) {
-
-                        var inputs_optG = document.getElementById('freeze_source_input');
-                        var backgrounds_optG = document.getElementById('freeze_source_background');
-
-                        var sourceElement = freezelist_Element.appendChild( new Option("") );
-                        sourceElement.value = -1;
-
-                        if( freeze_payload == null ) {
-                            freeze_payload = {id: -1, name: ""};
-                            sourceElement.selected = true;
-                        }
-
+                     var inputs_optG = document.getElementById('freeze_source_input');
                         for(var i=0; i<sources.length; i++) {
-                            //inputs
-                            if( sources[i].SrcType  == 0 ) {
-                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].id;
-                            }
-                            // backgrounds
-                            else if( sources[i].SrcType == 3 ) { 
-                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].id;
-                            }
+                            var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                            sourceElement.value = sources[i].id;
                         }
+                    }
 
-                        // select the previously selected item (from the plugin)
-                        for( var i=0; i<freezelist_Element.options.length; i++ ){
-                            if(freezelist_Element.options[i].value == freeze_payload.id ) {
-                                freezelist_Element.options[i].selected = true;
-                            }
+                    if( backgrounds ) {
+                        var backgrounds_optG = document.getElementById('freeze_source_background');
+                        for(var i=0; i<backgrounds.length; i++) {
+                        
+                            var sourceElement = backgrounds_optG.appendChild( new Option(backgrounds[i].Name) );
+                            sourceElement.value = backgrounds[i].id;
                         }
-                    }       
+                    }
+
+                    if( screenDestinations ) {
+                        var dests_optG = document.getElementById('freeze_source_destination')
+                        for(var i=0; i<screenDestinations.length; i++) {
+                            var screenElement = dests_optG.appendChild( new Option(screenDestinations[i].Name) );
+                            sourceElement.value = screenDestinations[i].id;
+                        }                            
+                    }
+
+                    if( auxDestinations ){
+                        var auxs_optG = document.getElementById('freeze_source_aux')
+                        for(var i=0; i<screenDestinations.length; i++) {
+                            var screenElement = auxs_optG.appendChild( new Option(auxDestinations[i].Name) );
+                            sourceElement.value = auxDestinations[i].id;
+                        }                            
+                    }
+
+                    // select the previously selected item (from the plugin)
+                    for( var i=0; i<freezelist_Element.options.length; i++ ){
+                        if(freezelist_Element.options[i].value == freeze_payload.id ) {
+                            freezelist_Element.options[i].selected = true;
+                        }
+                    }
                 } 
             }
             else if( action == "com.barco.eventmaster.unfreeze"){
@@ -384,37 +409,51 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     while (unfreezelist_Element.length)
                         unfreezelist_Element.remove(0);
 
+                    var sourceElement = unfreezelist_Element.appendChild( new Option("") );
+                    sourceElement.value = -1;
+                    sourceElement.selected = true;
+
+                    if( unfreeze_payload == null ) {
+                        unfreeze_payload = {id: -1, SrcType: FREEZE_SRC_TYPE.INPUT, name: ""};
+                    }
+
                     if( sources ) {
-
                         var inputs_optG = document.getElementById('unfreeze_source_input');
-                        var backgrounds_optG = document.getElementById('unfreeze_source_background');
-
-                        var sourceElement = unfreezelist_Element.appendChild( new Option("") );
-                        sourceElement.value = -1;
-                        sourceElement.selected = true;
-
-                        if( unfreeze_payload == null ) {
-                            unfreeze_payload = {id: -1, name: ""};
-                        }
-
                         for(var i=0; i<sources.length; i++) {
-                            //inputs
-                            if( sources[i].SrcType  == 0 ) {
-                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].id;
-                            }
-                            // backgrounds
-                            else if( sources[i].SrcType == 3 ) { 
-                                var screenElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].id;
-                            }
+                           var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                           sourceElement.value = sources[i].id;
                         }
+                    }
 
-                        // select the previously selected item (from the plugin)
-                        for( var i=0; i<unfreezelist_Element.options.length; i++ ){
-                            if(unfreezelist_Element.options[i].value == unfreeze_payload.id ) {
-                                unfreezelist_Element.options[i].selected = true;
-                            }
+                    if( backgrounds ) {
+                        var backgrounds_optG = document.getElementById('unfreeze_source_background');
+                        for(var i=0; i<backgrounds.length; i++) {
+                            var sourceElement = backgrounds_optG.appendChild( new Option(backgrounds[i].Name) );
+                            sourceElement.value = backgrounds[i].id;
+                        }
+                    }
+
+                    if( screenDestinations ){
+                        var dests_optG = document.getElementById('unfreeze_source_destination')
+                        for(var i=0; i<screenDestinations.length; i++) {
+                            var sourceElement = dests_optG.appendChild( new Option(screenDestinations[i].Name) );
+                            sourceElement.value = screenDestinations[i].id;
+                        }
+                    }
+
+                    if( auxDestinations ) {
+
+                        var aux_optG = document.getElementById('unfreeze_source_aux')                        
+                        for(var i=0; i<auxDestinations.length; i++) {
+                            var sourceElement = aux_optG.appendChild( new Option(auxDestinations[i].Name) );
+                            sourceElement.value = auxDestinations[i].id;
+                        }
+                    }
+                    
+                    // select the previously selected item (from the plugin)
+                    for( var i=0; i<unfreezelist_Element.options.length; i++ ){
+                        if(unfreezelist_Element.options[i].value == unfreeze_payload.id ) {
+                            unfreezelist_Element.options[i].selected = true;
                         }
                     }       
                 } 
@@ -542,8 +581,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         var inputs_optG = document.getElementById('cutLayer_source_input');
                         var stills_optG = document.getElementById('cutLayer_source_still');
                         var destinations_optG = document.getElementById('cutLayer_source_screen');
-                        var backgrounds_optG = document.getElementById('cutLayer_source_backgrounds');
-
+     
                         var sourceElement = cutLayer_source_list_Element.appendChild( new Option("") );
                         sourceElement.value = -1;
 
@@ -563,10 +601,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                             else if( sources[i].SrcType == 2 ) { 
                                 var sourceElement = destinations_optG.appendChild( new Option(sources[i].Name) );
                                 sourceElement.parentNode.value = sources[i].id;
-                            }
-                            else if( sources[i].SrcType == 3 ) { 
-                                var sourceElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].id;
                             }
                         }
 
@@ -658,8 +692,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         var inputs_optG = document.getElementById('cutAux_source_input');
                         var stills_optG = document.getElementById('cutAux_source_still');
                         var destinations_optG = document.getElementById('cutAux_source_screen');
-                        var backgrounds_optG = document.getElementById('cutAux_source_backgrounds');
-
+     
                         var sourceElement = cutAux_source_list_Element.appendChild( new Option("") );
                         sourceElement.value = -1;
 
@@ -680,10 +713,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                             else if( sources[i].SrcType == 2 ) { 
                                 var sourceElement = destinations_optG.appendChild( new Option(sources[i].Name) );
                                 sourceElement.parentNode.value = sources[i].id;
-                            }
-                            else if( sources[i].SrcType == 3 ) { 
-                                var sourceElement = backgrounds_optG.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].id;
                             }
                         }
 
@@ -845,7 +874,7 @@ function updateSettings() {
     }
  
     /** Freeze **/
-    var freeze = { id: -1, name:""};
+    var freeze = { id: -1, type:  FREEZE_SRC_TYPE.INPUT, name:""};
     var freeze_listElement = document.getElementById('freeze_source_list');
     if( freeze_listElement != null && freeze_listElement.selectedIndex >= 0) {
 
@@ -854,11 +883,25 @@ function updateSettings() {
               
         freeze.id = freeze_listElement.options[selectedIndex].value;
         freeze.name = freeze_listElement.options[selectedIndex].label;
+        var parentId = freeze_listElement.options[selectedIndex].parentElement.id;
+        if ( parentId == "freeze_source_input"){
+            freeze.type = FREEZE_SRC_TYPE.INPUT;
+        }
+        else if (parentId == "freeze_source_background") {
+            freeze.type = FREEZE_SRC_TYPE.BACKGROUND;
+        }
+        else if(parentId == "freeze_source_destination") {
+            freeze.type = FREEZE_SRC_TYPE.SCREEN_DEST;
+        }
+        else if(parentId == "freeze_source_aux"){
+            freeze.type = FREEZE_SRC_TYPE.AUX_DEST;
+        }
+        
         payload.freeze = freeze;
     }
     
     /** UnFreeze **/
-    var unfreeze = { id: -1, name:""};
+    var unfreeze = { id: -1, type: FREEZE_SRC_TYPE.INPUT, name:""};
     var unfreeze_listElement = document.getElementById('unfreeze_source_list');
     if( unfreeze_listElement != null && unfreeze_listElement.selectedIndex >= 0) {
 
@@ -866,6 +909,21 @@ function updateSettings() {
         var selectedIndex = unfreeze_listElement.selectedIndex;
         unfreeze.id = unfreeze_listElement.options[selectedIndex].value;
         unfreeze.name = unfreeze_listElement.options[selectedIndex].label;
+
+        var parentId = unfreeze_listElement.options[selectedIndex].parentElement.id;
+        if ( parentId == "unfreeze_source_input"){
+            freeze.type = FREEZE_SRC_TYPE.INPUT;
+        }
+        else if (parentId == "unfreeze_source_background") {
+            freeze.type = FREEZE_SRC_TYPE.BACKGROUND;
+        }
+        else if(parentId == "unfreeze_source_destination") {
+            freeze.type = FREEZE_SRC_TYPE.SCREEN_DEST;
+        }
+        else if(parentId == "freeze_source_aux"){
+            freeze.type = FREEZE_SRC_TYPE.AUX_DEST;
+        }
+        
         
         payload.unfreeze = unfreeze;
     }
@@ -966,6 +1024,34 @@ function updateSettings() {
     }
     
     payload.resetSourceBackup = resetSourceBackup;
+
+
+    // FreezeDest  ---------------------------------------------------------------
+    var freezeDest = { id: -1, name:""};
+    var freezeDest_listElement = document.getElementById('freezedest_source_list');
+    if( freezeDest_listElement != null && freezeDest_listElement.selectedIndex >= 0) {
+
+        // determine which group (set the type based on the optgroup //
+        var selectedIndex = freezeDest_listElement.selectedIndex;
+              
+        freezeDest.id = freezeDest_listElement.options[selectedIndex].value;
+        freezeDest.name = freezeDest_listElement.options[selectedIndex].label;
+        payload.freezeDest = freezeDest;
+    }
+
+    // UnFreezeDest  ---------------------------------------------------------------
+    var unfreezeDest = { id: -1, name:""};
+    var unfreezeDest_listElement = document.getElementById('unfreezedest_source_list');
+    if( unfreezeDest_listElement != null && freezeDest_listElement.selectedIndex >= 0) {
+
+        // determine which group (set the type based on the optgroup //
+        var selectedIndex = freezeDest_listElement.selectedIndex;
+              
+        freezeDest.id = freezeDest_listElement.options[selectedIndex].value;
+        freezeDest.name = freezeDest_listElement.options[selectedIndex].label;
+        payload.freezeDest = freezeDest;
+    }
+   
    
     sendPayloadToPlugin(payload);
 }

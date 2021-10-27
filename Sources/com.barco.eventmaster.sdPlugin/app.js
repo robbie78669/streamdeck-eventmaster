@@ -6,6 +6,14 @@ const OPERATOR = {
     THREE: 2
 }
 
+const FREEZE_SRC_TYPE = {
+    INPUT: 0,
+    BACKGROUND: 1,
+    SCREEN_DEST: 2,
+    AUX_DEST : 3
+}
+
+
 const ERROR_LEVEL = {
     ERROR: 1,
     WARN: 2,
@@ -413,28 +421,17 @@ var EventMasterRPC = {
 
             var freeze = settings['freeze'];
             if (freeze  &&
-                freeze.id ) {
+                freeze.id && 
+                freeze.name && 
+                freeze.type ) {
 
                 var id = parseInt(freeze.id);
                 var name = freeze.name;
-                var type = parseInt(0);
-                var sources = settings["sources"];
-
-                if( sources) {
+                var type = parseInt(freeze.type);
                 
-                    for (var i=0; i<sources.length; i++) {
-                        if (sources[i].id == id ) {
-                            // if background
-                            if ( sources[i].SrcType == 3 ) {
-                              type=1;
-                              break;
-                            }
-                        }
-                    }
-                    var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":1 /*freeze*/ }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
-                    xhr.send(data);
-                    console.log("sent: "+data);
-                }
+                var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":1 /*freeze*/ }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
+                xhr.send(data);
+                console.log("sent: "+data);
             }
             else{
                 console.error( "Error: freeze_unfreeze() is missing some data! " + settings.freeze );
@@ -488,28 +485,17 @@ var EventMasterRPC = {
 
             var unfreeze = settings['unfreeze'];
             if (unfreeze  &&
+                unfreeze.name &&
+                unfreeze.type &&
                 unfreeze.id ) {
 
                 var id = parseInt(unfreeze.id);
                 var name = unfreeze.name;
-                var type = parseInt(0);
-                var sources = settings["sources"];
+                var type = parseInt(freeze.type);
 
-                if( sources) {
-                
-                    for (var i=0; i<sources.length; i++) {
-                        if (sources[i].id == id ) {
-                            // if background
-                            if ( sources[i].SrcType == 3 ) {
-                              type=1;
-                              break;
-                            }
-                        }
-                    }
-                    var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":0 }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
-                    xhr.send(data);
-                    console.log("sent: "+data);
-                }
+                var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":0 }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
+                xhr.send(data);
+                console.log("sent: "+data);
             }
             else{
                 console.error( "Error: freeze_unfreeze() is missing some data! " + settings.freeze );
