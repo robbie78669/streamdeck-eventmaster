@@ -104,6 +104,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     operatorElement.value = OPERATOR.SUPER;
                         
                     if( operator == null ) {
+
+                        console.log("operator is null!");
                         // set selected to super
                         operator = {"id": OPERATOR.SUPER, 
                                     "password": "",
@@ -140,11 +142,17 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         passwordDivElement.style.marginTop = "2px";
                         passwordDivElement.style.maxWidth ="344px";
                        
-                        passwordDivElement.value = operator.password;
+                        var passwordElement = document.getElementById("password");
+                        if( passwordElement ) {
+                            passwordElement.value = operator.password
+                        }
                     } 
                     else {
                         passwordDivElement.style.display = "none";
-                        passwordDivElement.value = "";
+                        var passwordElement = document.getElementById("password");
+                        if( passwordElement ) {
+                            passwordElement.value = "";
+                        }
                     }
                 }
             }
