@@ -1017,6 +1017,8 @@ function updateSettings() {
         }
     }
 
+    payload.cutAux = cutAux;
+
       
     // resetSourceBackup ---------------------------------------------------------------
     var resetSourceBackup = { srcInfo: null};
