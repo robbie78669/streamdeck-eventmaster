@@ -158,8 +158,22 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-					
-			var data = JSON.stringify({"params": {}, "method":"allTrans", "id":"1234", "jsonrpc":"2.0"});
+            var data;
+
+            // if super operator, send password instead of id.
+            if( settings.operator )
+            {
+                if( settings.operator.id <= OPERATOR.SUPER ) {
+                    data = JSON.stringify({"params": {"password": settings.operator.password}, "method":"allTrans", "id":"1234", "jsonrpc":"2.0"});
+                }
+                else {
+                    data = JSON.stringify({"params": {"operatorId": settings.operator.id,}, "method":"allTrans", "id":"1234", "jsonrpc":"2.0"});
+                }
+            } 
+            else {
+                data = JSON.stringify({"params": {}, "method":"allTrans", "id":"1234", "jsonrpc":"2.0"});
+            }
+			
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -206,8 +220,21 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
-					
-			var data = JSON.stringify({"params": {}, "method":"cut", "id":"1234", "jsonrpc":"2.0"});
+            var data;
+
+            // if super operator, send password instead of id.
+            if( settings.operator )
+            {
+                if( settings.operator.id <= OPERATOR.SUPER ) {
+                    data = JSON.stringify({"params": {"password": settings.operator.password}, "method":"cut", "id":"1234", "jsonrpc":"2.0"});
+                }
+                else {
+                    data = JSON.stringify({"params": {"operatorId": settings.operator.id,}, "method":"cut", "id":"1234", "jsonrpc":"2.0"});
+                }
+            } 
+            else {
+                data = JSON.stringify({"params": {}, "method":"cut", "id":"1234", "jsonrpc":"2.0"});
+            }
 			xhr.send(data);
 			console.log("sent: "+data);
         }

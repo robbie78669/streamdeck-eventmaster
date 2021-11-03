@@ -12,7 +12,7 @@
       ], 
       "SupportedInMultiActions": true,
       "Tooltip": "This action transitions all layers in Preview to Program", 
-      "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/alltrans_pi.html",
       "UUID": "com.barco.eventmaster.alltrans"
     },
     {
@@ -27,7 +27,7 @@
       ], 
       "SupportedInMultiActions": true,
       "Tooltip": "This action cuts all layers in Preview to Program", 
-      "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/cut_pi.html",
       "UUID": "com.barco.eventmaster.cut"
     },
     {
@@ -57,7 +57,7 @@
       ], 
       "SupportedInMultiActions": true,
       "Tooltip": "This action recalls the next preset into PVW", 
-      "PropertyInspectorPath": "PropertyInspectors/noparams_pi.html",
+      "PropertyInspectorPath": "PropertyInspectors/recallnext_pi.html",
       "UUID": "com.barco.eventmaster.recallnextpreset"
     },
     {
@@ -158,11 +158,11 @@
   "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
-  "Description": "Requires Event Master v7.1 or higher. ", 
+  "Description": "Requires Event Master v8.2 or higher. ", 
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 
-  "Version": "3.0",
+  "Version": "3.0.1",
   "OS": [
     {
         "Platform": "mac", 
