@@ -278,8 +278,23 @@ var EventMasterRPC = {
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
+            var data;
+
+            // if super operator, send password instead of id.
+            if( settings.operator )
+            {
+                if( settings.operator.id <= OPERATOR.SUPER ) {
+                    data = JSON.stringify({"params": {"password": settings.operator.password}, "method":"recallNextPreset", "id":"1234", "jsonrpc":"2.0"});
+                }
+                else {
+                    data = JSON.stringify({"params": {"operatorId": settings.operator.id,}, "method":"recallNextPreset", "id":"1234", "jsonrpc":"2.0"});
+                }
+            } 
+            else {
+                data = JSON.stringify({"params": {}, "method":"recallNextPreset", "id":"1234", "jsonrpc":"2.0"});
+            }
 					
-			var data = JSON.stringify({"params": {}, "method":"recallNextPreset", "id":"1234", "jsonrpc":"2.0"});
+		
 			xhr.send(data);
 			console.log("sent: "+data);
         }
@@ -1079,9 +1094,9 @@ var EventMasterRPC = {
                         var fullResponse = JSON.parse(xhr.response);
                         console.log("changeContent response: "+xhr.response);
 
-                            if (fullResponse.result.success == 0 ) {
+                        if (fullResponse.result.success == 0 ) {
 
-                            }
+                        }
                     }
                     else {
                         console.error("changeContent error: "+xhr.responseText);
@@ -1128,9 +1143,9 @@ var EventMasterRPC = {
                         var fullResponse = JSON.parse(xhr.response);
                         console.log("changeAuxContent response: "+xhr.response);
 
-                            if (fullResponse.result.success == 0 ) {
+                        if (fullResponse.result.success == 0 ) {
 
-                            }
+                        }
                     }
                     else {
                         console.error("changeAuxContent error: "+xhr.responseText);
@@ -1286,8 +1301,8 @@ var EventMasterRPC = {
             return;
         }
 
-        ipAddress = settings.ipAddress;
-		if( isValidIp( ipAddress ) ) {		
+        var ipAddress = settings.ipAddress;
+		if( ipAddress && isValidIp( ipAddress ) ) {		
 			var url = "http://"+ipAddress+":9999";
 
 			var xhr = new XMLHttpRequest();
@@ -1436,6 +1451,59 @@ var EventMasterRPC = {
         }
     },
 
+    getFrameSettings: function(context ){
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            return;
+        }
+         
+        
+        var ipAddress = settings.ipAddress;
+        if( ipAddress && isValidIp( ipAddress ) ) {
+    
+            var url = "http://"+ipAddress+":9999";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Content-type", "application/json");
+
+            xhr.onload = function (e) { 
+                if (xhr.readyState === 4 ) {
+                    if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");					
+
+                        var fullResponse = JSON.parse(xhr.response);
+                        console.log("getFrameSettings response: "+xhr.response);
+
+                            if ( fullResponse.result.success == 0 ) {
+                                console.log("getFrameSettings response: "+xhr.response);
+                                settings.frameSettings = fullResponse.result.response;
+                            }
+                            else if( fullResponse.result.error ) {
+                                console.error("getFrameSettings error: "+fullResponse.result.error);        
+                            }
+                    }
+                    else {
+                        console.error("getFrameSettings error: "+xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.onerror = function (e) {
+                console.error("getFrameSettings error: "+xhr.responseText);
+            };
+    
+            var data = JSON.stringify({"params":{}, "method":"getFrameSettings", "id":"1234", "jsonrpc":"2.0"});
+
+            xhr.send(data);
+            console.log("sent: "+data);
+        }
+        else {
+             console.warn("getFrameSettings: Invalid IP Address: " + ipAddress);
+        }
+    },
+
     resetSourceBackup: function( context ) {
 
         var settings = settingsCache[context];
@@ -1451,13 +1519,6 @@ var EventMasterRPC = {
         }
         else {
             console.error( "Error: resetSourceBackup() is missing some data! " + settings.resetSourceBackup );
-        }
-
-
-        var settings = settingsCache[context];
-        if( settings == null ) {
-            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("resetSourceBackup error: settingCache is null!");
             return;
         }
 
@@ -1478,12 +1539,12 @@ var EventMasterRPC = {
                         var fullResponse = JSON.parse(xhr.response);
                         console.log("resetSourceBackup response: "+xhr.response);
 
-                            if (fullResponse.result.success && fullResponse.result.success == 0 ) {
+                        if (fullResponse.result.success == 0 ) {
 
-                            }
-                            else if( fullResponse.result.error ) {
-                                console.error("resetSourceBackup error: "+fullResponse.result.error);        
-                            }
+                        }
+                        else if( fullResponse.result.error ) {
+                            console.error("resetSourceBackup error: "+fullResponse.result.error);        
+                        }
                     }
                     else {
                         console.error("resetSourceBackup error: "+xhr.responseText);
@@ -1495,7 +1556,7 @@ var EventMasterRPC = {
                 console.error("resetSourceBackup error: "+xhr.responseText);
             };
     
-            var data = JSON.stringify({"params": content, "method":"resetSourceMainBackup", "id":"1234", "jsonrpc":"2.0"});
+            var data = JSON.stringify({"params":content, "method":"resetSourceMainBackup", "id":"1234", "jsonrpc":"2.0"});
 
             xhr.send(data);
             console.log("sent: "+data);
@@ -1504,9 +1565,73 @@ var EventMasterRPC = {
             console.warn("resetSourceBackup: Invalid IP Address: " + ipAddress);
         }
     },
+
+    mvrLayoutChange(context) {
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            return;
+        }
+        var content = "";
+
+        if( settings.mvrLayoutChange &&
+            ( settings.mvrLayoutChange.frameUnitId && settings.mvrLayoutChange.frameUnitId != -1 ) &&
+            ( settings.mvrLayoutChange.mvrLayoutId && settings.mvrLayoutChange.mvrLayoutId != -1) ) {
+            content = {"frameUnitId":settings.mvrLayoutChange.frameUnitId, "mvrLayoutId": settings.mvrLayoutChange.mvrLayoutId};
+          
+        }
+        else {
+            console.error( "Error: mvrLayoutChange() is missing some data! " + settings.resetSourceBackup );
+            return;
+        }
+
+        
+        if( isValidIp( ipAddress ) ) {
+    
+            var url = "http://"+ipAddress+":9999";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Content-type", "application/json");
+
+            xhr.onload = function (e) { 
+                if (xhr.readyState === 4 ) {
+                    if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");					
+
+                        var fullResponse = JSON.parse(xhr.response);
+                        console.log("mvrLayoutChange response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+
+                        }
+                        else if( fullResponse.result.error ) {
+                            console.error("mvrLayoutChange error: "+fullResponse.result.error);        
+                        }
+                }
+                    else {
+                        console.error("mvrLayoutChange error: "+xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.onerror = function (e) {
+                console.error("mvrLayoutChange error: "+xhr.responseText);
+            };
+    
+            var data = JSON.stringify({"params": content, "method":"mvrLayoutChange", "id":"1234", "jsonrpc":"2.0"});
+
+            xhr.send(data);
+            console.log("sent: "+data);
+        }
+        else{
+            console.warn("mvrLayoutChange: Invalid IP Address: " + ipAddress);
+        }
+    },
     
     updateCache: function(context, action) {
     
+        this.getFrameSettings(context);
         this.getDestinations(context);
         this.getInputs(context);
         this.getSources(context);
@@ -1677,6 +1802,9 @@ var eventMasterAction = {
             }
             else if( action == "com.barco.eventmaster.resetsourcebackup" ) {
                 EventMasterRPC.resetSourceBackup(context);
+            }
+            else if( action == "com.barco.eventmaster.mvrLayoutChange" ){
+                EventMasterRPC.mvrLayoutChange(context);
             }
         }
     },

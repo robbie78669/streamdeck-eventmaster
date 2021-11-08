@@ -150,6 +150,22 @@
       "Tooltip": "Reset the backup source to the primary", 
       "PropertyInspectorPath": "PropertyInspectors/resetsourcebackup_pi.html",
       "UUID": "com.barco.eventmaster.resetsourcebackup"
+    },
+
+    {
+      "Icon": "images/mvrLayoutChangeActionImage",
+      "Name": "MVR Layout Change", 
+      "States": [
+        {
+          "Image": "images/mvrLayoutChangeKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "Change the multiviewer layout", 
+      "PropertyInspectorPath": "PropertyInspectors/mvrLayoutChange_pi.html",
+      "UUID": "com.barco.eventmaster.mvrlayoutchange"
     }
   ],
   "SDKVersion": 2,
