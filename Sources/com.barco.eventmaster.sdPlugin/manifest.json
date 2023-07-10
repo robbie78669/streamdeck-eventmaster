@@ -174,7 +174,7 @@
   "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
-  "Description": "Requires Event Master v8.2 or higher. ", 
+  "Description": "Requires Event Master v9.0 or higher. ", 
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 

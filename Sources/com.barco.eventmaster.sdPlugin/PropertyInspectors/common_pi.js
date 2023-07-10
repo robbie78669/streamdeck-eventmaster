@@ -752,6 +752,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     frameSettings.System.FrameCollection && 
                     frameSettings.System.FrameCollection.length > 0){
 
+                    var frameCollection = frameSettings.System.FrameCollection;
                     var mvrLayoutChange = {"frameUnitId": -1, "mvrLayoutId": -1}
 
                     if( settings.mvrLayoutChange ) {
@@ -760,58 +761,50 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                             
                     //populate the frame dropdown list
                     var mvrLayoutChangeFrame_listElement = document.getElementById('mvrlayoutchange_frame_list');
-                    for(var i=0; i<frameSettings.FrameCollection.length; i++) {
-                        if( frameSettings.FrameCollection[i].Frame && frameSettings.FrameCollection[i].Frame.id) {
-                            var frameElement = mvrLayoutChangeFrame_listElement.appendChild( new Option(frameSettings.FrameCollection[i].Frame.Name) );
+                    for( var i=0; i<frameCollection.length; i++ ) {
+                        if( frameCollection[i].Frame && frameCollection[i].Frame.id) {
+                            var frameElement = mvrLayoutChangeFrame_listElement.appendChild( new Option(frameCollection[i].Frame.Name) );
                             frameElement.value = frameSettings.FrameCollection[i].Frame.id;
+
                             if( frameElement.value == settings.mvrLayoutChange.frameUnitId== frameElement.value){
                                 frameElement.selected=true;
                             }
-                        }
-                    }
+    
+                            if( frameHasMVR(frameCollection[i].Frame) ) {
 
-                    //populate the mvrLayoutId (if the unit has an MVR card)
-                    //If selected frame has a MVR output card
-                    //
-                    if( frameHasMVR(mvrLayoutChange.frameUnitId, frameSettings) ) {
-
-                        var mvrLayoutChangeMVRLayout_listElement = document.getElementById('mvrlayoutchange_mvrlayout_list');
-                        for(var i=0; i<3 /*4 MVR layouts*/; i++) {
-                            var mvrLayoutElement = mvrLayout_listElement.appendChild( new Option("MVROut"+i+1));
-                            if( mvrLayoutElement.value) {
-                                mvrLayoutElement.value = i;
-                            }
-                                                        
-                            if( mvrLayoutChange.mvrLayoutId && mvrLayoutChange.mvrLayoutId==i) {
-                                if( mvrLayoutElement.value) {
-                                    mvrLayoutElement.selectedOperatorIndex = true;
+                                var mvrLayoutChangeMVRLayout_listElement = document.getElementById('mvrlayoutchange_mvrlayout_list');
+                                for(var i=0; i<3 /*4 MVR layouts*/; i++) {
+                                    var mvrLayoutElement = mvrLayout_listElement.appendChild( new Option("MVROut"+i+1));
+                                    if( mvrLayoutElement.value) {
+                                        mvrLayoutElement.value = i;
+                                    }
+                                                                
+                                    if( mvrLayoutChange.mvrLayoutId && mvrLayoutChange.mvrLayoutId==i) {
+                                        if( mvrLayoutElement.value) {
+                                            mvrLayoutElement.selectedOperatorIndex = true;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
             }
         }
     };
 }
 
-function frameHasMVR(frameUnitId, frameSettings) {
+function frameHasMVR(frame) {
 
-    if( frameUnitId && frameUnitId > -1 ) {
-        if( frameSettings && frameSettings.System &&
-            frameSettings.System.FrameCollection && frameSettings.System.FrameCollection.length >0 ) {
-            for( var i=0; i<frameSettings.System.FrameCollection.length; i++){
-                if( frameSettings.System.FrameCollection[i] && frameSettings.System.FrameCollection[i].Frame.id == frameUnitId) {
-                    for( var cardSlot=0; cardSlot<frameSettings.system.FrameCollection[i].Frame.Slot.length; cardSlot++ ) {
-                        if( frameSettings.System.FrameCollection[i].Frame.Slot[cardSlot].Card.CardTypeLabel.contains("MVR Gen2") ){
-                            return true;
-                        }
-                    }
-                }
+    if( frame && frame.Slot.length > 0 ) {
+        for( var cardSlot=0; cardSlot< frame.Slot.length; cardSlot++ ) {
+            if( frame.Slot[cardSlot].Card.CardTypeLabel.contains("MVR Gen2") ){
+                return true;
             }
-        } 
+        }
     }
-
+    
     return false;
 }
 
