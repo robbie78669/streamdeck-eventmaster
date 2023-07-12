@@ -1574,14 +1574,11 @@ var EventMasterRPC = {
         }
         var content = "";
 
-        if( settings.mvrLayoutChange &&
-            ( settings.mvrLayoutChange.frameUnitId && settings.mvrLayoutChange.frameUnitId != -1 ) &&
-            ( settings.mvrLayoutChange.mvrLayoutId && settings.mvrLayoutChange.mvrLayoutId != -1) ) {
-            content = {"frameUnitId":settings.mvrLayoutChange.frameUnitId, "mvrLayoutId": settings.mvrLayoutChange.mvrLayoutId};
-          
+        if( settings.mvrLayoutChange ) {
+            content = {"frameUnitId":settings.mvrLayoutChange.frameUnitId, "mvrLayoutId": parseInt(settings.mvrLayoutChange.mvrLayoutId)-1};
         }
         else {
-            console.error( "Error: mvrLayoutChange() is missing some data! " + settings.resetSourceBackup );
+            console.error( "Error: mvrLayoutChange() is missing some data! " + settings.mvrLayoutChange );
             return;
         }
 
@@ -1803,7 +1800,7 @@ var eventMasterAction = {
             else if( action == "com.barco.eventmaster.resetsourcebackup" ) {
                 EventMasterRPC.resetSourceBackup(context);
             }
-            else if( action == "com.barco.eventmaster.mvrLayoutChange" ){
+            else if( action == "com.barco.eventmaster.mvrlayoutchange" ){
                 EventMasterRPC.mvrLayoutChange(context);
             }
         }
@@ -2126,6 +2123,10 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                 if( jsonPayload.hasOwnProperty('resetSourceBackup')) {
                     changed = true;
                     settings["resetSourceBackup"] = jsonPayload.resetSourceBackup;
+                }
+                if( jsonPayload.hasOwnProperty('mvrLayoutChange')) {
+                    changed = true;
+                    settings["mvrLayoutChange"] = jsonPayload.mvrLayoutChange;
                 }
                             
                 if( changed  ) {

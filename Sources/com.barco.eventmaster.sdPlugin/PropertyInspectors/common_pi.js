@@ -694,7 +694,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                     var options = cutAux_source_list_Element.getElementsByTagName("option");
                     while (options.length)
-                    cutAux_source_list_Element.remove(0);
+                        cutAux_source_list_Element.remove(0);
                     
                     // Inputs
                     if( sources ) {
@@ -748,48 +748,14 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             // mvrLayoutChange ----------------------------------------------------------------
             else if( action == "com.barco.eventmaster.mvrlayoutchange" ){
 
-                if( frameSettings && frameSettings.System &&
-                    frameSettings.System.FrameCollection && 
-                    frameSettings.System.FrameCollection.length > 0){
+                var mvrLayoutChange = payload['mvrLayoutChange'];
+                var mvrLayoutChangeFrame_Element = document.getElementById('mvrlayoutchange_frame');
+                var mvrLayoutChangeMVRLayout_Element = document.getElementById('mvrlayoutchange_mvrlayout');
 
-                    var frameCollection = frameSettings.System.FrameCollection;
-                    var mvrLayoutChange = {"frameUnitId": -1, "mvrLayoutId": -1}
-
-                    if( settings.mvrLayoutChange ) {
-                        mvrLayoutChange = settings.mvrLayoutChange;
-                    }
-                                            
-                    //populate the frame dropdown list
-                    var mvrLayoutChangeFrame_listElement = document.getElementById('mvrlayoutchange_frame_list');
-                    for( var i=0; i<frameCollection.length; i++ ) {
-                        if( frameCollection[i].Frame && frameCollection[i].Frame.id) {
-                            var frameElement = mvrLayoutChangeFrame_listElement.appendChild( new Option(frameCollection[i].Frame.Name) );
-                            frameElement.value = frameSettings.FrameCollection[i].Frame.id;
-
-                            if( frameElement.value == settings.mvrLayoutChange.frameUnitId== frameElement.value){
-                                frameElement.selected=true;
-                            }
-    
-                            if( frameHasMVR(frameCollection[i].Frame) ) {
-
-                                var mvrLayoutChangeMVRLayout_listElement = document.getElementById('mvrlayoutchange_mvrlayout_list');
-                                for(var i=0; i<3 /*4 MVR layouts*/; i++) {
-                                    var mvrLayoutElement = mvrLayout_listElement.appendChild( new Option("MVROut"+i+1));
-                                    if( mvrLayoutElement.value) {
-                                        mvrLayoutElement.value = i;
-                                    }
-                                                                
-                                    if( mvrLayoutChange.mvrLayoutId && mvrLayoutChange.mvrLayoutId==i) {
-                                        if( mvrLayoutElement.value) {
-                                            mvrLayoutElement.selectedOperatorIndex = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                if( mvrLayoutChange) {
+                    mvrLayoutChangeFrame_Element.value = mvrLayoutChange.frameUnitId;
+                    mvrLayoutChangeMVRLayout_Element.value = mvrLayoutChange.mvrLayoutId;
                 }
-
             }
         }
     };
@@ -799,7 +765,9 @@ function frameHasMVR(frame) {
 
     if( frame && frame.Slot.length > 0 ) {
         for( var cardSlot=0; cardSlot< frame.Slot.length; cardSlot++ ) {
-            if( frame.Slot[cardSlot].Card.CardTypeLabel.contains("MVR Gen2") ){
+            if( frame.Slot[cardSlot].Card &&
+                frame.Slot[cardSlot].Card.CardTypeLabel &&
+                frame.Slot[cardSlot].Card.CardTypeLabel.includes("MVR Gen2") ){
                 return true;
             }
         }
@@ -1077,7 +1045,6 @@ function updateSettings() {
             cutAux.srcInfo = srcInfo;
         }
     }
-
     payload.cutAux = cutAux;
 
       
@@ -1093,7 +1060,6 @@ function updateSettings() {
             resetSourceBackup.srcInfo = srcInfo;
         }
     }
-    
     payload.resetSourceBackup = resetSourceBackup;
 
     // FreezeDest  ---------------------------------------------------------------
@@ -1123,21 +1089,15 @@ function updateSettings() {
     payload.unfreezeDest = unfreezeDest;
    
     // mvrLayoutChange ----------------------------------------------------------------
-    var mvrLayoutChange = {"frameUnitId": -1, "mvrLayoutId": -1}
-    var mvrLayoutChangeFrame_listElement = document.getElementById('mvrlayoutchange_frame_list');
-    if( mvrLayoutChangeFrame_listElement != null && mvrLayoutChangeFrame_listElement.selectedIndex >= 0) {
+    var mvrLayoutChange = {"frameUnitId": -1, "mvrLayoutId":-1 };
+    var mvrLayoutChangeFrameElement = document.getElementById('mvrlayoutchange_frame');
+    if( mvrLayoutChangeFrameElement ){
+        mvrLayoutChange.frameUnitId = parseInt(mvrLayoutChangeFrameElement.value);
+    }
 
-        // determine which group (set the type based on the optgroup //
-        var selectedIndex = mvrLayoutChangeFrame_listElement.selectedIndex;
-        mvrLayoutChange.frameUnitId = mvrLayoutChangeFrame_listElement.options[selectedIndex].value;
-
-        var mvrLayoutChangeFrame_LayoutElement = document.getElementById('mvrlayoutchange_layout_list');
-        if( mvrLayoutChangeFrame_LayoutElement != null ) {
-            var selectedIndex = mvrLayoutChangeFrame_LayoutElement.selectedIndex;
-            if( selectedIndex >= 0 ){
-                mvrLayoutChange.mvrLayoutId = mvrLayoutChangeFrame_LayoutElement.options[selectedIndex].value;
-            }
-        }
+    var mvrLayoutChangeFrame_LayoutElement = document.getElementById('mvrlayoutchange_mvrlayout');
+    if( mvrLayoutChangeFrame_LayoutElement ){
+        mvrLayoutChange.mvrLayoutId = parseInt(mvrLayoutChangeFrame_LayoutElement.value);
     }
     payload.mvrLayoutChange = mvrLayoutChange;
    
