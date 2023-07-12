@@ -178,7 +178,7 @@
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 
-  "Version": "3.0.2",
+  "Version": "3.0.3",
   "OS": [
     {
         "Platform": "mac", 

@@ -194,7 +194,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                             for(var i=0; i<presets.length; i++) {
                                 if( operator.id <= OPERATOR.SUPER || 
-                                        (presets[i].id >= (operator.StartRange-1) && presets[i].id <= (operator.EndRange-1) ) ) {
+                                        (presets[i].presetSno >= (operator.StartRange-1) && presets[i].presetSno <= (operator.EndRange-1) ) ) {
                                     var presetElement = presetNameElement.appendChild( new Option(presets[i].Name) );
                                     presetElement.value = presets[i].id;
                                 }
@@ -243,13 +243,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                 var reset_sourcebackup_list_Element = document.getElementById("reset_sourcebackup_list");
                 if( reset_sourcebackup_list_Element != null ) {
 
-                    var options = reset_sourcebackup_list_Element.getElementsByTagName("option");
-                    while (options.length)
+                    while (reset_sourcebackup_list_Element.length)
                        reset_sourcebackup_list_Element.remove(0);
                     
-                    // Inputs
-                    if( inputs ) {
-                        var inputs_optG = document.getElementById('reset_sourcebackup_input');
+                    // Sources
+                    if( sources ) {
                         var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option("") );
                         sourceElement.value = -1;
 
@@ -258,34 +256,18 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                             sourceElement.selected = true;
                         }
 
-                        for(var i=0; i<inputs.length; i++) {
-                            var sourceElement = inputs_optG.appendChild( new Option(inputs[i].Name) );
-                            sourceElement.value = inputs[i].id;
-                        }
-                    }
-
-                    // backgrounds
-                    if( backgrounds ) {
-                        var backgrounds_optG = document.getElementById('reset_sourcebackup_background');
-                        var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option("") );
-                        sourceElement.value = -1;
- 
-                        if( srcInfo == null ) {
-                            srcInfo = {id: -1, name: ""};
-                            sourceElement.selected = true;
-                        }
-                        
-                        for(var i=0; i<backgrounds.length; i++) {
-                            var sourceElement = inputs_optG.appendChild( new Option(backgrounds[i].Name) );
-                            sourceElement.value = backgrounds[i].id;
+                        for(var i=0; i<sources.length; i++) {
+                            if( sources[i].SrcType == 0 )
+                            var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option(sources[i].Name) );
+                            sourceElement.value = sources[i].id;
                         }
                     }
 
                     if( srcInfo ) {
                         // select the previously selected item (from the plugin)
-                        for( var i=0; i<reset_sourcebackup_list_Element.options.length; i++ ){
-                            if(reset_sourcebackup_list_Element.options[i].value == srcInfo.id ){
-                                reset_sourcebackup_list_Element.options[i].selected = true;
+                        for( var i=0; i<reset_sourcebackup_list_Element.length; i++ ){
+                            if(reset_sourcebackup_list_Element[i].value == srcInfo.id ){
+                                reset_sourcebackup_list_Element[i].selected = true;
                                 break;
                             }
                         }
@@ -370,8 +352,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     if( sources ) {
                      var inputs_optG = document.getElementById('freeze_source_input');
                         for(var i=0; i<sources.length; i++) {
-                            var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
-                            sourceElement.value = sources[i].id;
+                            if( sources[i].SrcType == 0) {
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
                         }
                     }
 
@@ -379,10 +363,12 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         var backgrounds_optG = document.getElementById('freeze_source_background');
                         for(var i=0; i<backgrounds.length; i++) {
                         
-                            var sourceElement = backgrounds_optG.appendChild( new Option(backgrounds[i].Name) );
-                            sourceElement.value = backgrounds[i].id;
+                            if( backgrounds[i].BGSrcType == 0 ){
+                                var sourceElement = backgrounds_optG.appendChild( new Option(backgrounds[i].Name) );
+                                sourceElement.value = backgrounds[i].id;
+                            }
                         }
-                    }
+                    } 
 
                     if( screenDestinations ) {
                         var dests_optG = document.getElementById('freeze_source_destination')
@@ -437,8 +423,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     if( backgrounds ) {
                         var backgrounds_optG = document.getElementById('unfreeze_source_background');
                         for(var i=0; i<backgrounds.length; i++) {
-                            var sourceElement = backgrounds_optG.appendChild( new Option(backgrounds[i].Name) );
-                            sourceElement.value = backgrounds[i].id;
+                            if( backgrounds[i].BGSrcType == 0 ){
+                                var sourceElement = backgrounds_optG.appendChild( new Option(backgrounds[i].Name) );
+                                sourceElement.value = backgrounds[i].id;
+                            }
                         }
                     }
 

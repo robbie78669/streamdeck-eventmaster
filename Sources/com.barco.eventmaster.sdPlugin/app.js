@@ -462,10 +462,7 @@ var EventMasterRPC = {
 			};
 
             var freeze = settings['freeze'];
-            if (freeze  &&
-                freeze.id && 
-                freeze.name && 
-                freeze.type ) {
+            if (freeze ) {
 
                 var id = parseInt(freeze.id);
                 var name = freeze.name;
@@ -526,10 +523,7 @@ var EventMasterRPC = {
 			};
 
             var unfreeze = settings['unfreeze'];
-            if (unfreeze  &&
-                unfreeze.name &&
-                unfreeze.type &&
-                unfreeze.id ) {
+            if ( unfreeze ) {
 
                 var id = parseInt(unfreeze.id);
                 var name = unfreeze.name;
@@ -901,7 +895,7 @@ var EventMasterRPC = {
                                         console.log("  Name:" + operators[i].Name);
                                         console.log("  Enable:" + operators[i].Enable)
                                         console.log("  StartRange:" + operators[i].StartRange);
-                                        console.log("  EndRange:" + operators[i].StartRange);
+                                        console.log("  EndRange:" + operators[i].EndRange);
                                         console.log("  InvertColor:"+ operators[i].InvertColor);
                                         console.log("  DestCollection"+ operators[i].DestCollection);
                                 }
@@ -1782,8 +1776,7 @@ var eventMasterAction = {
 
                 if( settings.cutAux &&
                     ( settings.cutAux.destInfo && settings.cutAux.destInfo.id != -1 ) &&
-                    ( settings.cutAux.srcInfo && settings.cutAux.srcInfo.id != -1 ) &&
-                    ( settings.cutAux.layerInfo && settings.cutAux.layerInfo.id != -1 ) ) {
+                    ( settings.cutAux.srcInfo && settings.cutAux.srcInfo.id != -1 ) ) {
                         
                     // Look for the layer Id in the destationContents..
                     // Check to see whether it is a mix layer
