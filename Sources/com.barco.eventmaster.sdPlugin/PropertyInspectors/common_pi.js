@@ -257,9 +257,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         }
 
                         for(var i=0; i<sources.length; i++) {
-                            if( sources[i].SrcType == 0 )
-                            var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option(sources[i].Name) );
-                            sourceElement.value = sources[i].id;
+                            if( sources[i].InputCfgIndex != -1 ) {
+                                var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].InputCfgIndex;
+                            }   
                         }
                     }
 
@@ -370,21 +371,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         }
                     } 
 
-                    if( screenDestinations ) {
-                        var dests_optG = document.getElementById('freeze_source_destination')
-                        for(var i=0; i<screenDestinations.length; i++) {
-                            var screenElement = dests_optG.appendChild( new Option(screenDestinations[i].Name) );
-                            sourceElement.value = screenDestinations[i].id;
-                        }                            
-                    }
-
-                    if( auxDestinations ){
-                        var auxs_optG = document.getElementById('freeze_source_aux')
-                        for(var i=0; i<screenDestinations.length; i++) {
-                            var screenElement = auxs_optG.appendChild( new Option(auxDestinations[i].Name) );
-                            sourceElement.value = auxDestinations[i].id;
-                        }                            
-                    }
+                    
 
                     // select the previously selected item (from the plugin)
                     for( var i=0; i<freezelist_Element.options.length; i++ ){
@@ -415,8 +402,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     if( sources ) {
                         var inputs_optG = document.getElementById('unfreeze_source_input');
                         for(var i=0; i<sources.length; i++) {
-                           var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
-                           sourceElement.value = sources[i].id;
+                            if( sources[i].SrcType == 0) {
+                                var sourceElement = inputs_optG.appendChild( new Option(sources[i].Name) );
+                                sourceElement.value = sources[i].id;
+                            }
                         }
                     }
 
@@ -430,23 +419,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         }
                     }
 
-                    if( screenDestinations ){
-                        var dests_optG = document.getElementById('unfreeze_source_destination')
-                        for(var i=0; i<screenDestinations.length; i++) {
-                            var sourceElement = dests_optG.appendChild( new Option(screenDestinations[i].Name) );
-                            sourceElement.value = screenDestinations[i].id;
-                        }
-                    }
-
-                    if( auxDestinations ) {
-
-                        var aux_optG = document.getElementById('unfreeze_source_aux')                        
-                        for(var i=0; i<auxDestinations.length; i++) {
-                            var sourceElement = aux_optG.appendChild( new Option(auxDestinations[i].Name) );
-                            sourceElement.value = auxDestinations[i].id;
-                        }
-                    }
-                    
+                                       
                     // select the previously selected item (from the plugin)
                     for( var i=0; i<unfreezelist_Element.options.length; i++ ){
                         if(unfreezelist_Element.options[i].value == unfreeze_payload.id ) {
