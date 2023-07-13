@@ -45,22 +45,6 @@
       "PropertyInspectorPath": "PropertyInspectors/recallpreset_pi.html",
       "UUID": "com.barco.eventmaster.recallpreset" 
     },
-    /*{
-      "Icon": "images/recallNextPresetActionImage",
-      "Name": "Recall Next Preset", 
-      "States": [
-        {
-          "Image": "images/recallNextPresetKeyIcon",
-          "TitleAlignment": "bottom", 
-          "FontSize": "8"
-        }
-      ], 
-      "SupportedInMultiActions": true,
-      "Tooltip": "This action recalls the next preset into PVW", 
-      "PropertyInspectorPath": "PropertyInspectors/recallnext_pi.html",
-      "UUID": "com.barco.eventmaster.recallnextpreset"
-    },
-    */
     {
       "Icon": "images/activateCueActionImage",
       "Name": "Cue", 
