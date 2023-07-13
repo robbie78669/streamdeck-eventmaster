@@ -45,7 +45,7 @@
       "PropertyInspectorPath": "PropertyInspectors/recallpreset_pi.html",
       "UUID": "com.barco.eventmaster.recallpreset" 
     },
-    {
+    /*{
       "Icon": "images/recallNextPresetActionImage",
       "Name": "Recall Next Preset", 
       "States": [
@@ -60,6 +60,7 @@
       "PropertyInspectorPath": "PropertyInspectors/recallnext_pi.html",
       "UUID": "com.barco.eventmaster.recallnextpreset"
     },
+    */
     {
       "Icon": "images/activateCueActionImage",
       "Name": "Cue", 
@@ -178,7 +179,7 @@
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 
-  "Version": "3.0.4",
+  "Version": "3.0.5",
   "OS": [
     {
         "Platform": "mac", 

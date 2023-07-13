@@ -427,7 +427,7 @@ var EventMasterRPC = {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("freezeDestSource error: settingCache is null!");
+            console.error("freeze error: settingCache is null!");
 
             return;
         }
@@ -446,7 +446,7 @@ var EventMasterRPC = {
 					if( xhr.status === 200) {
 						
                         var fullResponse = JSON.parse(xhr.response);
-                        console.log("freezeDestSource response: "+xhr.response);
+                        console.log("freeze response: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
@@ -457,7 +457,7 @@ var EventMasterRPC = {
 			};
 
 			xhr.onerror = function (e) {
-                console.warn("freezeDestSource error: "+xhr.response);
+                console.warn("freeze error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -473,11 +473,11 @@ var EventMasterRPC = {
                 console.log("sent: "+data);
             }
             else{
-                console.error( "Error: freeze_unfreeze() is missing some data! " + settings.freeze );
+                console.error( "Error: freeze() is missing some data! " + settings.freeze );
             }
         }
         else{
-            console.warn("freezeDestSource: Invalid IP Address: " + ipAddress);
+            console.warn("freeze: Invalid IP Address: " + ipAddress);
         }
         
 	},
@@ -488,7 +488,7 @@ var EventMasterRPC = {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            console.error("freezeDestSource error: settingCache is null!");
+            console.error("unfreeze error: settingCache is null!");
 
             return;
         }
@@ -507,18 +507,18 @@ var EventMasterRPC = {
 					if( xhr.status === 200) {
 						
                         var fullResponse = JSON.parse(xhr.response);
-                        console.log("freezeDestSource response: "+xhr.response);
+                        console.log("unfreeze response: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Connection Established");
 					}
 					else {
-                        console.warn("freeze error: "+xhr.response);
+                        console.warn("unfreeze error: "+xhr.response);
                         eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 					}
 				}
 			};
 
 			xhr.onerror = function (e) {
-                console.warn("freezeDestSource error: "+xhr.response);
+                console.warn("unfreeze error: "+xhr.response);
                 eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
 			};
 
@@ -527,18 +527,18 @@ var EventMasterRPC = {
 
                 var id = parseInt(unfreeze.id);
                 var name = unfreeze.name;
-                var type = parseInt(freeze.type);
+                var type = parseInt(unfreeze.type);
 
-                var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":0 }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
+                var data = JSON.stringify({"params":{"id":id, "type": type, "screengroup": 0, "mode":0 /*unfreeze*/ }, "method":"freezeDestSource", "id":"1234", "jsonrpc":"2.0"});
                 xhr.send(data);
                 console.log("sent: "+data);
             }
             else{
-                console.error( "Error: freeze_unfreeze() is missing some data! " + settings.freeze );
+                console.error( "Error: unfreeze() is missing some data! " + settings.unfreeze );
             }
         }
         else{
-            console.warn("freezeDestSource: Invalid IP Address: " + ipAddress);
+            console.warn("unfreezeDestSource: Invalid IP Address: " + ipAddress);
         }
         
 	},
