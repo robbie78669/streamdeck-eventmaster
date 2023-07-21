@@ -11,7 +11,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action transitions all layers in Preview to Program", 
+      "Tooltip": "Transitions all layers in Preview to Program", 
       "PropertyInspectorPath": "PropertyInspectors/alltrans_pi.html",
       "UUID": "com.barco.eventmaster.alltrans"
     },
@@ -26,7 +26,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action cuts all layers in Preview to Program", 
+      "Tooltip": "Cuts all layers in Preview to Program", 
       "PropertyInspectorPath": "PropertyInspectors/cut_pi.html",
       "UUID": "com.barco.eventmaster.cut"
     },
@@ -41,9 +41,24 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action recalls the specified preset", 
+      "Tooltip": "Recalls the specified preset", 
       "PropertyInspectorPath": "PropertyInspectors/recallpreset_pi.html",
       "UUID": "com.barco.eventmaster.recallpreset" 
+    },
+    {
+      "Icon": "images/recallNextPresetActionImage",
+      "Name": "Recall Next Preset", 
+      "States": [
+        {
+          "Image": "images/recallNextPresetKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "Recalls the next preset into PVW", 
+      "PropertyInspectorPath": "PropertyInspectors/recallnext_pi.html",
+      "UUID": "com.barco.eventmaster.recallnextpreset"
     },
     {
       "Icon": "images/activateCueActionImage",
@@ -56,7 +71,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action recalls the specified cue", 
+      "Tooltip": "Recalls the specified cue", 
       "PropertyInspectorPath": "PropertyInspectors/recallCue_pi.html",
       "UUID": "com.barco.eventmaster.recallcue"
     },
@@ -71,7 +86,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action freezes an input", 
+      "Tooltip": "Freezes an input", 
       "PropertyInspectorPath": "PropertyInspectors/freeze_pi.html",
       "UUID": "com.barco.eventmaster.freeze"
     },
@@ -86,7 +101,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action unfreezes an input.", 
+      "Tooltip": "Unfreezes an input.", 
       "PropertyInspectorPath": "PropertyInspectors/unfreeze_pi.html",
       "UUID": "com.barco.eventmaster.unfreeze"
     },
@@ -101,7 +116,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action changes a source within a layer", 
+      "Tooltip": "Changes a source within a layer", 
       "PropertyInspectorPath": "PropertyInspectors/cutlayer_pi.html",
       "UUID": "com.barco.eventmaster.cutlayer"
     },
@@ -116,7 +131,7 @@
         }
       ], 
       "SupportedInMultiActions": true,
-      "Tooltip": "This action changes a source within an Aux", 
+      "Tooltip": "Changes a source within an Aux", 
       "PropertyInspectorPath": "PropertyInspectors/cutaux_pi.html",
       "UUID": "com.barco.eventmaster.cutaux"
     },
@@ -136,7 +151,6 @@
       "PropertyInspectorPath": "PropertyInspectors/resetsourcebackup_pi.html",
       "UUID": "com.barco.eventmaster.resetsourcebackup"
     },
-
     {
       "Icon": "images/mvrLayoutChangeActionImage",
       "Name": "MVR Layout Change", 
@@ -151,6 +165,36 @@
       "Tooltip": "Change the multiviewer layout", 
       "PropertyInspectorPath": "PropertyInspectors/mvrLayoutChange_pi.html",
       "UUID": "com.barco.eventmaster.mvrlayoutchange"
+    },
+    {
+      "Icon": "images/recallTestPatternScreenActionImage",
+      "Name": "Recall Test Pattern on Screen", 
+      "States": [
+        {
+          "Image": "images/recallTestPatternScreenKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "Recall a test pattern for a given screen.", 
+      "PropertyInspectorPath": "PropertyInspectors/recallTestPatternScreen_pi.html",
+      "UUID": "com.barco.eventmaster.recallTestPatternScreen"
+    },
+    {
+      "Icon": "images/recallTestPatternAuxActionImage",
+      "Name": "Recall Test Pattern on Aux", 
+      "States": [
+        {
+          "Image": "images/recallTestPatternAuxKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "Recall a test pattern for a given aux.", 
+      "PropertyInspectorPath": "PropertyInspectors/recallTestPatternAux_pi.html",
+      "UUID": "com.barco.eventmaster.recallTestPatternAux"
     }
   ],
   "SDKVersion": 2,
@@ -159,11 +203,11 @@
   "Icon": "images/barco_logo",
   "Author": "Barco", 
   "CodePath": "index.html",
-  "Description": "Requires Event Master v9.0 or higher. ", 
+  "Description": "Requires Event Master v9.2 or higher. ", 
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 
-  "Version": "3.0.5",
+  "Version": "3.0.6",
   "OS": [
     {
         "Platform": "mac", 

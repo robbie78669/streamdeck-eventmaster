@@ -26,6 +26,7 @@ var settingsCache = {};
 var socket = null;
 var debug = true;
 
+
     
        
 var DestinationEnum = Object.freeze({ "HARDWARE_AND_SOFTWARE": 0, "HARDWARE_ONLY": 1, "SOFTWARE_ONLY": 2 })
@@ -1619,6 +1620,83 @@ var EventMasterRPC = {
             console.warn("mvrLayoutChange: Invalid IP Address: " + ipAddress);
         }
     },
+
+    recallTestPattern(context, destinationType) {
+        var settings = settingsCache[context];
+        if( settings == null ) {
+            eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
+            return;
+        }
+        var content = "";
+        if(destinationType == 0 ){//screen
+            if( settings.recallTestPatternScreen ) {
+                content = {"id":settings.recallTestPatternScreen.dest_id, "TestPattern": parseInt(settings.recallTestPatternScreen.testpattern_id)};
+            }
+            else {
+                console.error( "Error: recallTestPattern() is missing some data! " + settings.recallTestPatternScreen );
+                return;
+            }
+        }
+        else{//aux
+            if( settings.recallTestPatternAux ) {
+                content = {"id":settings.recallTestPatternAux.dest_id, "TestPattern": parseInt(settings.recallTestPatternAux.testpattern_id)};
+            }
+            else {
+                console.error( "Error: recallTestPattern() is missing some data! " + settings.recallTestPatternAux );
+                return;
+            }
+        }
+        
+       
+        if( isValidIp( ipAddress ) ) {
+    
+            var url = "http://"+ipAddress+":9999";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+            xhr.setRequestHeader("Content-type", "application/json");
+
+            xhr.onload = function (e) { 
+                if (xhr.readyState === 4 ) {
+                    if( xhr.status === 200) {
+                        eventMasterAction.SetStatus(context, "Connection Established");					
+
+                        var fullResponse = JSON.parse(xhr.response);
+                        console.log("recallTestPattern response: "+xhr.response);
+
+                        if (fullResponse.result.success == 0 ) {
+
+                        }
+                        else if( fullResponse.result.error ) {
+                            console.error("recallTestPattern error: "+fullResponse.result.error);        
+                        }
+                }
+                    else {
+                        console.error("recallTestPattern error: "+xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.onerror = function (e) {
+                console.error("recallTestPattern error: "+xhr.responseText);
+            };
+    
+            if( destinationType == 0 /*screen*/){
+                this.changeContent(context, content);
+            }
+            else{//aux
+                this.changeAuxContent(context, content);
+            }
+
+            xhr.send(data);
+            console.log("sent: "+data);
+        }
+        else{
+            console.warn("recallTestPattern: Invalid IP Address: " + ipAddress);
+        }
+    },
+
+    
     
     updateCache: function(context, action) {
     
@@ -1796,6 +1874,12 @@ var eventMasterAction = {
             else if( action == "com.barco.eventmaster.mvrlayoutchange" ){
                 EventMasterRPC.mvrLayoutChange(context);
             }
+            else if( action == "com.barco.eventmaster.recalltestpatternscreen" ){
+                EventMasterRPC.recallTestPattern(context,0);
+            }
+            else if( action == "com.barco.eventmaster.recalltestpatternaux" ){
+                EventMasterRPC.recallTestPattern(context,1);
+            }
         }
     },
     
@@ -1808,6 +1892,9 @@ var eventMasterAction = {
         if(settings != null ){
             settingsCache[context] = settings;
         }
+         
+        
+
         settings["pendingCutAction"]=""
         settings["pendingCutAuxAction"]=""
         
@@ -2025,7 +2112,7 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
         var device = jsonObj['device'];
         var jsonPayload = jsonObj['payload'] || {};
 
-        
+              
         if(event == "keyDown") {
             var settings = jsonPayload['settings'];
             var coordinates = jsonPayload['coordinates'];
@@ -2121,7 +2208,14 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
                     changed = true;
                     settings["mvrLayoutChange"] = jsonPayload.mvrLayoutChange;
                 }
-                            
+                if( jsonPayload.hasOwnProperty('recallTestPatternScreen')) {
+                    changed = true;
+                    settings["recallTestPatternScreen"] = jsonPayload.recallTestPatternScreen;
+                }
+                if( jsonPayload.hasOwnProperty('recallTestPatternAux')) {
+                    changed = true;
+                    settings["recallTestPatternAux"] = jsonPayload.recallTestPatternAux;
+                }
                 if( changed  ) {
                     settingsCache[context] = settings;
     

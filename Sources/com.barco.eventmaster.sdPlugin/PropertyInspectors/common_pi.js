@@ -14,6 +14,95 @@ const FREEZE_SRC_TYPE = {
     AUX_DEST : 3
 }
 
+var kNUM_TESTPATTERNS = 21;
+const kTESTPATTERNS = [ 
+{
+    id: 0,
+    name: "Off"
+},
+{
+    id: 1,
+    name: "Horizontal Ramp"
+},
+{
+    id: 2,
+    name: "Vertical Ramp"
+},
+{
+    id: 3,
+    name: "100% Color Bars"
+},
+{
+    id: 4,
+    name: "16x16 Grid"
+},
+{
+    id: 5,
+    name: "32x32 Grid"
+},
+{
+    id: 6,
+    name: "Burst"
+},
+{
+    id: 7,
+    name: "75% Color Bars"
+},
+{
+    id: 8,
+    name: "50% Gray"
+},
+{
+    id: 9,
+    name: "Horizonal Steps"
+},
+{
+    id: 10,
+    name: "Vertical Steps"
+},
+{
+    id: 11,
+    name: "White"
+},
+{
+    id: 12,
+    name: "Black"
+},
+{
+    id: 13,
+    name: "SMPTE Bars"
+},
+{
+    id: 14,
+    name: "H Alignment"
+},
+{
+    id: 15,
+    name: "V Aligment"
+},
+{
+    id: 16,
+    name: "HV Alignment"
+},
+{
+    id: 17,
+    name: "Circle Alignment"
+},
+{
+    id: 18,
+    name: "Red"
+},
+{
+    id: 19,
+    name: "Green"
+},
+{
+    id: 20,
+    name: "Blue"
+},
+];
+
+
 var websocket = null,
     uuid = null,
     actionInfo = {},
@@ -55,6 +144,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var action = jsonObj.action;
             var context = jsonObj.context;
 
+            // vars from plugin used by most actions.
             var inputs = payload["inputs"];
             var sources = payload["sources"];
             var backgrounds = payload["backgrounds"];
@@ -69,6 +159,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var status = payload['status'];
             var sourceBackups = payload['sourceBackups'];
             var frameSettings = payload['frameSettings'];
+            
           
             
             // Global html properties
@@ -718,6 +809,139 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     mvrLayoutChangeMVRLayout_Element.value = mvrLayoutChange.mvrLayoutId;
                 }
             }
+            else if( action == "com.barco.eventmaster.recalltestpatternscreen"){
+
+                var recallTestPatternScreen_payload = payload['recallTestPatternScreen'];
+                
+                var recallTestPattern_Element = document.getElementById("recall_testpattern_destination_list");
+                if( recallTestPattern_Element != null ) {
+
+                    // ---------------- dest refresh Gui elements ------------------------------------------------- 
+                    // Clear old ones
+                    var recallTestPattern_dest_list_Element = document.getElementById("recall_testpattern_destination_list");
+                    while (recallTestPattern_dest_list_Element.length)
+                        recallTestPattern_dest_list_Element.remove(0);
+                
+                    // populate with new screens
+                    var screenDestinations = payload["screenDestinations"];
+                    if( screenDestinations ) {
+                    
+                        var destElement = recallTestPattern_dest_list_Element.appendChild( new Option("") );
+                        destElement.value = -1;
+
+                        if( destInfo == null ) {
+                            destInfo = {id: -1, name: ""};
+                            destElement.selected = true;
+                        }
+                        
+                        for(var i=0; i<screenDestinations.length; i++) {
+                            destElement = recallTestPattern_dest_list_Element.appendChild( new Option(screenDestinations[i].Name) );
+                            var id = destElement.value = auxDestinations[i].id;
+
+                            // if already selected
+                            if( destInfo && id==destInfo.id) {
+                                destElement.selected = true;
+                            }
+                        }
+                        if( recallTestPatternScreen_payload ){
+                            // select the previously selected destination (from the plugin)
+                            for( var i=0; i<recallTestPattern_Element.options.length; i++ ){
+                                if(recallTestPattern_Element.options[i].value == recallTestPatternScreen_payload.dest_id ) {
+                                    recallTestPattern_Element.options[i].selected = true;
+                                }
+                            }
+                        }
+                       
+                    }
+
+                    
+          
+                    // Add the test patterns to the drop
+                    var testPatterns = kTESTPATTERNS;
+                    if( testPatterns){
+                        var testPattern_optG = document.getElementById('recall_testpattern_list');
+                        for(var i=0; i<testPatterns.length; i++) {
+                            var testPatternElement = testPattern_optG.appendChild( new Option(testPatterns[i].name) );
+                            testPatternElement.value = testPatterns[i].id;
+                        }
+                    }          
+
+                    if( recallTestPatternScreen_payload ){
+                        var testPatternElement = document.getElementById('recall_testpattern_list');
+                        // select the previously selected test pattern (from the plugin)
+                        for( var i=0; i<testPatternElement.options.length; i++ ){
+                            if(testPatternElement.options[i].value == recallTestPatternScreen_payload.testpattern_id ) {
+                                testPatternElement.options[i].selected = true;
+                            }
+                        }  
+                    }     
+                } 
+            }
+        }
+        else if( action == "com.barco.eventmaster.recalltestpatternaux"){
+
+            var recallTestPatternAux_payload = payload['recallTestPatternAux'];
+            
+            var recallTestPattern_Element = document.getElementById("recall_testpattern_destination_list");
+            if( recallTestPattern_Element != null ) {
+
+                // ---------------- dest refresh Gui elements ------------------------------------------------- 
+                // Clear old ones
+                var recallTestPattern_dest_list_Element = document.getElementById("recall_testpattern_destination_list");
+                while (recallTestPattern_dest_list_Element.length)
+                    recallTestPattern_dest_list_Element.remove(0);
+            
+                // populate with new auxs
+                var auxDestinations = payload["auxDestinations"];
+                if( auxDestinations ) {
+                
+                    var destElement = recallTestPattern_dest_list_Element.appendChild( new Option("") );
+                    destElement.value = -1;
+
+                    if( destInfo == null ) {
+                        destInfo = {id: -1, name: ""};
+                        destElement.selected = true;
+                    }
+                    
+                    for(var i=0; i<auxDestinations.length; i++) {
+                        destElement = recallTestPattern_dest_list_Element.appendChild( new Option(auxDestinations[i].name) );
+                        var id = destElement.value = auxDestinations[i].id;
+
+                        // if already selected
+                        if( destInfo && id==destInfo.id) {
+                            destElement.selected = true;
+                        }
+                    }
+                    if( recallTestPatternAux_payload ){
+                        // select the previously selected destination (from the plugin)
+                        for( var i=0; i<recallTestPattern_Element.options.length; i++ ){
+                            if(recallTestPattern_Element.options[i].value == recallTestPatternAux_payload.dest_id ) {
+                                recallTestPattern_Element.options[i].selected = true;
+                            }
+                        }
+                    }
+                }
+
+                // Add the test patterns to the drop
+                var testPatterns = kTESTPATTERNS;
+                if( testPatterns){
+                    var testPattern_optG = document.getElementById('recall_testpattern_list');
+                    for(var i=0; i<testPatterns.length; i++) {
+                        var testPatternElement = testPattern_optG.appendChild( new Option(testPatterns[i].Name) );
+                        testPatternElement.value = testPatterns[i].id;
+                    }
+                }          
+
+                if(recallTestPatternAux_payload){
+                    var testPatternElement = document.getElementById('recall_testpattern_list');
+                    // select the previously selected test pattern (from the plugin)
+                    for( var i=0; i<testPatternElement.options.length; i++ ){
+                        if(testPatternElement.options[i].value == recallTestPatternAux_payload.testpattern_id ) {
+                            testPatternElement.options[i].selected = true;
+                        }
+                    }       
+                }
+            }
         }
     };
 }
@@ -1061,6 +1285,32 @@ function updateSettings() {
         mvrLayoutChange.mvrLayoutId = parseInt(mvrLayoutChangeFrame_LayoutElement.value);
     }
     payload.mvrLayoutChange = mvrLayoutChange;
+
+    // recallTestPatternScreen ----------------------------------------------------------------
+    var recallTestPatternScreen = {"dest_id": -1, "testpattern_id":-1 };
+    var recallTestPatternScreenDestElement = document.getElementById('recall_testpattern_destination_list');
+    if( recallTestPatternScreenDestElement ){
+        recallTestPatternScreen.dest_id = parseInt(recallTestPatternScreenDestElement.value);
+    }
+
+    var recallTestPatternScreenElement = document.getElementById('recall_testpattern_list');
+    if( recallTestPatternScreenElement ){
+        recallTestPatternScreen.testpattern_id = parseInt(recallTestPatternScreenElement.value);
+    }
+    payload.recallTestPatternScreen = recallTestPatternScreen;
+
+    // recallTestPatternAux ----------------------------------------------------------------
+    var recallTestPatternAux = {"dest_id": -1, "testpattern_id":-1 };
+    var recallTestPatternAuxDestElement = document.getElementById('recall_testpattern_destination_list');
+    if( recallTestPatternAuxDestElement ){
+        recallTestPatternAux.dest_id = parseInt(recallTestPatternAuxDestElement.value);
+    }
+
+    var recallTestPatternAuxElement = document.getElementById('recall_testpattern_list');
+    if( recallTestPatternAuxElement ){
+        recallTestPatternAux.testpattern_id = parseInt(recallTestPatternAuxElement.value);
+    }
+    payload.recallTestPatternAux = recallTestPatternAux;
    
     sendPayloadToPlugin(payload);
 }
