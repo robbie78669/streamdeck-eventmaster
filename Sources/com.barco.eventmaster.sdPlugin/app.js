@@ -1688,8 +1688,6 @@ var EventMasterRPC = {
                 this.changeAuxContent(context, content);
             }
 
-            xhr.send(data);
-            console.log("sent: "+data);
         }
         else{
             console.warn("recallTestPattern: Invalid IP Address: " + ipAddress);
