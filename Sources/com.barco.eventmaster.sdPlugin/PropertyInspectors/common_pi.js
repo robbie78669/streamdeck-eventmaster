@@ -99,7 +99,7 @@ const kTESTPATTERNS = [
 {
     id: 20,
     name: "Blue"
-},
+}
 ];
 
 
@@ -133,6 +133,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
     };
 
     websocket.onmessage = function (evt) {
+
         // Received message from Stream Deck
         var jsonObj = JSON.parse(evt.data);
 
@@ -809,6 +810,8 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     mvrLayoutChangeMVRLayout_Element.value = mvrLayoutChange.mvrLayoutId;
                 }
             }
+
+            // recalltestpatternscreen --------------------------------------------------------------
             else if( action == "com.barco.eventmaster.recalltestpatternscreen"){
 
                 var recallTestPatternScreen_payload = payload['recallTestPatternScreen'];
@@ -854,12 +857,15 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                        
                     }
 
-                    
-          
                     // Add the test patterns to the drop
                     var testPatterns = kTESTPATTERNS;
                     if( testPatterns){
                         var testPattern_optG = document.getElementById('recall_testpattern_list');
+
+                         // Clear old ones
+                        while (testPattern_optG.length)
+                            testPattern_optG.remove(0);
+     
                         for(var i=0; i<testPatterns.length; i++) {
                             var testPatternElement = testPattern_optG.appendChild( new Option(testPatterns[i].name) );
                             testPatternElement.value = testPatterns[i].id;
@@ -877,71 +883,79 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                     }     
                 } 
             }
-        }
-        else if( action == "com.barco.eventmaster.recalltestpatternaux"){
+        
+            else if( action == "com.barco.eventmaster.recalltestpatternaux"){
 
-            var recallTestPatternAux_payload = payload['recallTestPatternAux'];
-            
-            var recallTestPattern_Element = document.getElementById("recall_testpattern_destination_list");
-            if( recallTestPattern_Element != null ) {
-
-                // ---------------- dest refresh Gui elements ------------------------------------------------- 
-                // Clear old ones
-                var recallTestPattern_dest_list_Element = document.getElementById("recall_testpattern_destination_list");
-                while (recallTestPattern_dest_list_Element.length)
-                    recallTestPattern_dest_list_Element.remove(0);
-            
-                // populate with new auxs
-                var auxDestinations = payload["auxDestinations"];
-                if( auxDestinations ) {
+                var recallTestPatternAux_payload = payload['recallTestPatternAux'];
                 
-                    var destElement = recallTestPattern_dest_list_Element.appendChild( new Option("") );
-                    destElement.value = -1;
+                var recallTestPattern_Element = document.getElementById("recall_testpatternaux_destination_list");
+                if( recallTestPattern_Element != null ) {
 
-                    if( destInfo == null ) {
-                        destInfo = {id: -1, name: ""};
-                        destElement.selected = true;
-                    }
+                    // ---------------- dest refresh Gui elements ------------------------------------------------- 
+                    // Clear old ones
+                    var recallTestPattern_dest_list_Element = document.getElementById("recall_testpatternaux_destination_list");
+                    while (recallTestPattern_dest_list_Element.length)
+                        recallTestPattern_dest_list_Element.remove(0);
+                
+                    // populate with new screens
+                    var screenDestinations = payload["auxDestinations"];
+                    if( screenDestinations ) {
                     
-                    for(var i=0; i<auxDestinations.length; i++) {
-                        destElement = recallTestPattern_dest_list_Element.appendChild( new Option(auxDestinations[i].name) );
-                        var id = destElement.value = auxDestinations[i].id;
+                        var destElement = recallTestPattern_dest_list_Element.appendChild( new Option("") );
+                        destElement.value = -1;
 
-                        // if already selected
-                        if( destInfo && id==destInfo.id) {
+                        if( destInfo == null ) {
+                            destInfo = {id: -1, name: ""};
                             destElement.selected = true;
                         }
-                    }
-                    if( recallTestPatternAux_payload ){
-                        // select the previously selected destination (from the plugin)
-                        for( var i=0; i<recallTestPattern_Element.options.length; i++ ){
-                            if(recallTestPattern_Element.options[i].value == recallTestPatternAux_payload.dest_id ) {
-                                recallTestPattern_Element.options[i].selected = true;
+                        
+                        for(var i=0; i<auxDestinations.length; i++) {
+                            destElement = recallTestPattern_dest_list_Element.appendChild( new Option(auxDestinations[i].Name) );
+                            var id = destElement.value = auxDestinations[i].id;
+
+                            // if already selected
+                            if( destInfo && id==destInfo.id) {
+                                destElement.selected = true;
                             }
                         }
-                    }
-                }
-
-                // Add the test patterns to the drop
-                var testPatterns = kTESTPATTERNS;
-                if( testPatterns){
-                    var testPattern_optG = document.getElementById('recall_testpattern_list');
-                    for(var i=0; i<testPatterns.length; i++) {
-                        var testPatternElement = testPattern_optG.appendChild( new Option(testPatterns[i].Name) );
-                        testPatternElement.value = testPatterns[i].id;
-                    }
-                }          
-
-                if(recallTestPatternAux_payload){
-                    var testPatternElement = document.getElementById('recall_testpattern_list');
-                    // select the previously selected test pattern (from the plugin)
-                    for( var i=0; i<testPatternElement.options.length; i++ ){
-                        if(testPatternElement.options[i].value == recallTestPatternAux_payload.testpattern_id ) {
-                            testPatternElement.options[i].selected = true;
+                        if( recallTestPatternAux_payload ){
+                            // select the previously selected destination (from the plugin)
+                            for( var i=0; i<recallTestPattern_Element.options.length; i++ ){
+                                if(recallTestPattern_Element.options[i].value == recallTestPatternAux_payload.dest_id ) {
+                                    recallTestPattern_Element.options[i].selected = true;
+                                }
+                            }
                         }
-                    }       
+                       
+                    }
+
+                    // Add the test patterns to the drop
+                    var testPatterns = kTESTPATTERNS;
+                    if( testPatterns){
+                        var testPattern_optG = document.getElementById('recall_testpatternaux_list');
+
+                        // Clear old ones
+                        while (testPattern_optG.length)
+                            testPattern_optG.remove(0);
+        
+                        for(var i=0; i<testPatterns.length; i++) {
+                            var testPatternElement = testPattern_optG.appendChild( new Option(testPatterns[i].name) );
+                            testPatternElement.value = testPatterns[i].id;
+                        }
+                    }          
+
+                    if(recallTestPatternAux_payload){
+                        var testPatternElement = document.getElementById('recall_testpatternaux_list');
+                        // select the previously selected test pattern (from the plugin)
+                        for( var i=0; i<testPatternElement.options.length; i++ ){
+                            if(testPatternElement.options[i].value == recallTestPatternAux_payload.testpattern_id ) {
+                                testPatternElement.options[i].selected = true;
+                            }
+                        }       
+                    }
                 }
             }
+            
         }
     };
 }
@@ -1003,13 +1017,13 @@ function setChecked(radioObj, newValue) {
 
 function updateSettings() {
     var payload = {};
-
     payload.property_inspector = 'updateSettings';
 
     /** ipaddress **/
     var ipAddressElement = document.getElementById('ipAddress');
-    if( ipAddressElement != null )
+    if( ipAddressElement != null ){
         payload.ipAddress = ipAddress.value;
+    }
 
     //** operator **/
     var operator = {"id":0, "password": ""};
@@ -1301,18 +1315,20 @@ function updateSettings() {
 
     // recallTestPatternAux ----------------------------------------------------------------
     var recallTestPatternAux = {"dest_id": -1, "testpattern_id":-1 };
-    var recallTestPatternAuxDestElement = document.getElementById('recall_testpattern_destination_list');
+    var recallTestPatternAuxDestElement = document.getElementById('recall_testpatternaux_destination_list');
     if( recallTestPatternAuxDestElement ){
         recallTestPatternAux.dest_id = parseInt(recallTestPatternAuxDestElement.value);
     }
 
-    var recallTestPatternAuxElement = document.getElementById('recall_testpattern_list');
+    var recallTestPatternAuxElement = document.getElementById('recall_testpatternaux_list');
     if( recallTestPatternAuxElement ){
         recallTestPatternAux.testpattern_id = parseInt(recallTestPatternAuxElement.value);
     }
     payload.recallTestPatternAux = recallTestPatternAux;
    
     sendPayloadToPlugin(payload);
+
+               
 }
 
 function setSettings(payload) {
@@ -1352,7 +1368,6 @@ function sendValueToPlugin(value, param) {
         websocket.send(JSON.stringify(json));
     }
 }
-
 
 if (!isQT) {
     document.addEventListener('DOMContentLoaded', function () {

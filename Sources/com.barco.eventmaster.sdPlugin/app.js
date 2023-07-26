@@ -70,7 +70,7 @@ var EventMasterRPC = {
         var settings = settingsCache[context];
         if( settings == null ) {
             eventMasterAction.SetStatus(context, "Cannot detect Event Master on the the network");
-            eventMasterAction.logMessage( context, "powerStatus error: settingCache is null!", 1);
+            eventMasterAction.logMessage( context, "powerStatus error: settingCache is null!", ERROR_LEVEL.ERROR);
             return;
         }
 
@@ -1761,6 +1761,18 @@ var EventMasterRPC = {
                     }
                  }
             }
+            else if( action == "com.barco.eventmaster.recalltestpatternscreen" )
+            {
+                if( settings.recallTestPatternScreen ){
+                   pathToFile = "images/test_pattern_screen_" + testpattern_id + ".png";    
+                } 
+            }
+            else if( action == "com.barco.eventmaster.recalltestpatternaux" )
+            {
+                if( settings.recallTestPatternAux ){
+                   pathToFile = "images/test_pattern_aux_" + testpattern_id + ".png";    
+                } 
+            }
 
             if( pathToFile != null )
                 eventMasterAction.loadAndSetImage(context, pathToFile) 
@@ -1978,6 +1990,7 @@ var eventMasterAction = {
 
     logMessage: function( context, messageStr, errorLevel ) {
      
+        var textStr;
         if (errorLevel == 1 ) {
             errorLevelStr = "ERROR";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
