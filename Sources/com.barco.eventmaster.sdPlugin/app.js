@@ -1764,13 +1764,13 @@ var EventMasterRPC = {
             else if( action == "com.barco.eventmaster.recalltestpatternscreen" )
             {
                 if( settings.recallTestPatternScreen ){
-                   pathToFile = "images/test_pattern_screen_" + testpattern_id + ".png";    
+                   pathToFile = "images/screen_test_patterns/test_pattern_screen_" + testpattern_id + ".png";    
                 } 
             }
             else if( action == "com.barco.eventmaster.recalltestpatternaux" )
             {
                 if( settings.recallTestPatternAux ){
-                   pathToFile = "images/test_pattern_aux_" + testpattern_id + ".png";    
+                   pathToFile = "images/aux_test_patterns/test_pattern_aux_" + testpattern_id + ".png";    
                 } 
             }
 
