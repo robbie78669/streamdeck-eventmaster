@@ -1763,14 +1763,14 @@ var EventMasterRPC = {
             }
             else if( action == "com.barco.eventmaster.recalltestpatternscreen" )
             {
-                if( settings.recallTestPatternScreen ){
-                   pathToFile = "images/screen_test_patterns/test_pattern_screen_" + testpattern_id + ".png";    
+                if( settings.recallTestPatternScreen && settings.recallTestPatternScreen.testpattern_id >=0){
+                   pathToFile = "images/screen_test_patterns/testpattern_screen_" + (settings.recallTestPatternScreen.testpattern_id+1) + ".png";    
                 } 
             }
             else if( action == "com.barco.eventmaster.recalltestpatternaux" )
             {
-                if( settings.recallTestPatternAux ){
-                   pathToFile = "images/aux_test_patterns/test_pattern_aux_" + testpattern_id + ".png";    
+                if( settings.recallTestPatternAux && settings.recallTestPatternAux.testpattern_id >=0 ){
+                   pathToFile = "images/aux_test_patterns/testpattern_aux_" + (settings.recallTestPatternAux.testpattern_id+1) + ".png";    
                 } 
             }
 
