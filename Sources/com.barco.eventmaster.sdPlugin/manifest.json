@@ -46,21 +46,6 @@
       "UUID": "com.barco.eventmaster.recallpreset" 
     },
     {
-      "Icon": "images/recallNextPresetActionImage",
-      "Name": "Recall Next Preset", 
-      "States": [
-        {
-          "Image": "images/recallNextPresetKeyIcon",
-          "TitleAlignment": "bottom", 
-          "FontSize": "8"
-        }
-      ], 
-      "SupportedInMultiActions": true,
-      "Tooltip": "Recalls the next preset into PVW", 
-      "PropertyInspectorPath": "PropertyInspectors/recallnext_pi.html",
-      "UUID": "com.barco.eventmaster.recallnextpreset"
-    },
-    {
       "Icon": "images/activateCueActionImage",
       "Name": "Cue", 
       "States": [
@@ -179,7 +164,7 @@
       "SupportedInMultiActions": true,
       "Tooltip": "Recall a test pattern for a given screen.", 
       "PropertyInspectorPath": "PropertyInspectors/recallTestPatternScreen_pi.html",
-      "UUID": "com.barco.eventmaster.recallTestPatternScreen"
+      "UUID": "com.barco.eventmaster.recalltestpatternscreen"
     },
     {
       "Icon": "images/recallTestPatternAuxActionImage",
@@ -194,7 +179,22 @@
       "SupportedInMultiActions": true,
       "Tooltip": "Recall a test pattern for a given aux.", 
       "PropertyInspectorPath": "PropertyInspectors/recallTestPatternAux_pi.html",
-      "UUID": "com.barco.eventmaster.recallTestPatternAux"
+      "UUID": "com.barco.eventmaster.recalltestpatternaux"
+    },
+    {
+      "Icon": "images/recallSourceBackupActionImage",
+      "Name": "Recall source backup", 
+      "States": [
+        {
+          "Image": "images/recallSourceBackuKeyIcon",
+          "TitleAlignment": "bottom", 
+          "FontSize": "8"
+        }
+      ], 
+      "SupportedInMultiActions": true,
+      "Tooltip": "Recall a source backup for a given input.", 
+      "PropertyInspectorPath": "PropertyInspectors/recallSourceBackup_pi.html",
+      "UUID": "com.barco.eventmaster.recallsourcebackup"
     }
   ],
   "SDKVersion": 2,
@@ -207,7 +207,7 @@
   "Name": "Event Master", 
   "URL": "https://www.barco.com/en/product/e2", 
 
-  "Version": "3.0.8",
+  "Version": "3.1.0",
   "OS": [
     {
         "Platform": "mac", 
