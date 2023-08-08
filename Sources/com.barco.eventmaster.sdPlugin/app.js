@@ -24,7 +24,7 @@ var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
 var socket = null;
-var debug = false;
+var debug = true;
 
 
     
@@ -2239,18 +2239,18 @@ var eventMasterAction = {
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.error(textStr);
         }
-        else if (errorLevel == ERROR_LEVEL.WARN ) {
+        else if (debug==true && errorLevel == ERROR_LEVEL.WARN ) {
             errorLevelStr = "WARN";
             textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
             console.warn(textStr);
         }
-        else {
+        else if (debug ==true) {
             errorLevelStr = "INFO";
             textStr = messageStr;
             console.log(textStr);
         }
 
-        if( debug == true && errorLevel == ERROR_LEVEL.ERROR) {
+        if(errorLevel == ERROR_LEVEL.ERROR) {
             var json = {
                 'event': 'logMessage',
                 'payload': {

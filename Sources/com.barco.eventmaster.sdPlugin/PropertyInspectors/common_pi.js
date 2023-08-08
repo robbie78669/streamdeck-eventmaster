@@ -160,6 +160,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var status = payload['status'];
             var sourceBackups = payload['sourceBackups'];
             var frameSettings = payload['frameSettings'];
+            var inputBackups = payload[''];
             
           
             
@@ -339,7 +340,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                        reset_sourcebackup_list_Element.remove(0);
                     
                     // Sources
-                    if( sources ) {
+                    if( inputBackups ) {
                         var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option("") );
                         sourceElement.value = -1;
 
@@ -348,10 +349,10 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                             sourceElement.selected = true;
                         }
 
-                        for(var i=0; i<sources.length; i++) {
-                            if( sources[i].InputCfgIndex != -1 ) {
-                                var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option(sources[i].Name) );
-                                sourceElement.value = sources[i].InputCfgIndex;
+                        for(var i=0; i<inputBackups.length; i++) {
+                            if( inputBackups[i].id != -1 ) {
+                                var sourceElement = reset_sourcebackup_list_Element.appendChild( new Option(inputBackups[i].Name) );
+                                sourceElement.value = inputBackups[i].id;
                             }   
                         }
                     }
@@ -958,7 +959,6 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             else if( action == "com.barco.eventmaster.recallsourcebackup"){
 
                 var recallBackupSource_payload = payload['recallBackupSource'];
-                var inputBackups_payload = payload['inputBackups'];
 
                 // initialize the backupSource settings daya
                 if( recallBackupSource_payload == null ) {
@@ -980,15 +980,15 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                         recallBackupSourceInput_Element.remove(0);
 
                     // populate with new inputs
-                    if( inputBackups_payload ) {
+                    if( inputBackups ) {
                     
                         // create an empty row in the list (no selection)
                         var inputBackupsInputElement = recallBackupSourceInput_Element.appendChild( new Option("") );
                         inputBackupsInputElement.value = -1;
 
-                        for(var i=0; i<inputBackups_payload.length; i++ ){
-                            inputBackupsInputElement = recallBackupSourceInput_Element.appendChild( new Option(inputBackups_payload[i].Name) );
-                            inputBackupsInputElement.value = inputBackups_payload[i].id;
+                        for(var i=0; i<inputBackups.length; i++ ){
+                            inputBackupsInputElement = recallBackupSourceInput_Element.appendChild( new Option(inputBackups[i].Name) );
+                            inputBackupsInputElement.value = inputBackups[i].id;
                         }
                         // select the previously selected input (from the plugin)
                         if( recallBackupSource_payload ){
@@ -1006,56 +1006,56 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                         "Name": "SDIInput25",
                                         "VideoStatus": 4}
                                     */
-                                    if( inputBackups_payload ){
-                                        for( var i=0; i<inputBackups_payload.length; i++ ){
-                                            if(inputBackups_payload[i].id == recallBackupSource_payload.inputId ) {
+                                    if( inputBackups ){
+                                        for( var i=0; i<inputBackups.length; i++ ){
+                                            if(inputBackups[i].id == recallBackupSource_payload.inputId ) {
 
                                                 // Backup 1 -----------------------------------------------------------------
                                                 var backupElement = document.getElementById('source_name_backup1');
                                                 if( backupElement ) {
-                                                    backupElement.innerText = inputBackups_payload[i].Backup[0].Name;;
+                                                    backupElement.innerText = inputBackups[i].Backup[0].Name;;
                                                 }
                                                 var sourcebackupElement = document.getElementById('source_backup1');
                                                 if( sourcebackupElement ){
                                                     // inputId != null
                                                     if(inputBackups_payload[i].Backup[0].inputId!=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[0].inputId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[0].inputId;
                                                     else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        sourcebackupElement.value =inputBackups_payload[i].Backup[0].stillId;
+                                                        sourcebackupElement.value =inputBackups[i].Backup[0].stillId;
                                                     else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        sourcebackupElement.value =inputBackups_payload[i].Backup[0].destId;
+                                                        sourcebackupElement.value =inputBackups[i].Backup[0].destId;
                                                 }
 
                                                 // Backup 2 ---------------------------------------------------------------------------
                                                 backupElement = document.getElementById('source_name_backup2');
                                                 if( backupElement ) {
-                                                    backupElement.innerText = inputBackups_payload[i].Backup[1].Name;
+                                                    backupElement.innerText = inputBackups[i].Backup[1].Name;
                                                 }
                                                 var sourcebackupElement = document.getElementById('source_backup2');
                                                 if( sourcebackupElement ){
                                                 // inputId != null
                                                     if(inputBackups_payload[i].Backup[1].inputId!=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[1].inputId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[1].inputId;
                                                     else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[1].stillId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[1].stillId;
                                                     else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[1].destId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[1].destId;
                                                 }
 
                                                  // Backup 3 ---------------------------------------------------------------------------
                                                  backupElement = document.getElementById('source_name_backup3');
                                                  if( backupElement ) {
-                                                     backupElement.innerText = inputBackups_payload[i].Backup[2].Name;
+                                                     backupElement.innerText = inputBackups[i].Backup[2].Name;
                                                  }
                                                  var sourcebackupElement = document.getElementById('source_backup3');
                                                  if( sourcebackupElement ){
                                                     // inputId != null
                                                     if(inputBackups_payload[i].Backup[2].inputId!=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[2].inputId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[2].inputId;
                                                     else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[2].stillId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[2].stillId;
                                                     else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[2].destId;
+                                                        sourcebackupElement.value = inputBackups[i].Backup[2].destId;
                                                 }
                                             }
                                         }
