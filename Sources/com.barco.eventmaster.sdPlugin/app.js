@@ -24,7 +24,7 @@ var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
 var socket = null;
-var debug = true;
+var debug = false;
 
 
     
@@ -1999,8 +1999,18 @@ var EventMasterRPC = {
             else if( action == "com.barco.eventmaster.recalltestpatternaux" )
             {
                 if( settings.recallTestPatternAux && settings.recallTestPatternAux.testpattern_id >=0 ){
-                   pathToFile = "images/aux_test_patterns/testpattern_aux_" + (settings.recallTestPatternAux.testpattern_id+1) + ".png";    
+                   pathToFile = "images/backup_icons/Backup" + (settings.recallTestPatternAux.testpattern_id+1) + ".png";    
                 } 
+            }
+
+            else if( action == "com.barco.eventmaster.recallsourcebackup" )
+            {
+                if( settings.recallBackupSource && settings.recallBackupSource.BackUpState >=0 ){
+                   pathToFile = "images/backup_icons/Backup" + (settings.recallBackupSource.BackUpState+1) + ".png";    
+                } 
+                else{
+                    pathToFile = "images/activateSourceBackUp@2x.png";
+                }
             }
 
             if( pathToFile != null )
@@ -2236,7 +2246,7 @@ var eventMasterAction = {
         }
         else {
             errorLevelStr = "INFO";
-            textStr = "Event Master ["+context+"]["+errorLevelStr+"]"+messageStr
+            textStr = messageStr;
             console.log(textStr);
         }
 

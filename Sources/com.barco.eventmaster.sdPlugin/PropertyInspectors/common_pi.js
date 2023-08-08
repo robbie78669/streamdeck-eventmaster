@@ -1051,11 +1051,11 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                                  if( sourcebackupElement ){
                                                     // inputId != null
                                                     if(inputBackups_payload[i].Backup[2].inputId!=null )
-                                                        backupElement.value = inputBackups_payload[i].Backup[2].inputId;
+                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[2].inputId;
                                                     else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        backupElement.value = inputBackups_payload[i].Backup[2].stillId;
+                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[2].stillId;
                                                     else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        backupElement.value = inputBackups_payload[i].Backup[2].destId;
+                                                        sourcebackupElement.value = inputBackups_payload[i].Backup[2].destId;
                                                 }
                                             }
                                         }

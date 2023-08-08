@@ -182,11 +182,11 @@
       "UUID": "com.barco.eventmaster.recalltestpatternaux"
     },
     {
-      "Icon": "images/recallSourceBackupActionImage",
+      "Icon": "images/activateSourceBackupActionImage",
       "Name": "Recall source backup", 
       "States": [
         {
-          "Image": "images/recallSourceBackuKeyIcon",
+          "Image": "images/activateSourceBackupKeyIcon",
           "TitleAlignment": "bottom", 
           "FontSize": "8"
         }
