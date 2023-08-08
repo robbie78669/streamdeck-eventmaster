@@ -158,9 +158,9 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
             var operator = payload["operator"];
             var ipAddress = payload['ipAddress'];
             var status = payload['status'];
-            var sourceBackups = payload['sourceBackups'];
+            var inputBackups = payload['inputBackups'];
             var frameSettings = payload['frameSettings'];
-            var inputBackups = payload[''];
+        
             
           
             
@@ -968,7 +968,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                                     "Backup1": backup1_Obj, 
                                                     "Backup2": backup1_Obj, 
                                                     "Backup3": backup1_Obj,
-                                                    "BackupState":-1};
+                                                    "BackupState":-2};
                 }
         
                 var recallBackupSourceInput_Element = document.getElementById("backup_inputList");
@@ -990,6 +990,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                             inputBackupsInputElement = recallBackupSourceInput_Element.appendChild( new Option(inputBackups[i].Name) );
                             inputBackupsInputElement.value = inputBackups[i].id;
                         }
+
                         // select the previously selected input (from the plugin)
                         if( recallBackupSource_payload ){
                             for( var i=0; i<recallBackupSourceInput_Element.options.length; i++ ){
@@ -1006,89 +1007,94 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
                                         "Name": "SDIInput25",
                                         "VideoStatus": 4}
                                     */
-                                    if( inputBackups ){
-                                        for( var i=0; i<inputBackups.length; i++ ){
-                                            if(inputBackups[i].id == recallBackupSource_payload.inputId ) {
+      
+                                    for( var i=0; i<inputBackups.length; i++ ){
+                                        if(inputBackups[i].id == recallBackupSource_payload.inputId ) {
 
-                                                // Backup 1 -----------------------------------------------------------------
-                                                var backupElement = document.getElementById('source_name_backup1');
-                                                if( backupElement ) {
-                                                    backupElement.innerText = inputBackups[i].Backup[0].Name;;
-                                                }
-                                                var sourcebackupElement = document.getElementById('source_backup1');
-                                                if( sourcebackupElement ){
-                                                    // inputId != null
-                                                    if(inputBackups_payload[i].Backup[0].inputId!=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[0].inputId;
-                                                    else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        sourcebackupElement.value =inputBackups[i].Backup[0].stillId;
-                                                    else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        sourcebackupElement.value =inputBackups[i].Backup[0].destId;
-                                                }
+                                            // Backup 1 -----------------------------------------------------------------
+                                            var backupElement = document.getElementById('source_name_backup1');
+                                            if( backupElement ) {
+                                                backupElement.innerText = inputBackups[i].Backup[0].Name;
+                                            }
+                                            var sourcebackupElement = document.getElementById('source_backup1');
+                                            if( sourcebackupElement ){
+                                                // inputId != null
+                                                if(inputBackups[i].Backup[0].inputId!=null )
+                                                    sourcebackupElement.value = inputBackups[i].Backup[0].inputId;
+                                                else if(inputBackups[i].Backup[0].stillId !=null )
+                                                    sourcebackupElement.value =inputBackups[i].Backup[0].stillId;
+                                                else if(inputBackups[i].Backup[0].destId !=null )
+                                                    sourcebackupElement.value =inputBackups[i].Backup[0].destId;
+                                            }
 
-                                                // Backup 2 ---------------------------------------------------------------------------
-                                                backupElement = document.getElementById('source_name_backup2');
+                                            // Backup 2 ---------------------------------------------------------------------------
+                                            backupElement = document.getElementById('source_name_backup2');
+                                            if( backupElement ) {
+                                                backupElement.innerText = inputBackups[i].Backup[1].Name;
+                                            }
+                                            var sourcebackupElement = document.getElementById('source_backup2');
+                                            if( sourcebackupElement ){
+                                            // inputId != null
+                                                if(inputBackups[i].Backup[1].inputId!=null )
+                                                    sourcebackupElement.value = inputBackups[i].Backup[1].inputId;
+                                                else if(inputBackups[i].Backup[0].stillId !=null )
+                                                inputBackups.value = inputBackups[i].Backup[1].stillId;
+                                                else if(inputBackups[i].Backup[0].destId !=null )
+                                                    sourcebackupElement.value = inputBackups[i].Backup[1].destId;
+                                            }
+
+                                                // Backup 3 ---------------------------------------------------------------------------
+                                                backupElement = document.getElementById('source_name_backup3');
                                                 if( backupElement ) {
-                                                    backupElement.innerText = inputBackups[i].Backup[1].Name;
+                                                    backupElement.innerText = inputBackups[i].Backup[2].Name;
                                                 }
-                                                var sourcebackupElement = document.getElementById('source_backup2');
+                                                var sourcebackupElement = document.getElementById('source_backup3');
                                                 if( sourcebackupElement ){
                                                 // inputId != null
-                                                    if(inputBackups_payload[i].Backup[1].inputId!=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[1].inputId;
-                                                    else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[1].stillId;
-                                                    else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[1].destId;
-                                                }
-
-                                                 // Backup 3 ---------------------------------------------------------------------------
-                                                 backupElement = document.getElementById('source_name_backup3');
-                                                 if( backupElement ) {
-                                                     backupElement.innerText = inputBackups[i].Backup[2].Name;
-                                                 }
-                                                 var sourcebackupElement = document.getElementById('source_backup3');
-                                                 if( sourcebackupElement ){
-                                                    // inputId != null
-                                                    if(inputBackups_payload[i].Backup[2].inputId!=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[2].inputId;
-                                                    else if(inputBackups_payload[i].Backup[0].stillId !=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[2].stillId;
-                                                    else if(inputBackups_payload[i].Backup[0].destId !=null )
-                                                        sourcebackupElement.value = inputBackups[i].Backup[2].destId;
-                                                }
+                                                if(inputBackups[i].Backup[2].inputId!=null )
+                                                    sourcebackupElement.value = inputBackups[i].Backup[2].inputId;
+                                                else if(inputBackups[i].Backup[0].stillId !=null )
+                                                    sourcebackupElement.value = inputBackups[i].Backup[2].stillId;
+                                                else if(inputBackups[i].Backup[0].destId !=null )
+                                                    sourcebackupElement.value = inputBackups[i].Backup[2].destId;
                                             }
                                         }
                                     }
+                                
                                 }
                             }
-                        }   
-                    }
-                }
-                var recallBackupSourceActiveInput_Element = document.getElementById("backup_activeinputList");
-                if( recallBackupSourceActiveInput_Element != null ) {
-                 
-                    // ---------------- input refresh Gui elements ------------------------------------------------- 
-                    // if the list hasn't been initialized, do it now
-                    if (recallBackupSourceActiveInput_Element.length == 0){
-                        var inputBackupsActiveInputElement = recallBackupSourceActiveInput_Element.appendChild( new Option("Primary") );
-                        inputBackupsActiveInputElement.value = -1;
+                            
+                            var recallBackupSourceActiveInput_Element = document.getElementById("backup_activeinputList");
+                            if( recallBackupSourceActiveInput_Element != null ) {
+                            
+                                // ---------------- input refresh Gui elements ------------------------------------------------- 
+                                // if the list hasn't been initialized, do it now
+                                if (recallBackupSourceActiveInput_Element.length == 0){
+                                    var inputBackupsActiveInputElement = recallBackupSourceActiveInput_Element.appendChild( new Option("") );
+                                    inputBackupsActiveInputElement.value = -2;
 
-                        for(var i=0; i<3; i++ ){
-                            inputBackupsActiveInputElement = recallBackupSourceActiveInput_Element.appendChild( new Option("Backup"+(i+1) ));
-                            inputBackupsActiveInputElement.value = i;
-                        }
+                                    inputBackupsActiveInputElement = recallBackupSourceActiveInput_Element.appendChild( new Option("Primary") );
+                                    inputBackupsActiveInputElement.value = -1;
+
+                                    for(var i=0; i<3; i++ ){
+                                        inputBackupsActiveInputElement = recallBackupSourceActiveInput_Element.appendChild( new Option("Backup"+(i+1) ));
+                                        inputBackupsActiveInputElement.value = i;
+                                    }
+                                }
+                                // select the previously selected destination (from the plugin)
+                                if( recallBackupSource_payload ){
+                                    for( var i=0; i<recallBackupSourceActiveInput_Element.options.length; i++ ){
+                                        if(recallBackupSourceActiveInput_Element.options[i].value == recallBackupSource_payload.BackUpState ) {
+                                            recallBackupSourceActiveInput_Element.options[i].selected = true;
+                                        }
+                                    }
+                                }
+                            }  
+                        }  
+                        
                     }
-                    // select the previously selected destination (from the plugin)
-                    if( recallBackupSource_payload ){
-                        for( var i=0; i<recallBackupSourceActiveInput_Element.options.length; i++ ){
-                            if(recallBackupSourceActiveInput_Element.options[i].value == recallBackupSource_payload.BackUpState ) {
-                                recallBackupSourceActiveInput_Element.options[i].selected = true;
-                            }
-                        }
-                    }  
                 }
-            }
+             }
          }
     };
 }
