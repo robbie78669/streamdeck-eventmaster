@@ -1989,7 +1989,7 @@ var EventMasterRPC = {
                         pathToFile = "images/activateCueDefaultImage-Stop.png"    
                     }
                  }
-            }
+            } 
             else if( action == "com.barco.eventmaster.recalltestpatternscreen" )
             {
                 if( settings.recallTestPatternScreen && settings.recallTestPatternScreen.testpattern_id >=0){
@@ -2008,6 +2008,9 @@ var EventMasterRPC = {
                 if( settings.recallBackupSource && settings.recallBackupSource.BackUpState >=0 ){
                    pathToFile = "images/backup_icons/Backup" + (settings.recallBackupSource.BackUpState+1) + ".png";    
                 } 
+                else if( settings.recallBackupSource && settings.recallBackupSource.BackUpState ==-1 ){
+                    pathToFile = "images/backup_icons/Primary.png";    
+                 } 
                 else{
                     pathToFile = "images/activateSourceBackUp@2x.png";
                 }
