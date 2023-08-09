@@ -24,7 +24,7 @@ var websocket = null;
 var pluginUUID = null;
 var settingsCache = {};
 var socket = null;
-var debug = true;
+var debug = false;
 
 
     
@@ -1832,37 +1832,31 @@ var EventMasterRPC = {
             //
             if( settings.inputBackups ){
                 for( var i=0; i<settings.inputBackups.length; i++){
-                    for(var j=0; j<3; j++){
-                        if( j==0 ){
-                            if( settings.inputBackups[i].Backup[j].inputId == Backup1.SourceId)
-                                settings.recallBackupSource.Backup1.SrcType=0;//input
+                    if( settings.inputBackups[i].id == settings.recallBackupSource.inputId){ 
+                        var backupObj;
+                        for(var j=0; j<3; j++){
+                            if( j==0 )
+                                backupObj = Backup1;
+                            else if( j==1)
+                                backupObj = Backup2;
+                            else 
+                                backupObj = Backup3
+                            
+                            if( settings.inputBackups[i].Backup[j].inputId != null){
+                                backupObj.SrcType=0;//input
+                                backupObj.SourceId= settings.inputBackups[i].Backup[j].inputId;
+                            }
 
-                            else if( settings.inputBackups[i].Backup[j].stillId == Backup1.SourceId)
-                                settings.recallBackupSource.Backup1.SrcType=1;//still
+                            else if( settings.inputBackups[i].Backup[j].stillId !=null){
+                                backupObj.SrcType=1;//still
+                                backupObj.SourceId= settings.inputBackups[i].Backup[j].stillId;
+                            }
 
-                            else if( settings.inputBackups[i].Backup[j].destId == Backup1.SourceId)
-                                settings.recallBackupSource.Backup1.SrcType=2;//dest
-                        }
-                        else if( j==1 ){
-                            if( settings.inputBackups[i].Backup[j].inputId == Backup2.SourceId)
-                                settings.recallBackupSource.Backup2.SrcType=0;//input
-
-                            else if( settings.inputBackups[i].Backup[j].stillId == Backup2.SourceId)
-                                settings.recallBackupSource.Backup2.SrcType=1;//still
-
-                            else if( settings.inputBackups[i].Backup[j].destId == Backup2.SourceId)
-                                settings.recallBackupSource.Backup2.SrcType=2;//dest
-                        }
-                        else if( j==2 ){
-                            if( settings.inputBackups[i].Backup[j].inputId == Backup3.SourceId)
-                                settings.recallBackupSource.Backup3.SrcType=0;//input
-
-                            else if( settings.inputBackups[i].Backup[j].stillId == Backup3.SourceId)
-                                settings.recallBackupSource.Backup3.SrcType=1;//still
-
-                            else if( settings.inputBackups[i].Backup[j].destId == Backup3.SourceId)
-                                settings.recallBackupSource.Backup3.SrcType=2;//dest
-
+                            else if( settings.inputBackups[i].Backup[j].destId !=null){
+                                backupObj.SrcType=2;//destination
+                                backupObj.SourceId= settings.inputBackups[i].Backup[j].destId;
+                            }
+                           
                         }
                     }
                 }
