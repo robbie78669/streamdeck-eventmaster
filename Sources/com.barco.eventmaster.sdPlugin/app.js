@@ -671,6 +671,22 @@ var EventMasterRPC = {
                                 }
                                 eventMasterAction.logMessage(context,"--------------------------------------------------------", ERROR_LEVEL.INFO);
                             }
+                            
+                            // We need to ensure we get the latest backup settings
+                            // in order to change backup, the api combines it with a set
+                            // we need the latest values to ensure we don't change what was set in EMT
+                            if( settings["pendingRecallBackupSourceAction"] &&
+                                settings["pendingRecallBackupSourceAction"].action ==  "com.barco.eventmaster.recallsourcebackup" ) {
+
+                                eventMasterAction.logMessage(context,"pendingRecallBackupSourceAction", ERROR_LEVEL.INFO);
+                            
+                                settings["pendingRecallBackupSourceAction"]="";
+                                EventMasterRPC.recallBackupSource(context);
+                            }
+                        }
+                        else {
+                            eventMasterAction.logMessage(context,"getInputBackups error: "+xhr.responseText, ERROR_LEVEL.ERROR);
+                            eventMasterAction.setStatus(context, "Cannot detect Event Master on the the network");
                         }
 					}
 					else {
@@ -1834,7 +1850,7 @@ var EventMasterRPC = {
                 for( var i=0; i<settings.inputBackups.length; i++){
                     if( settings.inputBackups[i].id == settings.recallBackupSource.inputId){ 
                         var backupObj;
-                        for(var j=0; j<3; j++){
+                        for(var j=0; j<settings.inputBackups[i].Backup.length; j++){
                             if( j==0 )
                                 backupObj = Backup1;
                             else if( j==1)
@@ -2127,7 +2143,13 @@ var eventMasterAction = {
                 EventMasterRPC.recallTestPattern(context,1);
             }
             else if( action == "com.barco.eventmaster.recallsourcebackup" ){
-                EventMasterRPC.recallBackupSource(context);
+                // set pending flag - we need current content's state but it is async so must wait for the
+                // return of listContents to know which mix layer is on PGM or PVW
+                EventMasterRPC.getInputBackups(context);
+                eventMasterAction.logMessage(context,"Qeueing getInputBackups", ERROR_LEVEL.INFO);
+                var pendingRecallBackupSourceAction = {"action":action}; 
+
+                settings["pendingRecallBackupSourceAction"] = pendingRecallBackupSourceAction;
             }
         }
     },

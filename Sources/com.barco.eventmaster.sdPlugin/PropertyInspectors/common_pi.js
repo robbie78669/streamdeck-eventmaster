@@ -962,12 +962,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 
                 // initialize the backupSource settings daya
                 if( recallBackupSource_payload == null ) {
-                    var backup1_Obj = {"SrcType":0, "SourceId":-1};
-                
                     recallBackupSource_payload = {  "inputId": -1, 
-                                                    "Backup1": backup1_Obj, 
-                                                    "Backup2": backup1_Obj, 
-                                                    "Backup3": backup1_Obj,
                                                     "BackupState":-2};
                 }
         
@@ -1010,53 +1005,20 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
       
                                     for( var i=0; i<inputBackups.length; i++ ){
                                         if(inputBackups[i].id == recallBackupSource_payload.inputId ) {
-
-                                            // Backup 1 -----------------------------------------------------------------
-                                            var backupElement = document.getElementById('source_name_backup1');
-                                            if( backupElement ) {
-                                                backupElement.innerText = inputBackups[i].Backup[0].Name;
-                                            }
-                                            var sourcebackupElement = document.getElementById('source_backup1');
-                                            if( sourcebackupElement ){
-                                                // inputId != null
-                                                if(inputBackups[i].Backup[0].inputId!=null )
-                                                    sourcebackupElement.value = inputBackups[i].Backup[0].inputId;
-                                                else if(inputBackups[i].Backup[0].stillId !=null )
-                                                    sourcebackupElement.value =inputBackups[i].Backup[0].stillId;
-                                                else if(inputBackups[i].Backup[0].destId !=null )
-                                                    sourcebackupElement.value =inputBackups[i].Backup[0].destId;
-                                            }
-
-                                            // Backup 2 ---------------------------------------------------------------------------
-                                            backupElement = document.getElementById('source_name_backup2');
-                                            if( backupElement ) {
-                                                backupElement.innerText = inputBackups[i].Backup[1].Name;
-                                            }
-                                            var sourcebackupElement = document.getElementById('source_backup2');
-                                            if( sourcebackupElement ){
-                                            // inputId != null
-                                                if(inputBackups[i].Backup[1].inputId!=null )
-                                                    sourcebackupElement.value = inputBackups[i].Backup[1].inputId;
-                                                else if(inputBackups[i].Backup[0].stillId !=null )
-                                                inputBackups.value = inputBackups[i].Backup[1].stillId;
-                                                else if(inputBackups[i].Backup[0].destId !=null )
-                                                    sourcebackupElement.value = inputBackups[i].Backup[1].destId;
-                                            }
-
-                                                // Backup 3 ---------------------------------------------------------------------------
-                                                backupElement = document.getElementById('source_name_backup3');
+                                            for( var j=0; j<3; j++)
+                                            {
+                                                var backupObj = null;
+                                                if( j< inputBackups[i].Backup.length )
+                                                    backupObj =inputBackups[i].Backup[j];
+                                            
+                                                var str = "source_name_backup" + (j+1);
+                                                var backupElement = document.getElementById(str);
                                                 if( backupElement ) {
-                                                    backupElement.innerText = inputBackups[i].Backup[2].Name;
+                                                    if( backupObj )
+                                                        backupElement.innerText = backupObj.Name;
+                                                    else 
+                                                        backupElement.innerText = "None";
                                                 }
-                                                var sourcebackupElement = document.getElementById('source_backup3');
-                                                if( sourcebackupElement ){
-                                                // inputId != null
-                                                if(inputBackups[i].Backup[2].inputId!=null )
-                                                    sourcebackupElement.value = inputBackups[i].Backup[2].inputId;
-                                                else if(inputBackups[i].Backup[0].stillId !=null )
-                                                    sourcebackupElement.value = inputBackups[i].Backup[2].stillId;
-                                                else if(inputBackups[i].Backup[0].destId !=null )
-                                                    sourcebackupElement.value = inputBackups[i].Backup[2].destId;
                                             }
                                         }
                                     }
@@ -1475,19 +1437,7 @@ function updateSettings() {
     if( recallBackupSourceInputElement ){
         recallBackupSource.inputId = parseInt(recallBackupSourceInputElement.value);
     }
-    var recallBackupSourceBackup1Element = document.getElementById('source_backup1');
-    if( recallBackupSourceBackup1Element ){
-        recallBackupSource.Backup1.SourceId=parseInt(recallBackupSourceBackup1Element.value);;
-    }
-    var recallBackupSourceBackup2Element = document.getElementById('source_backup2');
-    if( recallBackupSourceBackup2Element ){
-        recallBackupSource.Backup2.SourceId=parseInt( recallBackupSourceBackup2Element.value);
-    }
-    var recallBackupSourceBackup3Element = document.getElementById('source_backup3');
-    if( recallBackupSourceBackup3Element ){
-        recallBackupSource.Backup3.SourceId=parseInt( recallBackupSourceBackup3Element.value);
-    }
-
+    
     var recallBackupSourceBackupStateElement = document.getElementById('backup_activeinputList');
     if( recallBackupSourceBackupStateElement ){
         recallBackupSource.BackUpState = parseInt( recallBackupSourceBackupStateElement.value);
